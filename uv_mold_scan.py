@@ -58,10 +58,29 @@ def compute_fluorescence(uv_spec, dark_spec):
     return fl
 
 def compute_fl_score(fl_signal, uv_spec, fl_bands=None, uv_ref_band=None):
-    pass  # Task 4
+    """
+    Returns (fl_score, fl_norm).
+    fl_score[bean] = mean of emission bands in fl_signal
+    fl_norm[bean]  = fl_score / UV reflected band (350nm) for illumination normalization
+    """
+    if fl_bands is None:
+        fl_bands = FL_BANDS
+    if uv_ref_band is None:
+        uv_ref_band = UV_REF_BAND
+    fl_score, fl_norm = {}, {}
+    for bean_id, spec in fl_signal.items():
+        vals = [spec.get(nm, 0.0) for nm in fl_bands]
+        score = float(np.mean(vals))
+        uv_ref = uv_spec[bean_id].get(uv_ref_band, 0.0)
+        fl_score[bean_id] = score
+        fl_norm[bean_id]  = score / (uv_ref + 1e-6)
+    return fl_score, fl_norm
 
 def flag_suspects(fl_norm, sigma=1.5):
-    pass  # Task 4
+    """Return {bean_id: 'SUSPECT'|'OK'}. Threshold = mean + sigma * std."""
+    vals = np.array(list(fl_norm.values()), dtype=float)
+    threshold = vals.mean() + sigma * vals.std()
+    return {bid: ("SUSPECT" if v > threshold else "OK") for bid, v in fl_norm.items()}
 
 
 # ── Subprocess wrappers ────────────────────────────────────────────────────────

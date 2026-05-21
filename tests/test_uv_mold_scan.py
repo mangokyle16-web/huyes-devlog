@@ -55,3 +55,38 @@ def test_compute_fluorescence_clamps_negative():
     dark = {"bean_1": {410: 1.0}}
     fl = compute_fluorescence(uv, dark)
     assert fl["bean_1"][410] == 0.0   # must not go negative
+
+
+def test_compute_fl_score_emission_mean_and_norm():
+    fl_signal = {
+        "bean_1": {350: 0.0, 410: 2.0, 430: 2.0, 450: 2.0, 470: 2.0, 490: 2.0},
+        "bean_2": {350: 0.0, 410: 1.0, 430: 1.0, 450: 1.0, 470: 1.0, 490: 1.0},
+    }
+    uv_spec = {"bean_1": {350: 4.0}, "bean_2": {350: 4.0}}
+    fl_score, fl_norm = compute_fl_score(fl_signal, uv_spec)
+    assert fl_score["bean_1"] == pytest.approx(2.0)
+    assert fl_score["bean_2"] == pytest.approx(1.0)
+    assert fl_norm["bean_1"]  == pytest.approx(2.0 / 4.0)
+    assert fl_norm["bean_2"]  == pytest.approx(1.0 / 4.0)
+
+
+def test_compute_fl_score_zero_uv_ref_no_crash():
+    fl_signal = {"bean_1": {410: 1.0, 430: 1.0, 450: 1.0, 470: 1.0, 490: 1.0}}
+    uv_spec   = {"bean_1": {350: 0.0}}   # UV ref = 0 → must not divide by zero
+    fl_score, fl_norm = compute_fl_score(fl_signal, uv_spec)
+    assert np.isfinite(fl_norm["bean_1"])
+
+
+def test_flag_suspects_outlier_flagged():
+    fl_norm = {"bean_1": 0.1, "bean_2": 0.1, "bean_3": 0.1,
+               "bean_4": 0.1, "bean_5": 1.0}
+    flags = flag_suspects(fl_norm, sigma=1.5)
+    assert flags["bean_5"] == "SUSPECT"
+    assert all(flags[f"bean_{i}"] == "OK" for i in range(1, 5))
+
+
+def test_flag_suspects_all_identical_no_suspects():
+    fl_norm = {"bean_1": 1.0, "bean_2": 1.0, "bean_3": 1.0}
+    flags = flag_suspects(fl_norm, sigma=1.5)
+    # std=0 → threshold=mean → no bean strictly exceeds mean
+    assert all(f == "OK" for f in flags.values())
