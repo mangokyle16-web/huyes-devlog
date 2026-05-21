@@ -1,0 +1,6 @@
+/home/kyle/KyleClaude/multispectral_demo/build/CMakeFiles/multispectral_demo.dir
+/home/kyle/KyleClaude/multispectral_demo/build/CMakeFiles/capture_one.dir
+/home/kyle/KyleClaude/multispectral_demo/build/CMakeFiles/spec_fingerprint.dir
+/home/kyle/KyleClaude/multispectral_demo/build/CMakeFiles/qs_to_png.dir
+/home/kyle/KyleClaude/multispectral_demo/build/CMakeFiles/edit_cache.dir
+/home/kyle/KyleClaude/multispectral_demo/build/CMakeFiles/rebuild_cache.dir

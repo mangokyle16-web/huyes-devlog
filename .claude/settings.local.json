@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(nm -D /home/kyle/KyleClaude/sdk_extract/linux-sdk-arm64/qssdk-20250817/libqs_camera.so)"
+    ]
+  }
+}
