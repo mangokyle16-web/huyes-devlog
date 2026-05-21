@@ -81,11 +81,17 @@ static const char* AGR_BAND_NAMES[5] = {
 // Band mode: intricacy level (1-1000). Lower = faster, less accurate.
 static const int BAND_INTRICACY = 50;
 
-static const int SB_W        = 300;   // sidebar width
-static const int SB_FULL_H   = 1200;  // internal draw height (sidebar scrolls within this)
-static const int DISP_W      = 800;   // 7" DSI display width
-static const int DISP_H      = 480;   // 7" DSI display height
-static const int DISP_PREV_W = DISP_W - SB_W;  // preview area width = 500
+static const int SB_W        = 300;   // kept: drawSidebar still references it (removed in cleanup)
+static const int SB_FULL_H   = 1200;  // kept: drawSidebar still references it (removed in cleanup)
+static const int DISP_W      = 480;   // portrait logical width (wlr-randr transform=270)
+static const int DISP_H      = 800;   // portrait logical height
+static const int DISP_PREV_H = 352;   // status bar 32 + image area 288 + label bar 32
+static const int GRID_H      = 360;   // button grid (3 rows × 120px)
+static const int BOT_H       = 88;    // bottom control bar
+static const int GRID_COLS   = 3;
+static const int GRID_ROWS   = 3;
+static const int CELL_W      = DISP_W / GRID_COLS;  // 160
+static const int CELL_H      = GRID_H / GRID_ROWS;  // 120
 
 // Returns {path, exposure_us} for the best available white ref.
 // Priority: 5000us > 2500us > 1250us. Bean spec is captured at the same exposure
@@ -375,6 +381,7 @@ enum class BtnTag {
     AGTRON_ROI_SETUP, AGTRON_ROI_SAVE, AGTRON_ROI_LARGER, AGTRON_ROI_SMALLER,
     GRIND_CAPTURE, GRIND_VIZ, GRIND_HIST,
     VEG_TOGGLE,
+    UV_SCAN,
     QUIT
 };
 
@@ -1124,6 +1131,225 @@ static void rrect(cv::Mat& img, cv::Rect r, cv::Scalar color, int radius = 7) {
     corner(r.x + r.width - radius, r.y + r.height - radius,   0,  90);
 }
 
+// ─────────────────────────────────────────────────────────
+// Portrait UI helpers
+// ─────────────────────────────────────────────────────────
+
+struct GridBtn {
+    const char* icon;
+    const char* label;
+    BtnTag      tag;
+};
+
+static const GridBtn GRID_BTNS[9] = {
+    {"CAM", "CAPTURE",   BtnTag::FULL_ANALYSIS},
+    {"AGT", "AGTRON",    BtnTag::AGTRON_RUN},
+    {"SEG", "SEGMENT",   BtnTag::SEG_SEGMENT},
+    {"MLD", "MOLD",      BtnTag::MOLD_DETECT},
+    {"SPC", "SPECTRUM",  BtnTag::SPEC_CAPTURE},
+    {"UV",  "UV SCAN",   BtnTag::UV_SCAN},
+    {"ROI", "ROI",       BtnTag::AGTRON_ROI_SETUP},
+    {"WHT", "WHITE REF", BtnTag::WHITE_CAPTURE},
+    {"END", "QUIT",      BtnTag::QUIT},
+};
+
+static bool isBtnActive(BtnTag tag, const AppState& app) {
+    switch (tag) {
+    case BtnTag::FULL_ANALYSIS:    return app.fullAnalysisRunning.load();
+    case BtnTag::AGTRON_RUN:       return app.agtronReady;
+    case BtnTag::SEG_SEGMENT:      return app.mode == Mode::SEGMENT;
+    case BtnTag::MOLD_DETECT:      return app.mode == Mode::MOLD;
+    case BtnTag::SPEC_CAPTURE:     return app.specCaptured;
+    case BtnTag::AGTRON_ROI_SETUP: return app.agtronRoiMode;
+    case BtnTag::WHITE_CAPTURE:    return app.whiteRefCaptured;
+    default:                       return false;
+    }
+}
+
+static bool isLiveCamMode(Mode m) {
+    switch (m) {
+    case Mode::SEGMENT: case Mode::MOLD:    case Mode::SPEC_VIZ:
+    case Mode::AGTRON:  case Mode::AGTRON_HISTOGRAM: case Mode::AGTRON_PIECHART:
+    case Mode::GRIND:   case Mode::GRIND_HISTOGRAM:
+        return false;
+    default: return true;
+    }
+}
+
+static cv::Mat drawPortraitUI(const cv::Mat& camImg, AppState& app) {
+    // Palette (BGR order — hex values are RGB)
+    const cv::Scalar BG_MAIN{26,  26,  26 };   // #1a1a1a
+    const cv::Scalar BG_PREV{46,  30,  30 };   // #1e1e2e
+    const cv::Scalar BG_BOT {24,  17,  17 };   // #111118
+    const cv::Scalar BTN_OFF{60,  42,  42 };   // #2a2a3c
+    const cv::Scalar BTN_ON {92,  58,  58 };   // #3a3a5c
+    const cv::Scalar ACCENT {255, 122, 122};   // #7a7aff
+    const cv::Scalar BDR_OFF{76,  58,  58 };   // #3a3a4c
+    const cv::Scalar TXT1   {232, 232, 232};   // #e8e8e8
+    const cv::Scalar TXT2   {154, 138, 138};   // #8a8a9a
+
+    g_sidebarBtns.clear();
+    cv::Mat canvas(DISP_H, DISP_W, CV_8UC3, BG_MAIN);
+
+    // ── 1. Status bar (y: 0–32) ─────────────────────────────
+    cv::putText(canvas, "LUX VISIONS", {8, 22},
+                cv::FONT_HERSHEY_SIMPLEX, 0.45, TXT1, 1, cv::LINE_AA);
+    {
+        char expStr[24];
+        snprintf(expStr, sizeof(expStr), "%dus", app.exposure);
+        int base = 0;
+        cv::Size ts = cv::getTextSize(expStr, cv::FONT_HERSHEY_SIMPLEX, 0.40, 1, &base);
+        cv::putText(canvas, expStr, {DISP_W - ts.width - 8, 22},
+                    cv::FONT_HERSHEY_SIMPLEX, 0.40, TXT2, 1, cv::LINE_AA);
+    }
+
+    // ── 2. Preview background (y: 32–320) ────────────────────
+    cv::rectangle(canvas, cv::Rect{0, 32, DISP_W, 288}, BG_PREV, -1);
+    if (!camImg.empty()) {
+        const int PREV_SZ = 280;
+        const int CX = 240, CY = 192;      // circle center in canvas coords
+        const int PX = CX - PREV_SZ / 2;  // 100
+        const int PY = CY - PREV_SZ / 2;  // 52
+
+        cv::Mat scaled;
+        if (isLiveCamMode(app.mode)) {
+            // Square-crop center of camera frame, resize to 280×280
+            int side = std::min(camImg.cols, camImg.rows);
+            int sx   = (camImg.cols - side) / 2;
+            int sy   = (camImg.rows - side) / 2;
+            cv::Mat cropped = camImg(cv::Rect(sx, sy, side, side));
+            cv::resize(cropped, scaled, cv::Size(PREV_SZ, PREV_SZ), 0, 0, cv::INTER_LINEAR);
+        } else {
+            // Letterbox analysis result to fit 280×280
+            double sw = (double)PREV_SZ / camImg.cols;
+            double sh = (double)PREV_SZ / camImg.rows;
+            double s  = std::min(sw, sh);
+            int nw = (int)(camImg.cols * s);
+            int nh = (int)(camImg.rows * s);
+            cv::Mat tmp;
+            cv::resize(camImg, tmp, cv::Size(nw, nh), 0, 0, cv::INTER_AREA);
+            scaled = cv::Mat(PREV_SZ, PREV_SZ, CV_8UC3, BG_PREV);
+            tmp.copyTo(scaled(cv::Rect((PREV_SZ - nw) / 2, (PREV_SZ - nh) / 2, nw, nh)));
+        }
+
+        // Apply circular mask (radius = PREV_SZ/2 = 140)
+        cv::Mat mask(PREV_SZ, PREV_SZ, CV_8UC1, cv::Scalar(0));
+        cv::circle(mask, {PREV_SZ / 2, PREV_SZ / 2}, PREV_SZ / 2,
+                   cv::Scalar(255), -1, cv::LINE_AA);
+        cv::Mat bg(PREV_SZ, PREV_SZ, CV_8UC3, BG_PREV);
+        scaled.copyTo(bg, mask);
+        bg.copyTo(canvas(cv::Rect(PX, PY, PREV_SZ, PREV_SZ)));
+
+        // Agtron ROI overlay (in preview space)
+        if (app.agtronRoiMode || app.agtronRoiSaved) {
+            double scx = (double)DISP_W / 1600.0;
+            double scy = 288.0 / 1200.0;
+            int pcx = (int)(app.agtronRoiCx * scx);
+            int pcy = 32 + (int)(app.agtronRoiCy * scy);
+            int prx = std::max(1, (int)(app.agtronRoiR * scx));
+            int pry = std::max(1, (int)(app.agtronRoiR * scy));
+            cv::Scalar col = app.agtronRoiMode
+                           ? cv::Scalar(0, 165, 255) : cv::Scalar(0, 220, 60);
+            int thick = app.agtronRoiMode ? 3 : 2;
+            cv::ellipse(canvas, {pcx, pcy}, {prx, pry},
+                        0, 0, 360, col, thick, cv::LINE_AA);
+            if (app.agtronRoiMode) {
+                cv::line(canvas, {pcx - 8, pcy}, {pcx + 8, pcy}, col, 1, cv::LINE_AA);
+                cv::line(canvas, {pcx, pcy - 8}, {pcx, pcy + 8}, col, 1, cv::LINE_AA);
+            }
+        }
+    }
+
+    // ── 3. Label bar (y: 320–352) ────────────────────────────
+    cv::rectangle(canvas, cv::Rect{0, 320, DISP_W, 32}, BG_MAIN, -1);
+    {
+        const char* mn = app.modeName();
+        int base = 0;
+        cv::Size ts = cv::getTextSize(mn, cv::FONT_HERSHEY_SIMPLEX, 0.42, 1, &base);
+        cv::putText(canvas, mn, {(DISP_W - ts.width) / 2, 341},
+                    cv::FONT_HERSHEY_SIMPLEX, 0.42, TXT1, 1, cv::LINE_AA);
+        if (app.agtronMean >= 0) {
+            char ag[12]; snprintf(ag, sizeof(ag), "%d", app.agtronMean);
+            cv::Size as = cv::getTextSize(ag, cv::FONT_HERSHEY_SIMPLEX, 0.42, 1, &base);
+            cv::putText(canvas, ag, {DISP_W - as.width - 8, 341},
+                        cv::FONT_HERSHEY_SIMPLEX, 0.42, ACCENT, 1, cv::LINE_AA);
+        }
+        if (app.segBeanCount > 0) {
+            char bc[20]; snprintf(bc, sizeof(bc), "%d beans", app.segBeanCount);
+            cv::putText(canvas, bc, {8, 341},
+                        cv::FONT_HERSHEY_SIMPLEX, 0.37, TXT2, 1, cv::LINE_AA);
+        }
+    }
+
+    // ── 4. Button grid (y: 352–712) ──────────────────────────
+    for (int r = 0; r < GRID_ROWS; r++) {
+        for (int c = 0; c < GRID_COLS; c++) {
+            const GridBtn& gb = GRID_BTNS[r * GRID_COLS + c];
+            bool active = isBtnActive(gb.tag, app);
+            int bx = c * CELL_W + 4;
+            int by = DISP_PREV_H + r * CELL_H + 4;
+            int bw = CELL_W - 8;
+            int bh = CELL_H - 8;
+            cv::Rect br{bx, by, bw, bh};
+            rrect(canvas, br, active ? BTN_ON : BTN_OFF, 12);
+            cv::rectangle(canvas, br, active ? ACCENT : BDR_OFF, 1, cv::LINE_AA);
+            int base = 0;
+            cv::Size is = cv::getTextSize(gb.icon, cv::FONT_HERSHEY_DUPLEX, 0.70, 1, &base);
+            cv::putText(canvas, gb.icon, {bx + (bw - is.width) / 2, by + 55},
+                        cv::FONT_HERSHEY_DUPLEX, 0.70,
+                        active ? ACCENT : TXT1, 1, cv::LINE_AA);
+            cv::Size ls = cv::getTextSize(gb.label, cv::FONT_HERSHEY_SIMPLEX, 0.33, 1, &base);
+            cv::putText(canvas, gb.label, {bx + (bw - ls.width) / 2, by + 82},
+                        cv::FONT_HERSHEY_SIMPLEX, 0.33,
+                        active ? TXT1 : TXT2, 1, cv::LINE_AA);
+            g_sidebarBtns.push_back({br, gb.tag});
+        }
+    }
+
+    // ── 5. Bottom bar (y: 712–800) ───────────────────────────
+    {
+        const int BAR_Y = DISP_PREV_H + GRID_H;  // 712
+        cv::rectangle(canvas, cv::Rect{0, BAR_Y, DISP_W, BOT_H}, BG_BOT, -1);
+
+        cv::Rect em{8,  BAR_Y + 19, 80, 50};
+        rrect(canvas, em, BTN_OFF, 8);
+        cv::putText(canvas, "EXP-", {em.x + 10, em.y + 32},
+                    cv::FONT_HERSHEY_SIMPLEX, 0.38, TXT1, 1, cv::LINE_AA);
+        g_sidebarBtns.push_back({em, BtnTag::EXP_MINUS});
+
+        cv::Rect ep{96, BAR_Y + 19, 80, 50};
+        rrect(canvas, ep, BTN_OFF, 8);
+        cv::putText(canvas, "EXP+", {ep.x + 10, ep.y + 32},
+                    cv::FONT_HERSHEY_SIMPLEX, 0.38, TXT1, 1, cv::LINE_AA);
+        g_sidebarBtns.push_back({ep, BtnTag::EXP_PLUS});
+
+        // Status message (up to 2 lines of ~20 chars each)
+        if (!app.statusMsg.empty()) {
+            std::string s1 = app.statusMsg.substr(0, 20);
+            std::string s2 = app.statusMsg.size() > 20
+                           ? app.statusMsg.substr(20, 20) : "";
+            cv::putText(canvas, s1, {186, BAR_Y + 30},
+                        cv::FONT_HERSHEY_SIMPLEX, 0.30, TXT1, 1, cv::LINE_AA);
+            if (!s2.empty())
+                cv::putText(canvas, s2, {186, BAR_Y + 52},
+                            cv::FONT_HERSHEY_SIMPLEX, 0.30, TXT2, 1, cv::LINE_AA);
+        }
+
+        // STOP button when any analysis is running
+        bool busy = app.fullAnalysisRunning.load() || app.agtronRunning.load() ||
+                    app.segRunning.load()           || app.moldRunning.load()   ||
+                    app.specRunning.load();
+        if (busy) {
+            cv::Rect sb{388, BAR_Y + 19, 80, 50};
+            rrect(canvas, sb, cv::Scalar(56, 68, 255), 8);  // RED
+            cv::putText(canvas, "STOP", {sb.x + 14, sb.y + 32},
+                        cv::FONT_HERSHEY_SIMPLEX, 0.40, TXT1, 1, cv::LINE_AA);
+        }
+    }
+
+    return canvas;
+}
+
 static cv::Mat drawSidebar(int dispH, AppState& app) {
     const int height = SB_FULL_H;
     g_sidebarBtns.clear();
@@ -1817,7 +2043,7 @@ static void onMouse(int event, int x, int y, int flags, void* /*userdata*/) {
     if (event == cv::EVENT_LBUTTONDOWN) {
         if (!onSidebar && g_app.agtronRoiMode) {
             g_app.agtronRoiDragging = true;
-            g_app.agtronRoiCx = std::clamp((int)(x * 1600.0 / DISP_PREV_W), 0, 1600);
+            g_app.agtronRoiCx = std::clamp((int)(x * 1600.0 / DISP_W), 0, 1600);
             g_app.agtronRoiCy = std::clamp((int)(y * 1200.0 / DISP_H),      0, 1200);
             return;
         }
@@ -1832,7 +2058,7 @@ static void onMouse(int event, int x, int y, int flags, void* /*userdata*/) {
     // ── Touch / drag move ─────────────────────────────────
     if (event == cv::EVENT_MOUSEMOVE && (flags & cv::EVENT_FLAG_LBUTTON)) {
         if (g_app.agtronRoiDragging) {
-            g_app.agtronRoiCx = std::clamp((int)(x * 1600.0 / DISP_PREV_W), 0, 1600);
+            g_app.agtronRoiCx = std::clamp((int)(x * 1600.0 / DISP_W), 0, 1600);
             g_app.agtronRoiCy = std::clamp((int)(y * 1200.0 / DISP_H),      0, 1200);
             return;
         }
@@ -2800,7 +3026,7 @@ int main(int argc, char* argv[]) {
 
     // Show placeholder immediately
     {
-        cv::Mat ph(DISP_H, DISP_PREV_W, CV_8UC3, cv::Scalar(28, 28, 28));
+        cv::Mat ph(DISP_H, 500, CV_8UC3, cv::Scalar(28, 28, 28));
         cv::putText(ph, "Giga-Image",
                     cv::Point(80, DISP_H / 2 - 10), cv::FONT_HERSHEY_DUPLEX, 1.4,
                     cv::Scalar(60, 220, 100), 2, cv::LINE_AA);
@@ -2809,7 +3035,7 @@ int main(int argc, char* argv[]) {
                     cv::Scalar(160, 160, 160), 1, cv::LINE_AA);
         cv::Mat sb = drawSidebar(DISP_H, g_app);
         cv::Mat composite; cv::hconcat(ph, sb, composite);
-        g_previewW = DISP_PREV_W;
+        g_previewW = 500;
         cv::imshow(WIN, composite);
         cv::waitKey(1);  // pump Qt events once so window is actually mapped
     }
@@ -3595,25 +3821,25 @@ int main(int argc, char* argv[]) {
                 g_app.mode == Mode::GRIND_HISTOGRAM) {
                 // Letterbox: fit histogram preserving aspect ratio, leave 30px for status bar
                 const int BAR_H = 30;
-                double sw = (double)DISP_PREV_W / displayImg.cols;
+                double sw = (double)500 / displayImg.cols;
                 double sh = (double)(DISP_H - BAR_H) / displayImg.rows;
                 double s  = std::min(sw, sh);
                 int nw = (int)(displayImg.cols * s);
                 int nh = (int)(displayImg.rows * s);
-                preview = cv::Mat(DISP_H, DISP_PREV_W, CV_8UC3, cv::Scalar(26, 26, 38));
+                preview = cv::Mat(DISP_H, 500, CV_8UC3, cv::Scalar(26, 26, 38));
                 cv::Mat scaled;
                 cv::resize(displayImg, scaled, cv::Size(nw, nh), 0, 0, cv::INTER_AREA);
-                int ox = (DISP_PREV_W - nw) / 2;
+                int ox = (500 - nw) / 2;
                 int oy = ((DISP_H - BAR_H) - nh) / 2;
                 scaled.copyTo(preview(cv::Rect(ox, oy, nw, nh)));
             } else {
-                cv::resize(displayImg, preview, cv::Size(DISP_PREV_W, DISP_H),
+                cv::resize(displayImg, preview, cv::Size(500, DISP_H),
                            0, 0, cv::INTER_LINEAR);
             }
 
             // ── Agtron fixed-ROI circle overlay ───────────────────
             if (g_app.agtronRoiMode || g_app.agtronRoiSaved) {
-                double sx = (double)DISP_PREV_W / 1600.0;
+                double sx = (double)500 / 1600.0;
                 double sy = (double)DISP_H / 1200.0;
                 int pcx = (int)(g_app.agtronRoiCx * sx);
                 int pcy = (int)(g_app.agtronRoiCy * sy);
@@ -3636,8 +3862,8 @@ int main(int argc, char* argv[]) {
 
             // Mode info bar: semi-transparent strip at bottom of preview
             {
-                cv::Mat roi = preview(cv::Rect{0, DISP_H - 26, DISP_PREV_W, 26});
-                cv::Mat dark(26, DISP_PREV_W, CV_8UC3, cv::Scalar(0, 0, 0));
+                cv::Mat roi = preview(cv::Rect{0, DISP_H - 26, 500, 26});
+                cv::Mat dark(26, 500, CV_8UC3, cv::Scalar(0, 0, 0));
                 cv::addWeighted(roi, 0.25, dark, 0.75, 0, roi);
                 // Mode name (left)
                 const char* modeName = g_app.modeName();
@@ -3648,7 +3874,7 @@ int main(int argc, char* argv[]) {
                 snprintf(expStr, sizeof(expStr), "%d us", g_app.exposure);
                 int base = 0;
                 cv::Size ts = cv::getTextSize(expStr, cv::FONT_HERSHEY_SIMPLEX, 0.38, 1, &base);
-                cv::putText(preview, expStr, {DISP_PREV_W - ts.width - 8, DISP_H - 9},
+                cv::putText(preview, expStr, {500 - ts.width - 8, DISP_H - 9},
                             cv::FONT_HERSHEY_SIMPLEX, 0.38, {160, 160, 160}, 1, cv::LINE_AA);
             }
 
@@ -3656,9 +3882,9 @@ int main(int argc, char* argv[]) {
             cv::Mat composite;
             cv::hconcat(preview, sb, composite);
             // Thin separator between preview and sidebar
-            cv::line(composite, {DISP_PREV_W, 0}, {DISP_PREV_W, DISP_H},
+            cv::line(composite, {500, 0}, {500, DISP_H},
                      cv::Scalar(58, 56, 62), 1);
-            g_previewW = DISP_PREV_W;
+            g_previewW = 500;
             cv::imshow(WIN, composite);
         }
 
