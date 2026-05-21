@@ -32,7 +32,18 @@ UV_REF_BAND = 350                        # reflected UV band for normalization
 # ── Pure analysis functions (unit-testable) ────────────────────────────────────
 
 def load_spec_csv(path):
-    pass  # Task 2
+    """Return {bean_id: {nm_int: float}} from spec_fingerprint CSV."""
+    result = {}
+    with open(path) as f:
+        reader = csv.DictReader(f)
+        bean_keys = [k for k in reader.fieldnames if k.startswith("bean_")]
+        for k in bean_keys:
+            result[k] = {}
+        for row in reader:
+            nm = int(float(row["wavelength_nm"]))
+            for k in bean_keys:
+                result[k][nm] = float(row[k])
+    return result
 
 def compute_fluorescence(uv_spec, dark_spec):
     pass  # Task 3

@@ -19,3 +19,21 @@ def _make_csv(tmp_path, data):
         for nm in all_nms:
             w.writerow([nm] + [data[b].get(nm, 0.0) for b in bean_ids])
     return path
+
+
+def test_load_spec_csv_basic(tmp_path):
+    path = _make_csv(tmp_path, {
+        "bean_1": {350: 1.0, 410: 2.0, 450: 3.0},
+        "bean_2": {350: 1.5, 410: 2.5, 450: 3.5},
+    })
+    spec = load_spec_csv(path)
+    assert set(spec.keys()) == {"bean_1", "bean_2"}
+    assert spec["bean_1"][350] == pytest.approx(1.0)
+    assert spec["bean_2"][450] == pytest.approx(3.5)
+
+
+def test_load_spec_csv_wavelength_as_int(tmp_path):
+    path = _make_csv(tmp_path, {"bean_1": {410: 5.5}})
+    spec = load_spec_csv(path)
+    assert 410 in spec["bean_1"]          # key must be int, not string
+    assert spec["bean_1"][410] == pytest.approx(5.5)
