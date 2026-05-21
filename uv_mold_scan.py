@@ -140,14 +140,86 @@ def run_spec_fingerprint(qs_path, out_csv, session_dir):
 
 # ── Visualization ──────────────────────────────────────────────────────────────
 
+def save_report_csv(fl_score, fl_norm, flags, out_path):
+    with open(out_path, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["bean_id", "fl_score", "fl_norm", "flag"])
+        for bid in sorted(fl_score.keys()):
+            writer.writerow([
+                bid,
+                f"{fl_score[bid]:.4f}",
+                f"{fl_norm[bid]:.4f}",
+                flags.get(bid, "OK"),
+            ])
+
 def save_labeled_png(ref_gray_path, rois_path, fl_norm, flags, out_path):
-    pass  # Task 6
+    img = cv2.imread(ref_gray_path)
+    if img is None:
+        raise RuntimeError(f"Cannot read: {ref_gray_path}")
+
+    with open(rois_path) as f:
+        rois_data = json.load(f)   # plain list
+
+    vals  = np.array(list(fl_norm.values()), dtype=float)
+    v_min = vals.min()
+    v_rng = vals.max() - v_min + 1e-6
+    cmap  = cm.get_cmap("RdYlGn_r")   # green=low fluorescence, red=high
+
+    for roi in rois_data:
+        bean_id = f"bean_{roi['id']}"
+        if bean_id not in fl_norm:
+            continue
+        cx = int((roi["x0"] + roi["x1"]) / 2)
+        cy = int((roi["y0"] + roi["y1"]) / 2)
+        w  = roi["x1"] - roi["x0"]
+        h  = roi["y1"] - roi["y0"]
+        r  = max(10, int(np.sqrt(w * h / np.pi) * 0.8))
+        norm_val = (fl_norm[bean_id] - v_min) / v_rng
+        rgba     = cmap(norm_val)
+        bgr      = (int(rgba[2]*255), int(rgba[1]*255), int(rgba[0]*255))
+
+        thickness = 4 if flags.get(bean_id) == "SUSPECT" else 2
+        cv2.circle(img, (cx, cy), r, bgr, thickness)
+        label = f"{fl_norm[bean_id]:.2f}"
+        if flags.get(bean_id) == "SUSPECT":
+            label += "!"
+        cv2.putText(img, label, (cx - 18, cy - r - 6),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.42, bgr, 1, cv2.LINE_AA)
+
+    cv2.imwrite(out_path, img)
 
 def save_spectrum_plot(fl_signal, fl_norm, flags, out_path):
-    pass  # Task 6
+    all_bands = sorted(next(iter(fl_signal.values())).keys())
 
-def save_report_csv(fl_score, fl_norm, flags, out_path):
-    pass  # Task 6
+    suspect_ids = sorted(
+        [b for b, f in flags.items() if f == "SUSPECT"],
+        key=lambda b: fl_norm[b], reverse=True
+    )[:3]
+    normal_ids = [b for b, f in flags.items() if f == "OK"]
+
+    fig, ax = plt.subplots(figsize=(9, 5))
+
+    if normal_ids:
+        matrix      = np.array([[fl_signal[b].get(nm, 0) for nm in all_bands] for b in normal_ids])
+        median_spec = np.median(matrix, axis=0)
+        ax.plot(all_bands, median_spec, color="steelblue", lw=1.5,
+                label="Median normal", alpha=0.8)
+
+    colors = ["crimson", "orangered", "darkorange"]
+    for i, bid in enumerate(suspect_ids):
+        vals = [fl_signal[bid].get(nm, 0) for nm in all_bands]
+        ax.plot(all_bands, vals, color=colors[i % 3], lw=2,
+                label=f"{bid} fl_norm={fl_norm[bid]:.3f} [SUSPECT]")
+
+    ax.axvspan(410, 490, alpha=0.12, color="gold", label="Emission window 410–490nm")
+    ax.set_xlabel("Wavelength (nm)")
+    ax.set_ylabel("Fluorescence (UV_on − dark)")
+    ax.set_title("UV 365nm Mold Scan — Suspect vs Normal Bean Spectra")
+    ax.legend(fontsize=8)
+    ax.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.savefig(out_path, dpi=150)
+    plt.close()
 
 
 # ── Main ───────────────────────────────────────────────────────────────────────

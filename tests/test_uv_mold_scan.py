@@ -90,3 +90,19 @@ def test_flag_suspects_all_identical_no_suspects():
     flags = flag_suspects(fl_norm, sigma=1.5)
     # std=0 → threshold=mean → no bean strictly exceeds mean
     assert all(f == "OK" for f in flags.values())
+
+
+def test_save_report_csv(tmp_path):
+    fl_score = {"bean_1": 2.0, "bean_2": 1.0}
+    fl_norm  = {"bean_1": 0.5, "bean_2": 0.25}
+    flags    = {"bean_1": "SUSPECT", "bean_2": "OK"}
+    out = str(tmp_path / "report.csv")
+    save_report_csv(fl_score, fl_norm, flags, out)
+
+    with open(out) as f:
+        rows = list(csv.DictReader(f))
+    assert len(rows) == 2
+    assert rows[0]["bean_id"]  == "bean_1"
+    assert rows[0]["flag"]     == "SUSPECT"
+    assert float(rows[0]["fl_norm"]) == pytest.approx(0.5, abs=1e-3)
+    assert rows[1]["flag"] == "OK"
