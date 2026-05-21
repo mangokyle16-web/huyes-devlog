@@ -2028,50 +2028,34 @@ static int expPrev(int v, int minVal, int maxVal) {
 static void fireSidebarClick(int x, int y);  // forward decl
 
 static void onMouse(int event, int x, int y, int flags, void* /*userdata*/) {
-    const int maxScroll = std::max(0, SB_FULL_H - DISP_H);
-    bool onSidebar = (y >= DISP_PREV_H || y >= DISP_H - BOT_H);
-
-    // ── Mouse wheel: always handle to prevent OpenCV zoom ──
-    if (event == cv::EVENT_MOUSEWHEEL) {
-        int delta = cv::getMouseWheelDelta(flags);
-        // Only scroll sidebar; preview area has no zoom interaction
-        g_sbScrollY = std::clamp(g_sbScrollY - delta / 3, 0, maxScroll);
+    // Portrait layout: preview y<352, grid y 352–712, bottom bar y>=712
+    // Mouse wheel: discard — no scroll panels in portrait mode
+    if (event == cv::EVENT_MOUSEWHEEL)
         return;
-    }
 
-    // ── Touch / drag start ────────────────────────────────
     if (event == cv::EVENT_LBUTTONDOWN) {
-        if (!onSidebar && g_app.agtronRoiMode) {
+        if (y < DISP_PREV_H && g_app.agtronRoiMode) {
             g_app.agtronRoiDragging = true;
-            g_app.agtronRoiCx = std::clamp((int)(x * 1600.0 / DISP_W), 0, 1600);
-            g_app.agtronRoiCy = std::clamp((int)((y - 32) * 1200.0 / 288.0), 0, 1200);
+            g_app.agtronRoiCx = std::clamp((int)(x * 1600.0 / DISP_W),        0, 1600);
+            g_app.agtronRoiCy = std::clamp((int)((y - 32) * 1200.0 / 288.0),  0, 1200);
             return;
         }
-        if (onSidebar) {
-            g_touchStartY     = y;
-            g_touchScrollBase = g_sbScrollY;
-            g_touchDragged    = false;
-        }
+        g_touchStartY  = y;
+        g_touchDragged = false;
         return;
     }
 
-    // ── Touch / drag move ─────────────────────────────────
     if (event == cv::EVENT_MOUSEMOVE && (flags & cv::EVENT_FLAG_LBUTTON)) {
         if (g_app.agtronRoiDragging) {
-            g_app.agtronRoiCx = std::clamp((int)(x * 1600.0 / DISP_W), 0, 1600);
-            g_app.agtronRoiCy = std::clamp((int)((y - 32) * 1200.0 / 288.0), 0, 1200);
+            g_app.agtronRoiCx = std::clamp((int)(x * 1600.0 / DISP_W),        0, 1600);
+            g_app.agtronRoiCy = std::clamp((int)((y - 32) * 1200.0 / 288.0),  0, 1200);
             return;
         }
-        if (onSidebar && g_touchStartY >= 0) {
-            int dy = g_touchStartY - y;           // positive = scroll down
-            if (std::abs(dy) >= DRAG_THRESHOLD) g_touchDragged = true;
-            if (g_touchDragged)
-                g_sbScrollY = std::clamp(g_touchScrollBase + dy, 0, maxScroll);
-        }
+        if (g_touchStartY >= 0 && std::abs(y - g_touchStartY) >= DRAG_THRESHOLD)
+            g_touchDragged = true;
         return;
     }
 
-    // ── Touch / drag end: tap → click, drag → just release ─
     if (event == cv::EVENT_LBUTTONUP) {
         if (g_app.agtronRoiDragging) {
             g_app.agtronRoiDragging = false;
@@ -2080,8 +2064,8 @@ static void onMouse(int event, int x, int y, int flags, void* /*userdata*/) {
         bool wasDrag = g_touchDragged;
         g_touchStartY  = -1;
         g_touchDragged = false;
-        if (!onSidebar || wasDrag) return;
-        fireSidebarClick(x, y);
+        if (!wasDrag)
+            fireSidebarClick(x, y);
         return;
     }
 }
@@ -2342,8 +2326,10 @@ static void fireSidebarClick(int x, int y) {
                 }).detach();
             break;
         case BtnTag::FULL_ANALYSIS:
-            if (!g_app.fullAnalysisRunning && g_app.segDaemonReady)
-                g_analysisPrompt = 1;  // show Complete/Quick prompt
+            if (!g_app.fullAnalysisRunning && g_app.segDaemonReady) {
+                g_analysisModeQuick = true;
+                g_app.fullAnalysisPending = true;
+            }
             break;
         case BtnTag::ANALYSIS_COMPLETE:
             if (g_app.segBgCaptured) {
@@ -2413,8 +2399,8 @@ static void fireSidebarClick(int x, int y) {
         case BtnTag::GRIND_HIST:
             g_app.mode = Mode::GRIND_HISTOGRAM;
             break;
-        case BtnTag::VEG_TOGGLE:
-            g_vegExpanded = !g_vegExpanded;
+        case BtnTag::UV_SCAN:
+            g_app.statusMsg = "UV: run uv_mold_scan.py in terminal";
             break;
         // Legacy keyboard-only buttons (kept for T/U/M shortcuts)
         case BtnTag::SEG_SEGMENT:
