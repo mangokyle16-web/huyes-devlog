@@ -46,7 +46,16 @@ def load_spec_csv(path):
     return result
 
 def compute_fluorescence(uv_spec, dark_spec):
-    pass  # Task 3
+    """Subtract dark from UV; clamp to 0 to remove negative noise."""
+    fl = {}
+    for bean_id, uv_bands in uv_spec.items():
+        if bean_id not in dark_spec:
+            continue
+        fl[bean_id] = {
+            nm: max(0.0, val - dark_spec[bean_id].get(nm, 0.0))
+            for nm, val in uv_bands.items()
+        }
+    return fl
 
 def compute_fl_score(fl_signal, uv_spec, fl_bands=None, uv_ref_band=None):
     pass  # Task 4

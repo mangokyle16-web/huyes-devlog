@@ -37,3 +37,21 @@ def test_load_spec_csv_wavelength_as_int(tmp_path):
     spec = load_spec_csv(path)
     assert 410 in spec["bean_1"]          # key must be int, not string
     assert spec["bean_1"][410] == pytest.approx(5.5)
+
+
+def test_compute_fluorescence_subtracts_dark():
+    uv   = {"bean_1": {410: 5.0, 450: 6.0, 350: 2.0},
+            "bean_2": {410: 3.0, 450: 4.0, 350: 1.5}}
+    dark = {"bean_1": {410: 1.0, 450: 1.5, 350: 0.5},
+            "bean_2": {410: 0.5, 450: 0.5, 350: 0.3}}
+    fl = compute_fluorescence(uv, dark)
+    assert fl["bean_1"][410] == pytest.approx(4.0)
+    assert fl["bean_1"][450] == pytest.approx(4.5)
+    assert fl["bean_2"][410] == pytest.approx(2.5)
+
+
+def test_compute_fluorescence_clamps_negative():
+    uv   = {"bean_1": {410: 0.3}}
+    dark = {"bean_1": {410: 1.0}}
+    fl = compute_fluorescence(uv, dark)
+    assert fl["bean_1"][410] == 0.0   # must not go negative
