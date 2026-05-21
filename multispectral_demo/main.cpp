@@ -2029,7 +2029,7 @@ static void fireSidebarClick(int x, int y);  // forward decl
 
 static void onMouse(int event, int x, int y, int flags, void* /*userdata*/) {
     const int maxScroll = std::max(0, SB_FULL_H - DISP_H);
-    bool onSidebar = (x >= g_previewW);
+    bool onSidebar = (y >= DISP_PREV_H || y >= DISP_H - BOT_H);
 
     // ── Mouse wheel: always handle to prevent OpenCV zoom ──
     if (event == cv::EVENT_MOUSEWHEEL) {
@@ -2044,7 +2044,7 @@ static void onMouse(int event, int x, int y, int flags, void* /*userdata*/) {
         if (!onSidebar && g_app.agtronRoiMode) {
             g_app.agtronRoiDragging = true;
             g_app.agtronRoiCx = std::clamp((int)(x * 1600.0 / DISP_W), 0, 1600);
-            g_app.agtronRoiCy = std::clamp((int)(y * 1200.0 / DISP_H),      0, 1200);
+            g_app.agtronRoiCy = std::clamp((int)((y - 32) * 1200.0 / 288.0), 0, 1200);
             return;
         }
         if (onSidebar) {
@@ -2059,7 +2059,7 @@ static void onMouse(int event, int x, int y, int flags, void* /*userdata*/) {
     if (event == cv::EVENT_MOUSEMOVE && (flags & cv::EVENT_FLAG_LBUTTON)) {
         if (g_app.agtronRoiDragging) {
             g_app.agtronRoiCx = std::clamp((int)(x * 1600.0 / DISP_W), 0, 1600);
-            g_app.agtronRoiCy = std::clamp((int)(y * 1200.0 / DISP_H),      0, 1200);
+            g_app.agtronRoiCy = std::clamp((int)((y - 32) * 1200.0 / 288.0), 0, 1200);
             return;
         }
         if (onSidebar && g_touchStartY >= 0) {
@@ -2087,11 +2087,8 @@ static void onMouse(int event, int x, int y, int flags, void* /*userdata*/) {
 }
 
 static void fireSidebarClick(int x, int y) {
-    if (x < g_previewW) return;
-    int sx = x - g_previewW;
-
     for (auto& b : g_sidebarBtns) {
-        if (!b.rect.contains({sx, y})) continue;
+        if (!b.rect.contains({x, y})) continue;
 
         auto setMode = [](Mode m) {
             if (m == Mode::SPEC_BAND && !g_app.specinvReady) {
