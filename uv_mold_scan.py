@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+"""
+uv_mold_scan.py - UV 365nm mold fluorescence detection
+Usage: python3 uv_mold_scan.py [--n-beans N] [--exposure-uv US]
+"""
+import argparse, csv, json, os, subprocess, sys
+from datetime import datetime
+
+import cv2
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+import numpy as np
+
+# ── Paths ──────────────────────────────────────────────────────────────────────
+BUILD    = "/home/kyle/KyleClaude/multispectral_demo/build"
+QSBS     = "/home/kyle/KyleClaude/camera_new.qsbs"
+QSDB     = "/home/kyle/KyleClaude/db_std.qsdb"
+FAST_SEG = "/home/kyle/KyleClaude/fast_seg_agtron.py"
+SDK      = "/home/kyle/KyleClaude/sdk_extract/linux-sdk-arm64/qssdk-20250817"
+
+CAPTURE_ONE      = os.path.join(BUILD, "capture_one")
+QS_TO_PNG        = os.path.join(BUILD, "qs_to_png")
+SPEC_FINGERPRINT = os.path.join(BUILD, "spec_fingerprint")
+
+# ── Analysis constants ─────────────────────────────────────────────────────────
+FL_BANDS    = [410, 430, 450, 470, 490]  # aflatoxin B1 emission region
+UV_REF_BAND = 350                        # reflected UV band for normalization
+
+
+# ── Pure analysis functions (unit-testable) ────────────────────────────────────
+
+def load_spec_csv(path):
+    pass  # Task 2
+
+def compute_fluorescence(uv_spec, dark_spec):
+    pass  # Task 3
+
+def compute_fl_score(fl_signal, uv_spec, fl_bands=None, uv_ref_band=None):
+    pass  # Task 4
+
+def flag_suspects(fl_norm, sigma=1.5):
+    pass  # Task 4
+
+
+# ── Subprocess wrappers ────────────────────────────────────────────────────────
+
+def _sdk_env():
+    pass  # Task 5
+
+def capture_qs(out_path, exposure_us):
+    pass  # Task 5
+
+def extract_gray(qs_path, gray_png_path):
+    pass  # Task 5
+
+def run_segmentation(session_dir):
+    pass  # Task 5
+
+def run_spec_fingerprint(qs_path, out_csv, session_dir):
+    pass  # Task 5
+
+
+# ── Visualization ──────────────────────────────────────────────────────────────
+
+def save_labeled_png(ref_gray_path, rois_path, fl_norm, flags, out_path):
+    pass  # Task 6
+
+def save_spectrum_plot(fl_signal, fl_norm, flags, out_path):
+    pass  # Task 6
+
+def save_report_csv(fl_score, fl_norm, flags, out_path):
+    pass  # Task 6
+
+
+# ── Main ───────────────────────────────────────────────────────────────────────
+
+def main():
+    pass  # Task 7
+
+
+if __name__ == "__main__":
+    main()
