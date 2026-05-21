@@ -86,19 +86,56 @@ def flag_suspects(fl_norm, sigma=1.5):
 # ── Subprocess wrappers ────────────────────────────────────────────────────────
 
 def _sdk_env():
-    pass  # Task 5
+    e = os.environ.copy()
+    e["LD_LIBRARY_PATH"] = (
+        f"{SDK}:{SDK}/libarm64/spinvcore:{SDK}/libarm64/opencv/lib"
+    )
+    return e
 
 def capture_qs(out_path, exposure_us):
-    pass  # Task 5
+    """Call capture_one binary; raises RuntimeError on failure."""
+    ret = subprocess.call(
+        [CAPTURE_ONE, QSBS, out_path, str(exposure_us)],
+        env=_sdk_env()
+    )
+    if ret != 0:
+        raise RuntimeError(f"capture_one failed (exit={ret})")
 
 def extract_gray(qs_path, gray_png_path):
-    pass  # Task 5
+    """Convert QS → color PNG via qs_to_png, then save as grayscale."""
+    tmp_png = qs_path + "_preview.png"
+    ret = subprocess.call([QS_TO_PNG, qs_path, tmp_png, QSBS], env=_sdk_env())
+    if ret != 0:
+        raise RuntimeError(f"qs_to_png failed (exit={ret})")
+    img = cv2.imread(tmp_png)
+    if img is None:
+        raise RuntimeError(f"Cannot read preview: {tmp_png}")
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    cv2.imwrite(gray_png_path, gray)
+    os.remove(tmp_png)
 
 def run_segmentation(session_dir):
-    pass  # Task 5
+    """Run fast_seg_agtron.py; returns detected bean count.
+    beans_rois.json is a plain list: [{"id":1,"x0":..,"y0":..,"x1":..,"y1":..}, ...]
+    """
+    ret = subprocess.call([sys.executable, FAST_SEG, session_dir])
+    if ret != 0:
+        raise RuntimeError("fast_seg_agtron.py failed")
+    rois_path = os.path.join(session_dir, "beans_rois.json")
+    with open(rois_path) as f:
+        data = json.load(f)  # list, not dict
+    return len(data)
 
 def run_spec_fingerprint(qs_path, out_csv, session_dir):
-    pass  # Task 5
+    """Run spec_fingerprint binary with existing labelmap from session_dir."""
+    rois = os.path.join(session_dir, "beans_rois.json")
+    lmap = os.path.join(session_dir, "beans_labelmap.png")
+    ret = subprocess.call(
+        [SPEC_FINGERPRINT, QSBS, QSDB, qs_path, rois, out_csv, lmap],
+        env=_sdk_env()
+    )
+    if ret != 0:
+        raise RuntimeError(f"spec_fingerprint failed (exit={ret})")
 
 
 # ── Visualization ──────────────────────────────────────────────────────────────
