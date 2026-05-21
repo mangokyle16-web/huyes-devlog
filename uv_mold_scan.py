@@ -225,7 +225,81 @@ def save_spectrum_plot(fl_signal, fl_norm, flags, out_path):
 # ── Main ───────────────────────────────────────────────────────────────────────
 
 def main():
-    pass  # Task 7
+    parser = argparse.ArgumentParser(description="UV 365nm mold fluorescence scan")
+    parser.add_argument("--n-beans", type=int, default=None,
+                        help="Expected bean count (informational only)")
+    parser.add_argument("--exposure-uv", type=int, default=5000,
+                        help="UV & dark capture exposure in microseconds (default: 5000)")
+    args = parser.parse_args()
+
+    ts          = datetime.now().strftime("%Y%m%d_%H%M%S")
+    session_dir = os.path.expanduser(f"~/Desktop/UV_scan_{ts}")
+    os.makedirs(session_dir, exist_ok=True)
+    print(f"\n[UV SCAN] Session dir: {session_dir}\n")
+
+    ref_qs   = os.path.join(session_dir, "ref.qs")
+    ref_gray = os.path.join(session_dir, "capture_2500us_gray.png")
+    uv_qs    = os.path.join(session_dir, "uv_on.qs")
+    dark_qs  = os.path.join(session_dir, "dark.qs")
+    uv_csv   = os.path.join(session_dir, "uv_on_spec.csv")
+    dark_csv = os.path.join(session_dir, "dark_spec.csv")
+    rois     = os.path.join(session_dir, "beans_rois.json")
+    out_img  = os.path.join(session_dir, "uv_mold_labeled.png")
+    out_plot = os.path.join(session_dir, "uv_spectrum_plot.png")
+    out_csv  = os.path.join(session_dir, "uv_report.csv")
+
+    # ── Step 1: 白光參考拍攝 → 分割 ──────────────────────────────────────────
+    input("[STEP 1/3] 白光開著，豆子擺好。按 Enter 拍分割參考圖...")
+    print("  拍攝中...", flush=True)
+    capture_qs(ref_qs, 2500)
+    print("  提取灰階...", flush=True)
+    extract_gray(ref_qs, ref_gray)
+    print("  分割豆子...", flush=True)
+    n_detected = run_segmentation(session_dir)
+    print(f"  偵測到 {n_detected} 顆豆子")
+    if args.n_beans and abs(n_detected - args.n_beans) > 3:
+        print(f"  [警告] 預期 {args.n_beans} 顆，實際 {n_detected} 顆，請確認擺放")
+
+    # ── Step 2: UV 拍攝 ───────────────────────────────────────────────────────
+    input(f"\n[STEP 2/3] 關掉白光，開 365nm UV LED。按 Enter（曝光 {args.exposure_uv}us）...")
+    print("  拍攝中...", flush=True)
+    capture_qs(uv_qs, args.exposure_uv)
+    print("  提取光譜...", flush=True)
+    run_spec_fingerprint(uv_qs, uv_csv, session_dir)
+    print("  完成")
+
+    # ── Step 3: 暗場拍攝 ──────────────────────────────────────────────────────
+    input(f"\n[STEP 3/3] 關掉所有光源。按 Enter（曝光 {args.exposure_uv}us）...")
+    print("  拍攝中...", flush=True)
+    capture_qs(dark_qs, args.exposure_uv)
+    print("  提取光譜...", flush=True)
+    run_spec_fingerprint(dark_qs, dark_csv, session_dir)
+    print("  完成")
+
+    # ── 分析 ──────────────────────────────────────────────────────────────────
+    print("\n[分析] 計算螢光訊號...")
+    uv_spec   = load_spec_csv(uv_csv)
+    dark_spec = load_spec_csv(dark_csv)
+    fl_signal = compute_fluorescence(uv_spec, dark_spec)
+    fl_score, fl_norm = compute_fl_score(fl_signal, uv_spec)
+    flags     = flag_suspects(fl_norm)
+
+    n_suspect = sum(1 for f in flags.values() if f == "SUSPECT")
+    print(f"  {n_detected} 顆豆子中標記 {n_suspect} 顆可疑 (threshold: mean + 1.5σ)")
+    for bid in sorted(fl_norm, key=lambda b: fl_norm[b], reverse=True)[:5]:
+        mark = "  *** SUSPECT" if flags[bid] == "SUSPECT" else ""
+        print(f"  {bid}: fl_norm={fl_norm[bid]:.4f}{mark}")
+
+    # ── 輸出 ──────────────────────────────────────────────────────────────────
+    print("\n[輸出] 產生結果...")
+    save_labeled_png(ref_gray, rois, fl_norm, flags, out_img)
+    save_spectrum_plot(fl_signal, fl_norm, flags, out_plot)
+    save_report_csv(fl_score, fl_norm, flags, out_csv)
+
+    print(f"\n[完成] 結果存在 {session_dir}/")
+    print(f"  uv_mold_labeled.png")
+    print(f"  uv_spectrum_plot.png")
+    print(f"  uv_report.csv")
 
 
 if __name__ == "__main__":
