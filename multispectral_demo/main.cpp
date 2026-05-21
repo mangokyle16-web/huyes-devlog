@@ -3023,17 +3023,17 @@ int main(int argc, char* argv[]) {
 
     // Show placeholder immediately
     {
-        cv::Mat ph(DISP_H, 500, CV_8UC3, cv::Scalar(28, 28, 28));
-        cv::putText(ph, "Giga-Image",
-                    cv::Point(80, DISP_H / 2 - 10), cv::FONT_HERSHEY_DUPLEX, 1.4,
+        cv::Mat ph(DISP_H, DISP_W, CV_8UC3, cv::Scalar(28, 28, 28));
+        cv::putText(ph, "LUX VISIONS",
+                    cv::Point((DISP_W - 140) / 2, DISP_H / 2 - 10),
+                    cv::FONT_HERSHEY_DUPLEX, 1.0,
                     cv::Scalar(60, 220, 100), 2, cv::LINE_AA);
         cv::putText(ph, "Waiting for camera...",
-                    cv::Point(60, DISP_H / 2 + 30), cv::FONT_HERSHEY_SIMPLEX, 0.6,
+                    cv::Point((DISP_W - 200) / 2, DISP_H / 2 + 30),
+                    cv::FONT_HERSHEY_SIMPLEX, 0.50,
                     cv::Scalar(160, 160, 160), 1, cv::LINE_AA);
-        cv::Mat sb = drawSidebar(DISP_H, g_app);
-        cv::Mat composite; cv::hconcat(ph, sb, composite);
-        g_previewW = 500;
-        cv::imshow(WIN, composite);
+        g_previewW = 0;
+        cv::imshow(WIN, ph);
         cv::waitKey(1);  // pump Qt events once so window is actually mapped
     }
 
@@ -3811,77 +3811,9 @@ int main(int argc, char* argv[]) {
             g_app.statusMsg = "Saved: capture_" + std::string(numBuf) + " (" + expBuf + ")";
         }
 
-        // Rebuild composite (preview + sidebar) and show at native 800×480
+        // Render portrait UI (480×800 single canvas)
         if (!displayImg.empty()) {
-            cv::Mat preview;
-            if (g_app.mode == Mode::AGTRON_HISTOGRAM ||
-                g_app.mode == Mode::GRIND_HISTOGRAM) {
-                // Letterbox: fit histogram preserving aspect ratio, leave 30px for status bar
-                const int BAR_H = 30;
-                double sw = (double)500 / displayImg.cols;
-                double sh = (double)(DISP_H - BAR_H) / displayImg.rows;
-                double s  = std::min(sw, sh);
-                int nw = (int)(displayImg.cols * s);
-                int nh = (int)(displayImg.rows * s);
-                preview = cv::Mat(DISP_H, 500, CV_8UC3, cv::Scalar(26, 26, 38));
-                cv::Mat scaled;
-                cv::resize(displayImg, scaled, cv::Size(nw, nh), 0, 0, cv::INTER_AREA);
-                int ox = (500 - nw) / 2;
-                int oy = ((DISP_H - BAR_H) - nh) / 2;
-                scaled.copyTo(preview(cv::Rect(ox, oy, nw, nh)));
-            } else {
-                cv::resize(displayImg, preview, cv::Size(500, DISP_H),
-                           0, 0, cv::INTER_LINEAR);
-            }
-
-            // ── Agtron fixed-ROI circle overlay ───────────────────
-            if (g_app.agtronRoiMode || g_app.agtronRoiSaved) {
-                double sx = (double)500 / 1600.0;
-                double sy = (double)DISP_H / 1200.0;
-                int pcx = (int)(g_app.agtronRoiCx * sx);
-                int pcy = (int)(g_app.agtronRoiCy * sy);
-                int prx = std::max(1, (int)(g_app.agtronRoiR * sx));
-                int pry = std::max(1, (int)(g_app.agtronRoiR * sy));
-                cv::Scalar col = g_app.agtronRoiMode
-                               ? cv::Scalar(0, 165, 255)   // orange
-                               : cv::Scalar(0, 220, 60);   // green
-                int thick = g_app.agtronRoiMode ? 3 : 2;
-                cv::ellipse(preview, {pcx, pcy}, {prx, pry},
-                            0, 0, 360, col, thick, cv::LINE_AA);
-                if (g_app.agtronRoiMode) {
-                    cv::line(preview, {pcx-8, pcy}, {pcx+8, pcy}, col, 1, cv::LINE_AA);
-                    cv::line(preview, {pcx, pcy-8}, {pcx, pcy+8}, col, 1, cv::LINE_AA);
-                    cv::putText(preview, "Drag to move  Larger/Smaller in sidebar",
-                                {4, DISP_H - 34},
-                                cv::FONT_HERSHEY_SIMPLEX, 0.32, col, 1, cv::LINE_AA);
-                }
-            }
-
-            // Mode info bar: semi-transparent strip at bottom of preview
-            {
-                cv::Mat roi = preview(cv::Rect{0, DISP_H - 26, 500, 26});
-                cv::Mat dark(26, 500, CV_8UC3, cv::Scalar(0, 0, 0));
-                cv::addWeighted(roi, 0.25, dark, 0.75, 0, roi);
-                // Mode name (left)
-                const char* modeName = g_app.modeName();
-                cv::putText(preview, modeName, {8, DISP_H - 9},
-                            cv::FONT_HERSHEY_SIMPLEX, 0.38, {220,220,220}, 1, cv::LINE_AA);
-                // Exposure (right)
-                char expStr[24];
-                snprintf(expStr, sizeof(expStr), "%d us", g_app.exposure);
-                int base = 0;
-                cv::Size ts = cv::getTextSize(expStr, cv::FONT_HERSHEY_SIMPLEX, 0.38, 1, &base);
-                cv::putText(preview, expStr, {500 - ts.width - 8, DISP_H - 9},
-                            cv::FONT_HERSHEY_SIMPLEX, 0.38, {160, 160, 160}, 1, cv::LINE_AA);
-            }
-
-            cv::Mat sb = drawSidebar(DISP_H, g_app);
-            cv::Mat composite;
-            cv::hconcat(preview, sb, composite);
-            // Thin separator between preview and sidebar
-            cv::line(composite, {500, 0}, {500, DISP_H},
-                     cv::Scalar(58, 56, 62), 1);
-            g_previewW = 500;
+            cv::Mat composite = drawPortraitUI(displayImg, g_app);
             cv::imshow(WIN, composite);
         }
 
