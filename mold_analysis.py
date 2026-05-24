@@ -22,6 +22,9 @@ def compute_mahalanobis(spec: dict) -> dict:
     if len(bean_ids) < 3:
         return {bid: 0.0 for bid in bean_ids}
     all_nms = sorted(next(iter(spec.values())).keys())
+    for bid in bean_ids:
+        if set(spec[bid].keys()) != set(all_nms):
+            raise ValueError(f"{bid} has different wavelengths from other beans")
     X = np.array([[spec[bid].get(nm, 0.0) for nm in all_nms] for bid in bean_ids])
     X_c = X - X.mean(axis=0)
     U, s, _ = np.linalg.svd(X_c, full_matrices=False)
@@ -39,6 +42,10 @@ def cross_validate(mahal: dict, fl_norm: dict, sigma: float = 1.5) -> dict:
     LOW:  neither.
     """
     common = sorted(set(mahal) & set(fl_norm))
+    if len(common) == 0:
+        return {}
+    if len(common) == 1:
+        return {common[0]: "LOW"}
 
     def _thr(d):
         v = np.array([d[k] for k in common])
@@ -65,7 +72,7 @@ def save_report_csv(mahal: dict, fl_norm: dict, suspects: dict, out_path: str):
                         suspects[bid]])
 
 
-def save_scatter_plot(mahal: dict, fl_norm: dict, suspects: dict, out_path: str):
+def save_scatter_plot(mahal: dict, fl_norm: dict, suspects: dict, out_path: str, sigma: float = 1.5):
     color_map = {"HIGH": "crimson", "MID": "orange", "LOW": "steelblue"}
     common = sorted(set(mahal) & set(fl_norm) & set(suspects))
     fig, ax = plt.subplots(figsize=(8, 6))
@@ -80,8 +87,8 @@ def save_scatter_plot(mahal: dict, fl_norm: dict, suspects: dict, out_path: str)
                         fontsize=7, ha="left", va="bottom")
     m_arr = np.array([mahal[b] for b in common])
     f_arr = np.array([fl_norm[b] for b in common])
-    ax.axvline(m_arr.mean() + 1.5 * m_arr.std(), color="gray", ls="--", lw=0.8, alpha=0.6)
-    ax.axhline(f_arr.mean() + 1.5 * f_arr.std(), color="gray", ls="--", lw=0.8, alpha=0.6)
+    ax.axvline(m_arr.mean() + sigma * m_arr.std(), color="gray", ls="--", lw=0.8, alpha=0.6)
+    ax.axhline(f_arr.mean() + sigma * f_arr.std(), color="gray", ls="--", lw=0.8, alpha=0.6)
     patches = [mpatches.Patch(color=c, label=l) for l, c in color_map.items()]
     ax.legend(handles=patches, fontsize=9)
     ax.set_xlabel("Mahalanobis distance (white-light FPI)")
@@ -118,4 +125,5 @@ def save_cross_labeled_png(ref_gray_path: str, rois_path: str,
             label += "!"
         cv2.putText(img, label, (cx - 25, cy - r - 6),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.35, bgr, 1, cv2.LINE_AA)
-    cv2.imwrite(out_path, img)
+    if not cv2.imwrite(out_path, img):
+        raise RuntimeError(f"cv2.imwrite failed: {out_path}")

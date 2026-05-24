@@ -1,8 +1,10 @@
-import csv, os, sys, pytest
+import csv, json, os, sys, pytest
+import cv2
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from mold_analysis import compute_mahalanobis, cross_validate, save_report_csv
+from mold_analysis import (compute_mahalanobis, cross_validate, save_report_csv,
+                            save_scatter_plot, save_cross_labeled_png)
 
 
 # ── compute_mahalanobis ────────────────────────────────────────────────────────
@@ -113,3 +115,46 @@ def test_save_report_csv_columns(tmp_path):
     assert rows[1]["suspect_level"] == "HIGH"
     assert float(rows[1]["mahal"]) == pytest.approx(4.56, abs=0.01)
     assert float(rows[1]["fl_norm"]) == pytest.approx(0.99, abs=0.01)
+
+
+# ── cross_validate edge-case guards (C2) ──────────────────────────────────────
+
+def test_cross_validate_empty_common():
+    result = cross_validate({}, {})
+    assert result == {}
+
+
+def test_cross_validate_single_bean():
+    result = cross_validate({"bean_1": 5.0}, {"bean_1": 5.0})
+    assert result == {"bean_1": "LOW"}
+
+
+# ── save_scatter_plot smoke test (I3) ─────────────────────────────────────────
+
+def test_save_scatter_plot_creates_file(tmp_path):
+    mahal    = {"bean_1": 1.0, "bean_2": 5.0, "bean_3": 2.0}
+    fl_norm  = {"bean_1": 0.1, "bean_2": 0.9, "bean_3": 0.3}
+    suspects = {"bean_1": "LOW", "bean_2": "HIGH", "bean_3": "MID"}
+    out = str(tmp_path / "scatter.png")
+    save_scatter_plot(mahal, fl_norm, suspects, out)
+    assert os.path.exists(out)
+    assert os.path.getsize(out) > 0
+
+
+# ── save_cross_labeled_png smoke test (I3) ────────────────────────────────────
+
+def test_save_cross_labeled_png_creates_file(tmp_path):
+    img = np.full((100, 100, 3), 128, dtype=np.uint8)
+    gray_path = str(tmp_path / "capture_2500us_gray.png")
+    cv2.imwrite(gray_path, img)
+    rois = [{"id": 1, "x0": 10, "y0": 10, "x1": 40, "y1": 40}]
+    rois_path = str(tmp_path / "beans_rois.json")
+    with open(rois_path, "w") as f:
+        json.dump(rois, f)
+    mahal    = {"bean_1": 2.5}
+    fl_norm  = {"bean_1": 0.8}
+    suspects = {"bean_1": "HIGH"}
+    out = str(tmp_path / "labeled.png")
+    save_cross_labeled_png(gray_path, rois_path, mahal, fl_norm, suspects, out)
+    assert os.path.exists(out)
+    assert os.path.getsize(out) > 0
