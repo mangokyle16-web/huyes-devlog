@@ -222,7 +222,7 @@ static const char* tr(const char* key) {
         {"DARK",                   {"DARK",                   "暗"}},
         {"MID",                    {"MID",                    "中"}},
         {"BRIGHT",                 {"BRIGHT",                 "亮"}},
-        {"QUIT",                   {"QUIT",                   "離開"}},
+        {"QUIT",                   {"BACK",                   "返回"}},
         {"Grayscale",              {"Grayscale",              "灰階"}},
         {"Mold Map",               {"Mold Map",               "黴菌圖"}},
         {"Agtron Roast",           {"Agtron Roast",           "烘焙度"}},
@@ -2120,7 +2120,7 @@ static void fireSidebarClick(int x, int y) {
             g_app.mode = Mode::SPEC_VIZ;
             break;
         case BtnTag::QUIT:
-            g_app.running = false;
+            g_app.settingsOpen = false;
             break;
         default: break;
         }
