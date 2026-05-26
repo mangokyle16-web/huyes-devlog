@@ -2426,6 +2426,11 @@ int main(int argc, char* argv[]) {
     std::cout << "Calibration : " << qsbsPath << "\n";
     std::cout << "DB          : " << qsdbPath << "\n\n";
 
+    // ── Load persisted settings ────────────────────────────
+    g_settings.load();
+    setBacklight(static_cast<int>(g_settings.bright));
+    initFreeType();
+
     // ── Load calibration file ─────────────────────────────
     QsErrorcodes err = loadQsbsFile(qsbsPath.c_str(), &g_app.qsbsData, &g_app.qsbsSize);
     if (err != QS_ERR_SUCCESS) {
