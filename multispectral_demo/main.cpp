@@ -1658,6 +1658,12 @@ static void onMouse(int event, int x, int y, int flags, void* /*userdata*/) {
     if (event == cv::EVENT_MOUSEWHEEL)
         return;
 
+    // When settings modal is open, block all non-click events
+    // (ROI dragging, etc.) to prevent interaction with background UI.
+    if (g_app.settingsOpen &&
+        event != cv::EVENT_LBUTTONUP && event != cv::EVENT_LBUTTONDOWN)
+        return;
+
     if (event == cv::EVENT_LBUTTONDOWN) {
         if (y < DISP_PREV_H && g_app.agtronRoiMode) {
             g_app.agtronRoiDragging = true;
@@ -2027,6 +2033,43 @@ static void fireSidebarClick(int x, int y) {
         case BtnTag::UV_SCAN:
             g_app.statusMsg = "UV: run uv_mold_scan.py in terminal";
             break;
+
+        case BtnTag::SETTINGS_OPEN:
+            g_app.settingsOpen = true;
+            break;
+
+        case BtnTag::SETTINGS_CLOSE:
+            g_app.settingsOpen = false;
+            break;
+
+        case BtnTag::LANG_EN:
+            g_settings.lang = Lang::EN;
+            g_settings.save();
+            break;
+
+        case BtnTag::LANG_ZH:
+            g_settings.lang = Lang::ZH;
+            g_settings.save();
+            break;
+
+        case BtnTag::BRIGHT_DARK:
+            g_settings.bright = BrightLevel::DARK;
+            g_settings.save();
+            setBacklight(static_cast<int>(BrightLevel::DARK));
+            break;
+
+        case BtnTag::BRIGHT_MID:
+            g_settings.bright = BrightLevel::MID;
+            g_settings.save();
+            setBacklight(static_cast<int>(BrightLevel::MID));
+            break;
+
+        case BtnTag::BRIGHT_BRIGHT:
+            g_settings.bright = BrightLevel::BRIGHT;
+            g_settings.save();
+            setBacklight(static_cast<int>(BrightLevel::BRIGHT));
+            break;
+
         // Legacy keyboard-only buttons (kept for T/U/M shortcuts)
         case BtnTag::SEG_SEGMENT:
             if (!g_app.fullAnalysisRunning && !g_app.segRunning && g_app.segDaemonReady)
