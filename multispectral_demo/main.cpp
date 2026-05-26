@@ -461,6 +461,7 @@ struct AppState {
 
     // ── Agtron Fixed ROI ─────────────────────────────────────
     bool agtronRoiMode{false};    // user is adjusting the ROI circle
+    bool settingsOpen{false};     // settings modal visible
     bool agtronRoiSaved{false};   // ROI saved and used for fast path
     int  agtronRoiCx{800};        // circle center X in full-image coords (1600x1200)
     int  agtronRoiCy{600};        // circle center Y
@@ -548,7 +549,11 @@ enum class BtnTag {
     GRIND_CAPTURE, GRIND_VIZ, GRIND_HIST,
     VEG_TOGGLE,
     UV_SCAN,
-    QUIT
+    QUIT,
+    SETTINGS_OPEN,
+    SETTINGS_CLOSE,
+    LANG_EN, LANG_ZH,
+    BRIGHT_DARK, BRIGHT_MID, BRIGHT_BRIGHT,
 };
 
 struct SidebarBtn {
@@ -1313,7 +1318,7 @@ static const GridBtn GRID_BTNS[9] = {
     {"UV",  "UV SCAN",   BtnTag::UV_SCAN},
     {"ROI", "ROI",       BtnTag::AGTRON_ROI_SETUP},
     {"WHT", "WHITE REF", BtnTag::WHITE_CAPTURE},
-    {"END", "QUIT",      BtnTag::QUIT},
+    {"SET", "SETTINGS",  BtnTag::SETTINGS_OPEN},
 };
 
 static bool isBtnActive(BtnTag tag, const AppState& app) {
