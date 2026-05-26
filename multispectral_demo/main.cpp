@@ -133,33 +133,51 @@ struct AppSettings {
 static AppSettings g_settings;
 
 // ─────────────────────────────────────────────────────────
-// FreeType2 — CJK text rendering
+// FreeType2 — dual-font rendering: Latin + CJK
 // ─────────────────────────────────────────────────────────
 
-static cv::Ptr<cv::freetype::FreeType2> g_ft;
+static cv::Ptr<cv::freetype::FreeType2> g_ft_en;  // DejaVuSans — Latin/ASCII
+static cv::Ptr<cv::freetype::FreeType2> g_ft_zh;  // DroidSansFallbackFull — CJK
 
 static void initFreeType() {
     try {
         auto ft = cv::freetype::createFreeType2();
+        ft->loadFontData("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 0);
+        g_ft_en = ft;
+    } catch (...) { g_ft_en = nullptr; }
+
+    try {
+        auto ft = cv::freetype::createFreeType2();
         ft->loadFontData(
             "/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf", 0);
-        g_ft = ft;
-        std::cout << "[OK] FreeType2 loaded (CJK rendering available)\n";
-    } catch (...) {
-        g_ft = nullptr;
+        g_ft_zh = ft;
+    } catch (...) { g_ft_zh = nullptr; }
+
+    if (g_ft_en || g_ft_zh)
+        std::cout << "[OK] FreeType2 loaded (EN=" << (g_ft_en ? "yes" : "no")
+                  << " ZH=" << (g_ft_zh ? "yes" : "no") << ")\n";
+    else
         std::cout << "[WARN] FreeType2 init failed — falling back to ASCII fonts\n";
-    }
+}
+
+// Returns true if text contains any non-ASCII (UTF-8 high byte) characters.
+static bool hasNonAscii(const std::string& s) {
+    for (unsigned char c : s) if (c > 0x7F) return true;
+    return false;
 }
 
 // Draw text using FreeType if available, otherwise cv::putText.
-// org = bottom-left corner of the text (OpenCV convention).
+// org = bottom-left corner of the text (OpenCV convention, bottomLeftOrigin=true).
 // fontHeight in pixels. thickness=-1 lets FreeType auto-select.
 static void ftPut(cv::Mat& img, const std::string& text,
                   cv::Point org, int fontHeight,
                   cv::Scalar color, int thickness = -1) {
-    if (!text.empty() && g_ft) {
-        g_ft->putText(img, text, org, fontHeight, color,
-                      thickness, cv::LINE_AA, false);
+    if (text.empty()) return;
+    auto ft = (hasNonAscii(text) && g_ft_zh) ? g_ft_zh
+            : (g_ft_en ? g_ft_en : g_ft_zh);
+    if (ft) {
+        ft->putText(img, text, org, fontHeight, color,
+                    thickness, cv::LINE_AA, true);
     } else {
         double scale = fontHeight / 28.0;
         cv::putText(img, text, org,
@@ -169,9 +187,12 @@ static void ftPut(cv::Mat& img, const std::string& text,
 
 // Returns text width in pixels using current font.
 static int ftTextWidth(const std::string& text, int fontHeight) {
-    if (!text.empty() && g_ft) {
+    if (text.empty()) return 0;
+    auto ft = (hasNonAscii(text) && g_ft_zh) ? g_ft_zh
+            : (g_ft_en ? g_ft_en : g_ft_zh);
+    if (ft) {
         int baseline = 0;
-        cv::Size s = g_ft->getTextSize(text, fontHeight, -1, &baseline);
+        cv::Size s = ft->getTextSize(text, fontHeight, -1, &baseline);
         return s.width;
     }
     double scale = fontHeight / 28.0;
@@ -208,8 +229,8 @@ static const char* tr(const char* key) {
         {"Agtron Histogram",       {"Agtron Histogram",       "烘焙分佈"}},
         {"Agtron Pie Chart",       {"Agtron Pie Chart",       "烘焙圓餅"}},
         {"Waiting for camera...", {"Waiting for camera...",  "等待相機..."}},
-        {"EXP-",                   {"EXP-",                   "曝光-"}},
-        {"EXP+",                   {"EXP+",                   "曝光+"}},
+        {"EXP-",                   {"EXP-",                   "減曝"}},
+        {"EXP+",                   {"EXP+",                   "增曝"}},
         {"English",                {"English",                "英文"}},
     };
     bool zh = (g_settings.lang == Lang::ZH);
@@ -1358,7 +1379,7 @@ static void drawSettingsModal(cv::Mat& canvas) {
     // ── Title row (MY … MY+40) ────────────────────────────
     cv::rectangle(canvas, cv::Rect{MX, MY, MW, 40},
                   cv::Scalar(20, 20, 38), -1);
-    std::string title = std::string("SET  ") + tr("SETTINGS");
+    std::string title = tr("SETTINGS");
     int tw = ftTextWidth(title, 15);
     ftPut(canvas, title, {MX + (MW - tw) / 2, MY + 27}, 15,
           cv::Scalar(60, 220, 100));
@@ -2286,6 +2307,8 @@ static void procThreadFn() {
 // ─────────────────────────────────────────────────────────
 
 // Recursively search X11 window tree for a window with the given title.
+// Find our OpenCV/Qt window by WM_NAME title.
+// In QT_QPA_PLATFORM=xcb mode, cv::namedWindow("Huyes") sets WM_NAME to "Huyes".
 static Window x11FindByTitle(Display* dpy, Window parent, const char* title) {
     char* name = nullptr;
     if (XFetchName(dpy, parent, &name) && name) {
@@ -2305,13 +2328,13 @@ static Window x11FindByTitle(Display* dpy, Window parent, const char* title) {
     return found;
 }
 
-// Set override_redirect on our OpenCV window: tells the window manager to
-// leave it alone (no title bar, no borders). Unmap+remap is needed for the
-// attribute to take effect on an already-mapped window.
+// Set override_redirect on our OpenCV/Qt window: tells XWayland to leave it
+// alone (no title bar, no borders) and pins it at exact DSI screen coords.
+// Unmap+remap is needed for the attribute to take effect on a mapped window.
 // Called in a detached thread right after namedWindow().
 static void applyOverrideRedirect(const std::string& title, int x, int y, int w, int h) {
     using namespace std::chrono_literals;
-    std::this_thread::sleep_for(500ms);   // wait for Qt to map the window
+    std::this_thread::sleep_for(1500ms);  // wait for Qt to fully map the window
 
     Display* dpy = XOpenDisplay(nullptr);
     if (!dpy) {
@@ -2675,9 +2698,8 @@ int main(int argc, char* argv[]) {
     cv::moveWindow(WIN, 0, 0);               // 7" DSI display at (0,0)
     cv::resizeWindow(WIN, DISP_W, DISP_H);  // exact 800×480, 1:1 with composite
 
-    // Apply override_redirect in background: removes title bar without
-    // triggering Wayland compositor fullscreen/direct-scanout mode switch
-    // (which would cause HDMI to flicker and need replug to recover).
+    // Apply override_redirect to pin window at DSI (0,0): removes title bar and locks position.
+    // Requires QT_QPA_PLATFORM=xcb (X11 mode); cv::namedWindow("Huyes") sets WM_NAME="Huyes".
     std::thread(applyOverrideRedirect, WIN, 0, 0, DISP_W, DISP_H).detach();
 
     // Show placeholder immediately
