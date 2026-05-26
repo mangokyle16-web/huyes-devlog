@@ -41,6 +41,7 @@ target_link_libraries(multispectral_demo
     ${LIB_SPECINV}
     ${LIB_AGRI}
     ${OpenCV_LIBS}
+    opencv_freetype
     ${X11_LIBRARIES}
     pthread
     dl
