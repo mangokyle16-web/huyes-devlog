@@ -50,10 +50,11 @@ fi
 export LD_LIBRARY_PATH="$SPINV_DIR:$OPENCV_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 export LD_PRELOAD="$SCRIPT_DIR/uvc_fix.so"
 
-# Ensure DISPLAY is set (needed when launched from .desktop without a terminal)
-if [ -z "$DISPLAY" ]; then
-    export DISPLAY=:0
-fi
+# Force X11/XCB mode so cv::moveWindow and override_redirect work correctly.
+# Without this Qt auto-detects the Wayland socket and ignores cv::moveWindow.
+export DISPLAY=:0
+unset WAYLAND_DISPLAY
+export QT_QPA_PLATFORM=xcb
 
 DEFAULT_QSBS="/home/kyle/KyleClaude/camera_new.qsbs"
 DEFAULT_QSDB="/home/kyle/KyleClaude/db_std.qsdb"
