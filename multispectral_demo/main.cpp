@@ -132,6 +132,54 @@ struct AppSettings {
 static AppSettings g_settings;
 
 // ─────────────────────────────────────────────────────────
+// FreeType2 — CJK text rendering
+// ─────────────────────────────────────────────────────────
+
+static cv::Ptr<cv::freetype::FreeType2> g_ft;
+
+static void initFreeType() {
+    try {
+        auto ft = cv::freetype::createFreeType2();
+        ft->loadFontData(
+            "/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf", 0);
+        g_ft = ft;
+        std::cout << "[OK] FreeType2 loaded (CJK rendering available)\n";
+    } catch (...) {
+        g_ft = nullptr;
+        std::cout << "[WARN] FreeType2 init failed — falling back to ASCII fonts\n";
+    }
+}
+
+// Draw text using FreeType if available, otherwise cv::putText.
+// org = bottom-left corner of the text (OpenCV convention).
+// fontHeight in pixels. thickness=-1 lets FreeType auto-select.
+static void ftPut(cv::Mat& img, const std::string& text,
+                  cv::Point org, int fontHeight,
+                  cv::Scalar color, int thickness = -1) {
+    if (!text.empty() && g_ft) {
+        g_ft->putText(img, text, org, fontHeight, color,
+                      thickness, cv::LINE_AA, false);
+    } else {
+        double scale = fontHeight / 28.0;
+        cv::putText(img, text, org,
+                    cv::FONT_HERSHEY_SIMPLEX, scale, color, 1, cv::LINE_AA);
+    }
+}
+
+// Returns text width in pixels using current font.
+static int ftTextWidth(const std::string& text, int fontHeight) {
+    if (!text.empty() && g_ft) {
+        int baseline = 0;
+        cv::Size s = g_ft->getTextSize(text, fontHeight, -1, &baseline);
+        return s.width;
+    }
+    double scale = fontHeight / 28.0;
+    int base = 0;
+    cv::Size s = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, scale, 1, &base);
+    return s.width;
+}
+
+// ─────────────────────────────────────────────────────────
 // Constants
 // ─────────────────────────────────────────────────────────
 
