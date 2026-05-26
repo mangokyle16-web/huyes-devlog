@@ -1344,6 +1344,95 @@ static bool isLiveCamMode(Mode m) {
     }
 }
 
+static void drawSettingsModal(cv::Mat& canvas) {
+    // ── Semi-transparent backdrop ──────────────────────────
+    cv::Mat dark(canvas.size(), canvas.type(), cv::Scalar(0, 0, 0));
+    cv::addWeighted(dark, 0.70, canvas, 0.30, 0, canvas);
+
+    // ── Modal box ─────────────────────────────────────────
+    const int MX = 60, MY = 200, MW = 360, MH = 224;
+    cv::Rect modal{MX, MY, MW, MH};
+    cv::rectangle(canvas, modal, cv::Scalar(26, 26, 46), -1);
+    cv::rectangle(canvas, modal, cv::Scalar(80, 80, 100), 1, cv::LINE_AA);
+
+    // ── Title row (MY … MY+40) ────────────────────────────
+    cv::rectangle(canvas, cv::Rect{MX, MY, MW, 40},
+                  cv::Scalar(20, 20, 38), -1);
+    std::string title = std::string("SET  ") + tr("SETTINGS");
+    int tw = ftTextWidth(title, 15);
+    ftPut(canvas, title, {MX + (MW - tw) / 2, MY + 27}, 15,
+          cv::Scalar(60, 220, 100));
+
+    // ── Language row (MY+40 … MY+108) ─────────────────────
+    ftPut(canvas, tr("LANGUAGE"),
+          {MX + 12, MY + 60}, 12, cv::Scalar(160, 160, 160));
+
+    struct LangBtn { const char* key; bool active; BtnTag tag; int x; };
+    LangBtn langBtns[2] = {
+        {"English", g_settings.lang == Lang::EN, BtnTag::LANG_EN, MX + 10},
+        {"\xe4\xb8\xad\xe6\x96\x87",
+         g_settings.lang == Lang::ZH, BtnTag::LANG_ZH, MX + 190},
+    };
+    for (auto& lb : langBtns) {
+        cv::Rect r{lb.x, MY + 66, 170, 34};
+        cv::Scalar bg  = lb.active ? cv::Scalar(26, 58, 26) : cv::Scalar(37, 37, 64);
+        cv::Scalar txt = lb.active ? cv::Scalar(60, 220, 100) : cv::Scalar(136, 136, 136);
+        cv::Scalar bdr = lb.active ? cv::Scalar(60, 150, 60) : cv::Scalar(60, 60, 90);
+        cv::rectangle(canvas, r, bg, -1);
+        cv::rectangle(canvas, r, bdr, 1);
+        int lw = ftTextWidth(lb.key, 14);
+        ftPut(canvas, lb.key, {r.x + (r.width - lw) / 2, r.y + 24}, 14, txt);
+        g_sidebarBtns.push_back({r, lb.tag});
+    }
+
+    // ── Brightness row (MY+108 … MY+176) ──────────────────
+    ftPut(canvas, tr("BRIGHTNESS"),
+          {MX + 12, MY + 122}, 12, cv::Scalar(160, 160, 160));
+
+    struct BrightBtn { const char* key; BrightLevel level; BtnTag tag; int x; };
+    BrightBtn brightBtns[3] = {
+        {tr("DARK"),   BrightLevel::DARK,   BtnTag::BRIGHT_DARK,   MX + 10},
+        {tr("MID"),    BrightLevel::MID,    BtnTag::BRIGHT_MID,    MX + 130},
+        {tr("BRIGHT"), BrightLevel::BRIGHT, BtnTag::BRIGHT_BRIGHT, MX + 250},
+    };
+    for (auto& bb : brightBtns) {
+        bool active = (g_settings.bright == bb.level);
+        cv::Rect r{bb.x, MY + 128, 110, 34};
+        cv::Scalar bg  = active ? cv::Scalar(26, 58, 26) : cv::Scalar(37, 37, 64);
+        cv::Scalar txt = active ? cv::Scalar(60, 220, 100) : cv::Scalar(136, 136, 136);
+        cv::Scalar bdr = active ? cv::Scalar(60, 150, 60) : cv::Scalar(60, 60, 90);
+        cv::rectangle(canvas, r, bg, -1);
+        cv::rectangle(canvas, r, bdr, 1);
+        int bw2 = ftTextWidth(bb.key, 14);
+        ftPut(canvas, bb.key, {r.x + (r.width - bw2) / 2, r.y + 24}, 14, txt);
+        g_sidebarBtns.push_back({r, bb.tag});
+    }
+
+    // ── QUIT button (MY+176 … MY+224) ─────────────────────
+    cv::Rect qr{MX + 10, MY + 178, MW - 20, 36};
+    cv::rectangle(canvas, qr, cv::Scalar(50, 20, 20), -1);
+    cv::rectangle(canvas, qr, cv::Scalar(120, 60, 60), 1);
+    std::string ql = tr("QUIT");
+    int qw = ftTextWidth(ql, 15);
+    ftPut(canvas, ql, {qr.x + (qr.width - qw) / 2, qr.y + 25}, 15,
+          cv::Scalar(100, 100, 220));
+    g_sidebarBtns.push_back({qr, BtnTag::QUIT});
+
+    // ── Backdrop close regions (outside modal box) ─────────
+    if (MY > 0)
+        g_sidebarBtns.push_back({{0, 0, DISP_W, MY},
+                                   BtnTag::SETTINGS_CLOSE});
+    if (MY + MH < DISP_H)
+        g_sidebarBtns.push_back({{0, MY + MH, DISP_W, DISP_H - MY - MH},
+                                   BtnTag::SETTINGS_CLOSE});
+    if (MX > 0)
+        g_sidebarBtns.push_back({{0, MY, MX, MH},
+                                   BtnTag::SETTINGS_CLOSE});
+    if (MX + MW < DISP_W)
+        g_sidebarBtns.push_back({{MX + MW, MY, DISP_W - MX - MW, MH},
+                                   BtnTag::SETTINGS_CLOSE});
+}
+
 static cv::Mat drawPortraitUI(const cv::Mat& camImg, AppState& app) {
     // Palette (BGR order — hex values are RGB)
     const cv::Scalar BG_MAIN{26,  26,  26 };   // #1a1a1a
@@ -1509,6 +1598,12 @@ static cv::Mat drawPortraitUI(const cv::Mat& camImg, AppState& app) {
             cv::putText(canvas, "STOP", {sb.x + 14, sb.y + 32},
                         cv::FONT_HERSHEY_SIMPLEX, 0.40, TXT1, 1, cv::LINE_AA);
         }
+    }
+
+    // ── Settings modal overlay (when active) ──────────────
+    if (app.settingsOpen) {
+        g_sidebarBtns.clear();   // remove grid + bottom bar buttons
+        drawSettingsModal(canvas);
     }
 
     return canvas;
