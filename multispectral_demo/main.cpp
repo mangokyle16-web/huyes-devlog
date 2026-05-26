@@ -1360,8 +1360,7 @@ static cv::Mat drawPortraitUI(const cv::Mat& camImg, AppState& app) {
     cv::Mat canvas(DISP_H, DISP_W, CV_8UC3, BG_MAIN);
 
     // ── 1. Status bar (y: 0–32) ─────────────────────────────
-    cv::putText(canvas, "HUYES", {8, 22},
-                cv::FONT_HERSHEY_SIMPLEX, 0.45, TXT1, 1, cv::LINE_AA);
+    ftPut(canvas, "HUYES", {8, 22}, 14, TXT1);
     {
         char expStr[24];
         snprintf(expStr, sizeof(expStr), "%dus", app.exposure);
@@ -1431,13 +1430,12 @@ static cv::Mat drawPortraitUI(const cv::Mat& camImg, AppState& app) {
     // ── 3. Label bar (y: 320–352) ────────────────────────────
     cv::rectangle(canvas, cv::Rect{0, 320, DISP_W, 32}, BG_MAIN, -1);
     {
-        const char* mn = app.modeName();
-        int base = 0;
-        cv::Size ts = cv::getTextSize(mn, cv::FONT_HERSHEY_SIMPLEX, 0.42, 1, &base);
-        cv::putText(canvas, mn, {(DISP_W - ts.width) / 2, 341},
-                    cv::FONT_HERSHEY_SIMPLEX, 0.42, TXT1, 1, cv::LINE_AA);
+        std::string mn = tr(app.modeName());
+        int mnw = ftTextWidth(mn, 13);
+        ftPut(canvas, mn, {(DISP_W - mnw) / 2, 343}, 13, TXT1);
         if (app.agtronMean >= 0) {
             char ag[12]; snprintf(ag, sizeof(ag), "%d", app.agtronMean);
+            int base = 0;
             cv::Size as = cv::getTextSize(ag, cv::FONT_HERSHEY_SIMPLEX, 0.42, 1, &base);
             cv::putText(canvas, ag, {DISP_W - as.width - 8, 341},
                         cv::FONT_HERSHEY_SIMPLEX, 0.42, ACCENT, 1, cv::LINE_AA);
@@ -1466,10 +1464,10 @@ static cv::Mat drawPortraitUI(const cv::Mat& camImg, AppState& app) {
             cv::putText(canvas, gb.icon, {bx + (bw - is.width) / 2, by + 55},
                         cv::FONT_HERSHEY_DUPLEX, 0.70,
                         active ? ACCENT : TXT1, 1, cv::LINE_AA);
-            cv::Size ls = cv::getTextSize(gb.label, cv::FONT_HERSHEY_SIMPLEX, 0.33, 1, &base);
-            cv::putText(canvas, gb.label, {bx + (bw - ls.width) / 2, by + 82},
-                        cv::FONT_HERSHEY_SIMPLEX, 0.33,
-                        active ? TXT1 : TXT2, 1, cv::LINE_AA);
+            std::string lbl = tr(gb.label);
+            int lw = ftTextWidth(lbl, 12);
+            ftPut(canvas, lbl, {bx + (bw - lw) / 2, by + 84},
+                  12, active ? TXT1 : TXT2);
             g_sidebarBtns.push_back({br, gb.tag});
         }
     }
@@ -1481,14 +1479,12 @@ static cv::Mat drawPortraitUI(const cv::Mat& camImg, AppState& app) {
 
         cv::Rect em{8,  BAR_Y + 19, 80, 50};
         rrect(canvas, em, BTN_OFF, 8);
-        cv::putText(canvas, "EXP-", {em.x + 10, em.y + 32},
-                    cv::FONT_HERSHEY_SIMPLEX, 0.38, TXT1, 1, cv::LINE_AA);
+        ftPut(canvas, tr("EXP-"), {em.x + 10, em.y + 32}, 13, TXT1);
         g_sidebarBtns.push_back({em, BtnTag::EXP_MINUS});
 
         cv::Rect ep{96, BAR_Y + 19, 80, 50};
         rrect(canvas, ep, BTN_OFF, 8);
-        cv::putText(canvas, "EXP+", {ep.x + 10, ep.y + 32},
-                    cv::FONT_HERSHEY_SIMPLEX, 0.38, TXT1, 1, cv::LINE_AA);
+        ftPut(canvas, tr("EXP+"), {ep.x + 10, ep.y + 32}, 13, TXT1);
         g_sidebarBtns.push_back({ep, BtnTag::EXP_PLUS});
 
         // Status message (up to 2 lines of ~20 chars each)
@@ -2548,10 +2544,10 @@ int main(int argc, char* argv[]) {
                     cv::Point((DISP_W - 80) / 2, DISP_H / 2 - 10),
                     cv::FONT_HERSHEY_DUPLEX, 1.0,
                     cv::Scalar(60, 220, 100), 2, cv::LINE_AA);
-        cv::putText(ph, "Waiting for camera...",
-                    cv::Point((DISP_W - 200) / 2, DISP_H / 2 + 30),
-                    cv::FONT_HERSHEY_SIMPLEX, 0.50,
-                    cv::Scalar(160, 160, 160), 1, cv::LINE_AA);
+        std::string waiting = tr("Waiting for camera...");
+        int ww = ftTextWidth(waiting, 14);
+        ftPut(ph, waiting, cv::Point((DISP_W - ww) / 2, DISP_H / 2 + 30),
+              14, cv::Scalar(160, 160, 160));
         g_previewW = 0;
         cv::imshow(WIN, ph);
         cv::waitKey(1);  // pump Qt events once so window is actually mapped
