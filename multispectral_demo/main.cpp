@@ -59,8 +59,77 @@ static void init_raw_yuyv() {
 }
 
 #include <opencv2/opencv.hpp>
+#include <opencv2/freetype.hpp>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
+
+// ─────────────────────────────────────────────────────────
+// Settings (persisted to ~/.config/huyes/settings.json)
+// ─────────────────────────────────────────────────────────
+
+enum class Lang        { EN, ZH };
+enum class BrightLevel { DARK = 64, MID = 160, BRIGHT = 255 };
+
+struct AppSettings {
+    Lang        lang   = Lang::EN;
+    BrightLevel bright = BrightLevel::BRIGHT;
+
+    void load() {
+        const char* home = getenv("HOME");
+        if (!home) return;
+        std::string path = std::string(home) + "/.config/huyes/settings.json";
+        std::ifstream f(path);
+        if (!f) return;
+        std::string line, content;
+        while (std::getline(f, line)) content += line;
+
+        auto findStr = [&](const std::string& key) -> std::string {
+            auto pos = content.find("\"" + key + "\"");
+            if (pos == std::string::npos) return "";
+            pos = content.find(':', pos);
+            if (pos == std::string::npos) return "";
+            pos = content.find('"', pos);
+            if (pos == std::string::npos) return "";
+            auto end = content.find('"', pos + 1);
+            if (end == std::string::npos) return "";
+            return content.substr(pos + 1, end - pos - 1);
+        };
+        auto findInt = [&](const std::string& key) -> int {
+            auto pos = content.find("\"" + key + "\"");
+            if (pos == std::string::npos) return -1;
+            pos = content.find(':', pos);
+            if (pos == std::string::npos) return -1;
+            pos++;
+            while (pos < content.size() &&
+                   (content[pos] == ' ' || content[pos] == '\t')) pos++;
+            try { return std::stoi(content.substr(pos)); }
+            catch (...) { return -1; }
+        };
+
+        if (findStr("lang") == "zh") lang = Lang::ZH;
+        int b = findInt("brightness");
+        if      (b == 64)  bright = BrightLevel::DARK;
+        else if (b == 160) bright = BrightLevel::MID;
+        else if (b == 255) bright = BrightLevel::BRIGHT;
+    }
+
+    void save() const {
+        const char* home = getenv("HOME");
+        if (!home) return;
+        std::string dir = std::string(home) + "/.config/huyes";
+        mkdir(dir.c_str(), 0755);
+        std::string path = dir + "/settings.json";
+        // Write to temp file then rename for atomicity
+        std::string tmp = path + ".tmp";
+        std::ofstream f(tmp);
+        if (!f) return;
+        f << "{ \"lang\": \"" << (lang == Lang::ZH ? "zh" : "en")
+          << "\", \"brightness\": " << static_cast<int>(bright) << " }\n";
+        f.close();
+        rename(tmp.c_str(), path.c_str());
+    }
+};
+static AppSettings g_settings;
 
 // ─────────────────────────────────────────────────────────
 // Constants
@@ -1187,7 +1256,7 @@ static cv::Mat drawPortraitUI(const cv::Mat& camImg, AppState& app) {
     cv::Mat canvas(DISP_H, DISP_W, CV_8UC3, BG_MAIN);
 
     // ── 1. Status bar (y: 0–32) ─────────────────────────────
-    cv::putText(canvas, "LUX VISIONS", {8, 22},
+    cv::putText(canvas, "HUYES", {8, 22},
                 cv::FONT_HERSHEY_SIMPLEX, 0.45, TXT1, 1, cv::LINE_AA);
     {
         char expStr[24];
@@ -2283,7 +2352,7 @@ int main(int argc, char* argv[]) {
         std::tm* tm = std::localtime(&t);
         std::ostringstream oss;
         mkdir("/home/kyle/Desktop/Report", 0755);  // ensure parent exists
-        oss << "/home/kyle/Desktop/Report/LuxVisions_"
+        oss << "/home/kyle/Desktop/Report/Huyes_"
             << std::put_time(tm, "%Y%m%d_%H%M%S");
         g_app.saveDir = oss.str();
         mkdir(g_app.saveDir.c_str(), 0755);
@@ -2358,7 +2427,7 @@ int main(int argc, char* argv[]) {
     std::cout << "      < / >  band cycle   + / -  exposure   [L]amp   [S]ave   [Z]depth  [V]raw  [X]rawRGB  [Q]uit\n\n";
 
     // ── OpenCV window ─────────────────────────────────────
-    const std::string WIN = "Giga-Image";
+    const std::string WIN = "Huyes";
     cv::namedWindow(WIN, cv::WINDOW_NORMAL | cv::WINDOW_GUI_NORMAL);
     cv::moveWindow(WIN, 0, 0);               // 7" DSI display at (0,0)
     cv::resizeWindow(WIN, DISP_W, DISP_H);  // exact 800×480, 1:1 with composite
@@ -2371,8 +2440,8 @@ int main(int argc, char* argv[]) {
     // Show placeholder immediately
     {
         cv::Mat ph(DISP_H, DISP_W, CV_8UC3, cv::Scalar(28, 28, 28));
-        cv::putText(ph, "LUX VISIONS",
-                    cv::Point((DISP_W - 140) / 2, DISP_H / 2 - 10),
+        cv::putText(ph, "HUYES",
+                    cv::Point((DISP_W - 80) / 2, DISP_H / 2 - 10),
                     cv::FONT_HERSHEY_DUPLEX, 1.0,
                     cv::Scalar(60, 220, 100), 2, cv::LINE_AA);
         cv::putText(ph, "Waiting for camera...",
