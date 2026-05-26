@@ -31,6 +31,7 @@
 #include <cstring>
 #include <cmath>
 #include <algorithm>
+#include <unordered_map>
 #include <sstream>
 #include <iomanip>
 #include <sys/stat.h>
@@ -177,6 +178,56 @@ static int ftTextWidth(const std::string& text, int fontHeight) {
     int base = 0;
     cv::Size s = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, scale, 1, &base);
     return s.width;
+}
+
+// ─────────────────────────────────────────────────────────
+// i18n — translate UI string based on g_settings.lang
+// ─────────────────────────────────────────────────────────
+
+static const char* tr(const char* key) {
+    using P = std::pair<const char*, const char*>;
+    static const std::unordered_map<std::string, P> T = {
+        {"CAPTURE",                {"CAPTURE",                "拍攝"}},
+        {"AGTRON",                 {"AGTRON",                 "烘焙度"}},
+        {"SEGMENT",                {"SEGMENT",                "分割"}},
+        {"MOLD",                   {"MOLD",                   "黴菌"}},
+        {"SPECTRUM",               {"SPECTRUM",               "光譜"}},
+        {"UV SCAN",                {"UV SCAN",                "紫外掃描"}},
+        {"ROI",                    {"ROI",                    "感興趣區"}},
+        {"WHITE REF",              {"WHITE REF",              "白平衡"}},
+        {"SETTINGS",               {"SETTINGS",               "設定"}},
+        {"LANGUAGE",               {"LANGUAGE",               "語言"}},
+        {"BRIGHTNESS",             {"BRIGHTNESS",             "亮度"}},
+        {"DARK",                   {"DARK",                   "暗"}},
+        {"MID",                    {"MID",                    "中"}},
+        {"BRIGHT",                 {"BRIGHT",                 "亮"}},
+        {"QUIT",                   {"QUIT",                   "離開"}},
+        {"Grayscale",              {"Grayscale",              "灰階"}},
+        {"Mold Map",               {"Mold Map",               "黴菌圖"}},
+        {"Agtron Roast",           {"Agtron Roast",           "烘焙度"}},
+        {"Agtron Histogram",       {"Agtron Histogram",       "烘焙分佈"}},
+        {"Agtron Pie Chart",       {"Agtron Pie Chart",       "烘焙圓餅"}},
+        {"Waiting for camera...", {"Waiting for camera...",  "等待相機..."}},
+        {"EXP-",                   {"EXP-",                   "曝光-"}},
+        {"EXP+",                   {"EXP+",                   "曝光+"}},
+        {"English",                {"English",                "英文"}},
+    };
+    bool zh = (g_settings.lang == Lang::ZH);
+    auto it = T.find(key);
+    if (it != T.end()) return zh ? it->second.second : it->second.first;
+    return key;
+}
+
+// ─────────────────────────────────────────────────────────
+// Backlight control — DSI display /sys/class/backlight
+// ─────────────────────────────────────────────────────────
+
+static void setBacklight(int value) {
+    int fd = ::open("/sys/class/backlight/6-0045/brightness", O_WRONLY);
+    if (fd < 0) return;
+    std::string s = std::to_string(value) + "\n";
+    ::write(fd, s.c_str(), s.size());
+    ::close(fd);
 }
 
 // ─────────────────────────────────────────────────────────
