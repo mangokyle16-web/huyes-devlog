@@ -1955,10 +1955,7 @@ static void fireSidebarClick(int x, int y) {
                 }).detach();
             break;
         case BtnTag::FULL_ANALYSIS:
-            if (!g_app.fullAnalysisRunning && g_app.segDaemonReady) {
-                g_analysisModeQuick = true;
-                g_app.fullAnalysisPending = true;
-            }
+            g_app.mode = Mode::GRAY;  // CAM = back to live camera preview
             break;
         case BtnTag::ANALYSIS_COMPLETE:
             if (g_app.segBgCaptured) {
