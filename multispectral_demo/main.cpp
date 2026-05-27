@@ -1343,16 +1343,8 @@ static const GridBtn GRID_BTNS[9] = {
 };
 
 static bool isBtnActive(BtnTag tag, const AppState& app) {
-    switch (tag) {
-    case BtnTag::FULL_ANALYSIS:    return app.fullAnalysisRunning.load();
-    case BtnTag::AGTRON_RUN:       return app.agtronReady;
-    case BtnTag::SEG_SEGMENT:      return app.mode == Mode::SEGMENT;
-    case BtnTag::MOLD_DETECT:      return app.mode == Mode::MOLD;
-    case BtnTag::SPEC_CAPTURE:     return app.specCaptured;
-    case BtnTag::AGTRON_ROI_SETUP: return app.agtronRoiMode;
-    case BtnTag::WHITE_CAPTURE:    return app.whiteRefCaptured;
-    default:                       return false;
-    }
+    (void)tag; (void)app;
+    return false;
 }
 
 static bool isLiveCamMode(Mode m) {
