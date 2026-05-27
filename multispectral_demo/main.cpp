@@ -1483,58 +1483,35 @@ static cv::Mat drawPortraitUI(const cv::Mat& camImg, AppState& app) {
     // ── 2. Preview background (y: 32–320) ────────────────────
     cv::rectangle(canvas, cv::Rect{0, 32, DISP_W, 288}, BG_PREV, -1);
     if (!camImg.empty()) {
-        const int PREV_SZ = 280;
-        const int CX = 240, CY = 192;      // circle center in canvas coords
-        const int PX = CX - PREV_SZ / 2;  // 100
-        const int PY = CY - PREV_SZ / 2;  // 52
+        const int PREV_W = DISP_W;  // 480
+        const int PREV_H = 288;
 
         cv::Mat scaled;
         if (isLiveCamMode(app.mode)) {
-            // Square-crop center of camera frame, resize to 280×280
-            int side = std::min(camImg.cols, camImg.rows);
-            int sx   = (camImg.cols - side) / 2;
-            int sy   = (camImg.rows - side) / 2;
-            cv::Mat cropped = camImg(cv::Rect(sx, sy, side, side));
-            cv::resize(cropped, scaled, cv::Size(PREV_SZ, PREV_SZ), 0, 0, cv::INTER_LINEAR);
+            // Center-crop to 480:288 aspect ratio, then resize
+            double src_ar = (double)camImg.cols / camImg.rows;
+            double dst_ar = (double)PREV_W / PREV_H;
+            int sx, sy, sw, sh;
+            if (src_ar > dst_ar) {
+                sh = camImg.rows; sw = (int)(sh * dst_ar);
+                sy = 0;           sx = (camImg.cols - sw) / 2;
+            } else {
+                sw = camImg.cols; sh = (int)(sw / dst_ar);
+                sx = 0;           sy = (camImg.rows - sh) / 2;
+            }
+            cv::Mat cropped = camImg(cv::Rect(sx, sy, sw, sh));
+            cv::resize(cropped, scaled, cv::Size(PREV_W, PREV_H), 0, 0, cv::INTER_LINEAR);
         } else {
-            // Letterbox analysis result to fit 280×280
-            double sw = (double)PREV_SZ / camImg.cols;
-            double sh = (double)PREV_SZ / camImg.rows;
-            double s  = std::min(sw, sh);
+            // Letterbox analysis result to fit 480×288
+            double s = std::min((double)PREV_W / camImg.cols, (double)PREV_H / camImg.rows);
             int nw = (int)(camImg.cols * s);
             int nh = (int)(camImg.rows * s);
             cv::Mat tmp;
             cv::resize(camImg, tmp, cv::Size(nw, nh), 0, 0, cv::INTER_AREA);
-            scaled = cv::Mat(PREV_SZ, PREV_SZ, CV_8UC3, BG_PREV);
-            tmp.copyTo(scaled(cv::Rect((PREV_SZ - nw) / 2, (PREV_SZ - nh) / 2, nw, nh)));
+            scaled = cv::Mat(PREV_H, PREV_W, CV_8UC3, BG_PREV);
+            tmp.copyTo(scaled(cv::Rect((PREV_W - nw) / 2, (PREV_H - nh) / 2, nw, nh)));
         }
-
-        // Apply circular mask (radius = PREV_SZ/2 = 140)
-        cv::Mat mask(PREV_SZ, PREV_SZ, CV_8UC1, cv::Scalar(0));
-        cv::circle(mask, {PREV_SZ / 2, PREV_SZ / 2}, PREV_SZ / 2,
-                   cv::Scalar(255), -1, cv::LINE_AA);
-        cv::Mat bg(PREV_SZ, PREV_SZ, CV_8UC3, BG_PREV);
-        scaled.copyTo(bg, mask);
-        bg.copyTo(canvas(cv::Rect(PX, PY, PREV_SZ, PREV_SZ)));
-
-        // Agtron ROI overlay (in preview space)
-        if (app.agtronRoiMode || app.agtronRoiSaved) {
-            double scx = (double)DISP_W / 1600.0;
-            double scy = 288.0 / 1200.0;
-            int pcx = (int)(app.agtronRoiCx * scx);
-            int pcy = 32 + (int)(app.agtronRoiCy * scy);
-            int prx = std::max(1, (int)(app.agtronRoiR * scx));
-            int pry = std::max(1, (int)(app.agtronRoiR * scy));
-            cv::Scalar col = app.agtronRoiMode
-                           ? cv::Scalar(0, 165, 255) : cv::Scalar(0, 220, 60);
-            int thick = app.agtronRoiMode ? 3 : 2;
-            cv::ellipse(canvas, {pcx, pcy}, {prx, pry},
-                        0, 0, 360, col, thick, cv::LINE_AA);
-            if (app.agtronRoiMode) {
-                cv::line(canvas, {pcx - 8, pcy}, {pcx + 8, pcy}, col, 1, cv::LINE_AA);
-                cv::line(canvas, {pcx, pcy - 8}, {pcx, pcy + 8}, col, 1, cv::LINE_AA);
-            }
-        }
+        scaled.copyTo(canvas(cv::Rect(0, 32, PREV_W, PREV_H)));
     }
 
     // ── 3. Label bar (y: 320–352) ────────────────────────────
