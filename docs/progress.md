@@ -23,7 +23,7 @@
 
 ---
 
-## 2026-06-01
+## 2026-06-01（更新）
 
 **完成：**
 - 儲存方案決策：因硬碟與記憶體漲價，放棄實體 NAS，改用 Backblaze B2 雲端儲存
@@ -41,6 +41,31 @@
 - 申請 Backblaze B2 帳號，建立 `huyes-data` bucket
 - 帶回 Mac Mini → 安裝 rclone，設定 B2 掛載
 - 執行 Plan A Task 3~8（Pocketbase + Caddy + Cloudflare）
+
+---
+
+## 2026-06-01（晚）
+
+**完成：**
+- 閱讀並分析論文：Hu et al. 2025, *Siamese networks for few-shot coffee bean defect detection*（LWT 235, 118631）
+- 決定將 Siamese 方法移植到多光譜版本（10-band 光譜向量取代 RGB 圖）
+- 完成 Siamese 多光譜豆子瑕疵偵測系統完整開發計畫
+  - 計畫文件：`docs/superpowers/plans/2026-06-01-siamese-bean-defect.md`
+  - Phase 1：採集監控器（RPi5，沿用現有互動式系統）
+  - Phase 2：特徵提取 + z-score 標準化 + 配對生成（含 bean-level data split）
+  - Phase 3：SiameseMLP 訓練腳本（Mac Mini MPS，預計 30 秒/50 epochs）
+  - Phase 4：推理模組（reference-set 比對）
+- RPi5 設定開機自動啟動 Claude Code（labwc autostart）
+
+**設計重點：**
+- Train/val/test 以 bean_id 切割，避免同一顆豆的 10 次 pass 造成 data leakage
+- 每類 50 顆 × 10 次 = 500 樣本/類，超過論文的 240 樣本/類
+- Mac Mini Apple Silicon MPS 完全足夠（模型只有 ~15k 參數）
+
+**明天待辦（帶回 Mac Mini）：**
+- 安裝 PyTorch + rclone
+- 執行 Plan A（Pocketbase + Caddy + Cloudflare + B2 掛載）
+- 開始採集第一批豆子資料（至少 normal 類 10 顆）
 
 ---
 
