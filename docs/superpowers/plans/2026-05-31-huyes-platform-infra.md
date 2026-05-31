@@ -10,40 +10,30 @@
 
 ---
 
-## Phase 1 — NAS 設定
+## Phase 1 — B2 雲端儲存設定
 
-### Task 1: Synology NAS 初始化
+> **注意：** 原 NAS（Synology）方案已改為 Backblaze B2 雲端儲存 + rclone 掛載。
+> 掛載路徑 `/Users/kyle/huyes-data` 取代原本的 `/Users/kyle/huyes-data`。
 
-**目標機器：** Mac Mini（透過瀏覽器設定 NAS）
+### Task 1: 建立 B2 Bucket + Application Key
 
-- [ ] **Step 1: 連接 NAS**
+**目標機器：** 任何瀏覽器（backblaze.com）
 
-  將 NAS 接上電源與網路交換器，等待開機燈號穩定（約 2 分鐘）。
+- [ ] **Step 1: 建立 B2 帳號**
 
-- [ ] **Step 2: 找到 NAS IP**
+  前往 https://www.backblaze.com/sign-up/cloud-storage，完成免費帳號註冊。
 
-  在 Mac Mini 終端機執行：
-  ```bash
-  arp -a | grep -i synology
-  # 或用 Synology Assistant：https://www.synology.com/en-global/support/download
-  ```
-  記下 IP，例如 `192.168.1.100`
+- [ ] **Step 2: 建立 Bucket**
 
-- [ ] **Step 3: 開啟 DSM 設定介面**
+  B2 Dashboard → Buckets → Create a Bucket：
+  - Bucket Name：`huyes-data`（全球唯一，可加前綴如 `huyes-data-2026`）
+  - Files in Bucket are：**Private**
+  - Default Encryption：Enable（建議）
+  - Object Lock：Disable
 
-  瀏覽器開啟 `http://192.168.1.100:5000`，按照精靈完成初始化（建立 admin 帳號、設定磁碟為 RAID 1）。
+- [ ] **Step 3: 建立子目錄結構**
 
-- [ ] **Step 4: 建立共享資料夾**
-
-  DSM → 控制台 → 共享資料夾 → 新增：
-  - 名稱：`huyes-data`
-  - 位置：Volume 1
-  - 加密：關閉（效能考量）
-  - 勾選「啟用資源回收桶」
-
-- [ ] **Step 5: 建立子目錄**
-
-  DSM → File Station → 進入 `huyes-data`，建立以下資料夾：
+  Bucket 建立完成後，Upload 一個空佔位檔或直接在 rclone 掛載後建立：
   ```
   huyes-data/
   ├── ocf/
@@ -52,71 +42,116 @@
   └── attachments/
   ```
 
-- [ ] **Step 6: 建立 NAS 使用者給 Mac Mini 掛載用**
+- [ ] **Step 4: 建立 Application Key**
 
-  DSM → 控制台 → 使用者與群組 → 新增使用者：
-  - 帳號：`macmini-mount`
-  - 密碼：設強密碼，記下來
-  - 群組：`users`
-  - 共享資料夾權限：`huyes-data` → 讀寫
+  B2 Dashboard → Application Keys → Add a New Application Key：
+  - Name：`macmini-rclone`
+  - Access：Allow access to Bucket `huyes-data`（只限這個 bucket）
+  - Type of access：Read and Write
+  - 複製 **keyID** 和 **applicationKey**，存到安全地方（只顯示一次）
 
 ---
 
-### Task 2: Mac Mini 掛載 NAS
+### Task 2: Mac Mini 安裝 rclone + 掛載 B2
 
 **目標機器：** Mac Mini
 
-- [ ] **Step 1: 透過 Finder 掛載**
-
-  Finder → 前往 → 連接伺服器（⌘K）：
-  ```
-  smb://192.168.1.100/huyes-data
-  ```
-  輸入 `macmini-mount` 帳密，勾選「記住密碼」。
-
-- [ ] **Step 2: 確認掛載路徑**
+- [ ] **Step 1: 安裝 rclone**
 
   ```bash
-  ls /Volumes/huyes-data
-  # 應顯示：ocf  bands  analysis  attachments
+  brew install rclone
+  rclone version
+  # 預期：rclone v1.6x.x
   ```
 
-- [ ] **Step 3: 設定開機自動掛載**
+- [ ] **Step 2: 設定 B2 remote**
 
-  建立 plist 讓開機自動掛載（取代手動每次連線）：
   ```bash
-  cat > ~/Library/LaunchAgents/com.huyes.nas-mount.plist << 'EOF'
+  rclone config
+  ```
+  依序輸入：
+  - `n` → New remote
+  - Name：`b2`
+  - Storage type：`5`（Backblaze B2）
+  - account（keyID）：貼上 Step 4 的 keyID
+  - key（applicationKey）：貼上 Step 4 的 applicationKey
+  - 其餘全部按 Enter 使用預設值
+  - 最後 `q` 離開
+
+  驗證設定：
+  ```bash
+  rclone lsd b2:huyes-data
+  # 應顯示 ocf/ bands/ analysis/ attachments/（或空）
+  ```
+
+- [ ] **Step 3: 建立掛載點目錄**
+
+  ```bash
+  mkdir -p ~/huyes-data
+  ```
+
+- [ ] **Step 4: 測試手動掛載**
+
+  ```bash
+  rclone mount b2:huyes-data ~/huyes-data \
+    --vfs-cache-mode full \
+    --vfs-cache-max-size 2G \
+    --daemon
+  
+  ls ~/huyes-data
+  echo "test" > ~/huyes-data/ocf/test.txt
+  cat ~/huyes-data/ocf/test.txt
+  rm ~/huyes-data/ocf/test.txt
+  echo "B2 讀寫正常"
+  ```
+
+  確認後卸載：
+  ```bash
+  umount ~/huyes-data
+  ```
+
+- [ ] **Step 5: 設定 launchd 開機自動掛載**
+
+  ```bash
+  cat > ~/Library/LaunchAgents/com.huyes.b2-mount.plist << 'EOF'
   <?xml version="1.0" encoding="UTF-8"?>
   <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
   <plist version="1.0">
   <dict>
     <key>Label</key>
-    <string>com.huyes.nas-mount</string>
+    <string>com.huyes.b2-mount</string>
     <key>ProgramArguments</key>
     <array>
-      <string>/bin/sh</string>
-      <string>-c</string>
-      <string>mount_smbfs //macmini-mount:YOUR_PASSWORD@192.168.1.100/huyes-data /Volumes/huyes-data</string>
+      <string>/opt/homebrew/bin/rclone</string>
+      <string>mount</string>
+      <string>b2:huyes-data</string>
+      <string>/Users/kyle/huyes-data</string>
+      <string>--vfs-cache-mode</string>
+      <string>full</string>
+      <string>--vfs-cache-max-size</string>
+      <string>2G</string>
     </array>
     <key>RunAtLoad</key>
     <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/Users/kyle/huyes-data-mount.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/kyle/huyes-data-mount.log</string>
   </dict>
   </plist>
   EOF
-  ```
-  將 `YOUR_PASSWORD` 換成實際密碼。
 
-  ```bash
-  launchctl load ~/Library/LaunchAgents/com.huyes.nas-mount.plist
+  launchctl load ~/Library/LaunchAgents/com.huyes.b2-mount.plist
   ```
 
-- [ ] **Step 4: 驗證**
+- [ ] **Step 6: 驗證開機掛載**
 
   ```bash
-  ls /Volumes/huyes-data/ocf/
-  # 應顯示空目錄（無錯誤）
-  echo "test" > /Volumes/huyes-data/ocf/test.txt && rm /Volumes/huyes-data/ocf/test.txt
-  echo "NAS 讀寫正常"
+  ls ~/huyes-data/
+  # 應顯示：ocf  bands  analysis  attachments
+  echo "B2 自動掛載正常"
   ```
 
 ---
@@ -335,7 +370,7 @@
       # 大檔案直接 serve（NAS 掛載路徑）
       handle /files/* {
           uri strip_prefix /files
-          root * /Volumes/huyes-data
+          root * /Users/kyle/huyes-data
           file_server
       }
 
@@ -534,7 +569,7 @@
   curl -s http://localhost:8080/api/health | python3 -m json.tool
 
   # NAS 掛載
-  ls /Volumes/huyes-data/
+  ls /Users/kyle/huyes-data/
 
   # Cloudflare Tunnel
   sudo launchctl list | grep cloudflare
@@ -543,10 +578,10 @@
 - [ ] **Step 2: 測試 NAS 大檔案 serve**
 
   ```bash
-  echo "test_data" > /Volumes/huyes-data/ocf/test.ocf
+  echo "test_data" > /Users/kyle/huyes-data/ocf/test.ocf
   curl -s http://localhost:8080/files/ocf/test.ocf
   # 預期：test_data
-  rm /Volumes/huyes-data/ocf/test.ocf
+  rm /Users/kyle/huyes-data/ocf/test.ocf
   ```
 
 - [ ] **Step 3: 測試 Pocketbase API 建立 task**
@@ -593,7 +628,7 @@
   - Pocketbase: ~/pocketbase/（binary + pb_data/）
   - Caddy: ~/caddy/Caddyfile
   - Cloudflare: ~/.cloudflared/config.yml（含敏感憑證，不進版本控制）
-  - NAS 掛載: /Volumes/huyes-data → 192.168.1.100/huyes-data
+  - NAS 掛載: /Users/kyle/huyes-data → 192.168.1.100/huyes-data
   EOF
 
   git add infra/

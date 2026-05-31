@@ -30,10 +30,10 @@ Mac Mini（主 Server）
 ├── Caddy（反向代理，HTTPS 終止，Rate Limiting）
 ├── Pocketbase（後端 API + SQLite DB + Auth + Realtime）
 └── SvelteKit（前端靜態檔案）
-    │ SMB/NFS（本機網路）
+    │ rclone mount（FUSE）
     ▼
-NAS（Synology，RAID 1）
-└── /huyes-data/
+Backblaze B2（雲端 Bucket：huyes-data）
+└── /Users/kyle/huyes-data/
     ├── ocf/          ← .ocf 原始檔
     ├── bands/        ← band PNG（10 個/session）
     ├── analysis/     ← 分析結果圖、JSON
@@ -47,15 +47,15 @@ RPi5（相機端，獨立）
 
 ## 3. 硬體規格
 
-| 設備 | 角色 | 規格建議 |
+| 設備 | 角色 | 規格/費用 |
 |------|------|----------|
 | Mac Mini | 主 Server | 現有 Mac Mini，有線網路，常開 |
-| NAS | 資料後台 | Synology 2-bay（DS223 或 DS723+），RAID 1，2×4TB HDD |
+| Backblaze B2 | 雲端儲存 | ~NT$18/100GB/月；搭配 Cloudflare 出流量免費 |
 | RPi5 | 相機開發端 | 現有，不作 server 用途 |
 | Cloudflare | 網路層 | 免費方案（Tunnel + Zero Trust，最多 50 人）|
 
-**NAS 掛載方式：**  
-Mac Mini 透過 SMB 掛載 NAS 為 `/Volumes/HuyesNAS`，Pocketbase 設定檔案儲存路徑指向此掛載點。
+**儲存掛載方式：**  
+Mac Mini 透過 rclone（FUSE）掛載 B2 Bucket 為 `/Users/kyle/huyes-data`，Caddy 直接 serve 此路徑。無需實體 NAS 硬體。
 
 ---
 
@@ -180,7 +180,7 @@ Pocketbase 內建 SSE（Server-Sent Events）即時推送：
   → 建立 session record（POST /api/collections/sessions/records）
   → 上傳 band PNG × 10（POST /api/collections/session_files/records）
   → 上傳 bean_results（POST /api/collections/bean_results/records）
-  → 大檔案（.ocf）直接 scp 到 NAS，只在 session_files 記路徑
+  → 大檔案（.ocf）用 rclone copy 直接上傳 B2，只在 session_files 記路徑
 ```
 
 ---
@@ -205,11 +205,14 @@ Pocketbase 內建 SSE（Server-Sent Events）即時推送：
 
 ---
 
-## 10. 硬體採購清單
+## 10. 儲存費用估算（B2 方案）
 
-| 項目 | 型號建議 | 估價 |
-|------|----------|------|
-| NAS 主機 | Synology DS223 | NT$6,000 |
-| NAS 硬碟 × 2 | WD Red Plus 4TB × 2 | NT$6,000 |
-| 網路交換器（選配）| TP-Link 5-port Gigabit | NT$500 |
-| **合計** | | **NT$12,500** |
+| 項目 | 說明 | 估價 |
+|------|------|------|
+| B2 儲存（前 10GB）| 免費 | NT$0 |
+| B2 儲存（100GB）| $0.006/GB/月 | ~NT$18/月 |
+| B2 儲存（1TB）| $0.006/GB/月 | ~NT$185/月 |
+| 出流量（透過 Cloudflare）| Bandwidth Alliance，免費 | NT$0 |
+| **硬體一次性費用** | 無需購買 NAS | **NT$0** |
+
+> 對比原 NAS 方案（NT$12,500 一次性），B2 在資料量 < 500GB 時長期更便宜。
