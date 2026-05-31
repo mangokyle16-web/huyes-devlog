@@ -20,3 +20,25 @@
 - 寄 OCF 廠商分析報告（A5）
 - 採購電子零件 BOM（B1）
 - 確認 bean_26/27 黴菌菌落（A2）
+
+---
+
+## 2026-05-31（下午）
+
+**完成：**
+- 建立 GitHub repo（huyes-devlog）+ Docsify Dev Log 網站上線
+- 所有文件供應商名稱 QS → OCF 替換完成（7 個檔案）
+- 內部協作平台完整設計：架構 / 安全 / UI / 資料表
+  - 架構：Mac Mini（Pocketbase + SvelteKit + Caddy）+ NAS + Cloudflare Tunnel
+  - 安全：四層防護（CF Zero Trust / Caddy Rate Limit / PB Auth / NAS 隔離）
+  - UI：左側欄 + Dashboard 首頁，四個主頁面（Dashboard / 任務 / 筆記 / 資料庫）
+- 設計規格文件：`docs/superpowers/specs/2026-05-31-huyes-platform-design.md`
+- Plan A 實作計劃：`docs/superpowers/plans/2026-05-31-huyes-platform-infra.md`
+
+**待採購：**
+- Synology DS224+（NT$8,500）+ WD Red Plus 4TB × 2（NT$5,600）= NT$14,100
+
+**下一步（明天）：**
+- 帶回 Mac Mini → 執行 Plan A Task 3~8（Pocketbase + Caddy + Cloudflare）
+- 確認 domain 名稱給我填入設定檔
+- NAS 採購後執行 Task 1~2
