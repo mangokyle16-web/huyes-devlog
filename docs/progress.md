@@ -23,6 +23,27 @@
 
 ---
 
+## 2026-06-01
+
+**完成：**
+- 儲存方案決策：因硬碟與記憶體漲價，放棄實體 NAS，改用 Backblaze B2 雲端儲存
+- Plan A Phase 1 全面改寫：Synology DSM 設定 → B2 Bucket 建立 + rclone 掛載
+- 所有路徑從 `/Volumes/huyes-data` 更新為 `/Users/kyle/huyes-data`
+- RPi5 上傳方式從 `scp` 改為 `rclone copy`
+- Spec 硬體表與費用估算更新（NT$12,500 一次性 → ~NT$18/月）
+- 設定 RPi5 開機自動啟動 Claude Code（labwc autostart）
+
+**費用比較：**
+- 原方案：Synology DS223 + WD Red 4TB×2 = NT$12,500 一次性
+- 新方案：B2 ~NT$18/月（100GB），出流量透過 Cloudflare 免費
+
+**下一步：**
+- 申請 Backblaze B2 帳號，建立 `huyes-data` bucket
+- 帶回 Mac Mini → 安裝 rclone，設定 B2 掛載
+- 執行 Plan A Task 3~8（Pocketbase + Caddy + Cloudflare）
+
+---
+
 ## 2026-05-31（下午）
 
 **完成：**
