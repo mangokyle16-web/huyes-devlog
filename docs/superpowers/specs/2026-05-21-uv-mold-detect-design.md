@@ -2,7 +2,7 @@
 
 **日期**: 2026-05-21  
 **狀態**: 已核准，待實作  
-**目標**: 驗證 365nm UV LED + QS 多光譜相機能否偵測熟豆（烘焙後）的黴菌螢光訊號
+**目標**: 驗證 365nm UV LED + OCF 多光譜相機能否偵測熟豆（烘焙後）的黴菌螢光訊號
 
 ---
 
@@ -34,17 +34,17 @@
 ```
 步驟 1 ─ 白光 ON
   提示：「白光開著，按 Enter 拍分割參考圖...」
-  → capture_one → ref.qs → qs_to_png → ref_gray.png
+  → capture_one → ref.ocf → ocf_to_png → ref_gray.png
   → fast_seg 分割 → beans_rois.json + beans_labelmap.png
 
 步驟 2 ─ UV ON（白光 OFF）
   提示：「關掉白光，開 365nm UV LED，按 Enter...」
-  → capture_one → uv_on.qs（曝光 5000us 預設）
+  → capture_one → uv_on.ocf（曝光 5000us 預設）
   → spec_fingerprint → uv_on_spec.csv
 
 步驟 3 ─ 全暗
   提示：「關掉所有光源，按 Enter...」
-  → capture_one → dark.qs（同曝光）
+  → capture_one → dark.ocf（同曝光）
   → spec_fingerprint → dark_spec.csv
 
 步驟 4 ─ 分析與輸出（自動）
@@ -88,11 +88,11 @@ python3 uv_mold_scan.py [--n-beans N] [--exposure-uv US]
 | 工具 | 路徑 |
 |------|------|
 | capture_one | `/home/kyle/KyleClaude/multispectral_demo/build/capture_one` |
-| qs_to_png | `/home/kyle/KyleClaude/multispectral_demo/build/qs_to_png` |
+| ocf_to_png | `/home/kyle/KyleClaude/multispectral_demo/build/ocf_to_png` |
 | spec_fingerprint | `/home/kyle/KyleClaude/multispectral_demo/build/spec_fingerprint` |
 | fast_seg_agtron.py | `/home/kyle/KyleClaude/fast_seg_agtron.py`（分割邏輯參考） |
-| camera_new.qsbs | `/home/kyle/KyleClaude/camera_new.qsbs` |
-| db_std.qsdb | `/home/kyle/KyleClaude/db_std.qsdb` |
+| camera_new.ocfbs | `/home/kyle/KyleClaude/camera_new.ocfbs` |
+| db_std.ocfdb | `/home/kyle/KyleClaude/db_std.ocfdb` |
 | Python libs | numpy, cv2, matplotlib（已安裝） |
 
 ---

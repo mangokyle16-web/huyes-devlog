@@ -793,8 +793,8 @@ SDK=/home/kyle/KyleClaude/sdk_extract/linux-sdk-arm64/qssdk-20250817
 LD_LIBRARY_PATH=$SDK/libarm64/opencv/lib:$SDK/libarm64/spinvcore:$SDK/libarm64:$SDK:$LD_LIBRARY_PATH \
   DISPLAY=:0 WAYLAND_DISPLAY=wayland-0 \
   /home/kyle/KyleClaude/multispectral_demo/build/multispectral_demo \
-  /home/kyle/KyleClaude/camera_new.qsbs \
-  /home/kyle/KyleClaude/db_std.qsdb > /tmp/msdemo.log 2>&1 &
+  /home/kyle/KyleClaude/camera_new.ocfbs \
+  /home/kyle/KyleClaude/db_std.ocfdb > /tmp/msdemo.log 2>&1 &
 sleep 6 && grim -o DSI-1 /tmp/verify_main.png
 ```
 
@@ -843,8 +843,8 @@ SDK=/home/kyle/KyleClaude/sdk_extract/linux-sdk-arm64/qssdk-20250817
 LD_LIBRARY_PATH=$SDK/libarm64/opencv/lib:$SDK/libarm64/spinvcore:$SDK/libarm64:$SDK:$LD_LIBRARY_PATH \
   DISPLAY=:0 WAYLAND_DISPLAY=wayland-0 \
   /home/kyle/KyleClaude/multispectral_demo/build/multispectral_demo \
-  /home/kyle/KyleClaude/camera_new.qsbs \
-  /home/kyle/KyleClaude/db_std.qsdb > /tmp/msdemo.log 2>&1 &
+  /home/kyle/KyleClaude/camera_new.ocfbs \
+  /home/kyle/KyleClaude/db_std.ocfdb > /tmp/msdemo.log 2>&1 &
 sleep 6 && grim -o DSI-1 /tmp/verify_persist.png
 ```
 Confirm: language and brightness from previous session are restored on relaunch.

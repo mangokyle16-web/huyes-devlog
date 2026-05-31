@@ -2,11 +2,11 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 建立 `uv_mold_scan.py`，透過 365nm UV LED 照射 + QS 多光譜相機拍攝，偵測熟豆可能的黴菌螢光訊號。
+**Goal:** 建立 `uv_mold_scan.py`，透過 365nm UV LED 照射 + OCF 多光譜相機拍攝，偵測熟豆可能的黴菌螢光訊號。
 
 **Architecture:** 單一 Python 腳本，三次互動拍攝（白光參考 → UV on → 全暗），暗場相減後計算 per-bean 螢光正規化分數，輸出標注圖 + 光譜圖 + CSV。純分析函式獨立於硬體，可單元測試；subprocess wrapper 薄且不可單元測試，以手動煙霧測試驗證。
 
-**Tech Stack:** Python 3.11, numpy, cv2, matplotlib, pytest；現有 binaries：`capture_one`, `qs_to_png`, `spec_fingerprint`, `fast_seg_agtron.py`
+**Tech Stack:** Python 3.11, numpy, cv2, matplotlib, pytest；現有 binaries：`capture_one`, `ocf_to_png`, `spec_fingerprint`, `fast_seg_agtron.py`
 
 ---
 
@@ -53,13 +53,13 @@ import numpy as np
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
 BUILD    = "/home/kyle/KyleClaude/multispectral_demo/build"
-QSBS     = "/home/kyle/KyleClaude/camera_new.qsbs"
-QSDB     = "/home/kyle/KyleClaude/db_std.qsdb"
+OCFBS     = "/home/kyle/KyleClaude/camera_new.ocfbs"
+OCFDB     = "/home/kyle/KyleClaude/db_std.ocfdb"
 FAST_SEG = "/home/kyle/KyleClaude/fast_seg_agtron.py"
 SDK      = "/home/kyle/KyleClaude/sdk_extract/linux-sdk-arm64/qssdk-20250817"
 
 CAPTURE_ONE      = os.path.join(BUILD, "capture_one")
-QS_TO_PNG        = os.path.join(BUILD, "qs_to_png")
+OCF_TO_PNG        = os.path.join(BUILD, "ocf_to_png")
 SPEC_FINGERPRINT = os.path.join(BUILD, "spec_fingerprint")
 
 # ── Analysis constants ─────────────────────────────────────────────────────────
@@ -87,16 +87,16 @@ def flag_suspects(fl_norm, sigma=1.5):
 def _sdk_env():
     pass  # Task 5
 
-def capture_qs(out_path, exposure_us):
+def capture_ocf(out_path, exposure_us):
     pass  # Task 5
 
-def extract_gray(qs_path, gray_png_path):
+def extract_gray(ocf_path, gray_png_path):
     pass  # Task 5
 
 def run_segmentation(session_dir):
     pass  # Task 5
 
-def run_spec_fingerprint(qs_path, out_csv, session_dir):
+def run_spec_fingerprint(ocf_path, out_csv, session_dir):
     pass  # Task 5
 
 
@@ -417,7 +417,7 @@ git commit -m "feat: implement compute_fl_score and flag_suspects with tests"
 **Files:**
 - Modify: `/home/kyle/KyleClaude/uv_mold_scan.py` — 實作 5 個 wrapper
 
-- [ ] **Step 1: 實作 `_sdk_env` + `capture_qs`**
+- [ ] **Step 1: 實作 `_sdk_env` + `capture_ocf`**
 
 ```python
 def _sdk_env():
@@ -428,10 +428,10 @@ def _sdk_env():
     return e
 
 
-def capture_qs(out_path, exposure_us):
+def capture_ocf(out_path, exposure_us):
     """Call capture_one binary; raises RuntimeError on failure."""
     ret = subprocess.call(
-        [CAPTURE_ONE, QSBS, out_path, str(exposure_us)],
+        [CAPTURE_ONE, OCFBS, out_path, str(exposure_us)],
         env=_sdk_env()
     )
     if ret != 0:
@@ -441,12 +441,12 @@ def capture_qs(out_path, exposure_us):
 - [ ] **Step 2: 實作 `extract_gray`**
 
 ```python
-def extract_gray(qs_path, gray_png_path):
-    """Convert QS → color PNG via qs_to_png, then save as grayscale."""
-    tmp_png = qs_path + "_preview.png"
-    ret = subprocess.call([QS_TO_PNG, qs_path, tmp_png, QSBS], env=_sdk_env())
+def extract_gray(ocf_path, gray_png_path):
+    """Convert OCF → color PNG via ocf_to_png, then save as grayscale."""
+    tmp_png = ocf_path + "_preview.png"
+    ret = subprocess.call([OCF_TO_PNG, ocf_path, tmp_png, OCFBS], env=_sdk_env())
     if ret != 0:
-        raise RuntimeError(f"qs_to_png failed (exit={ret})")
+        raise RuntimeError(f"ocf_to_png failed (exit={ret})")
     img = cv2.imread(tmp_png)
     if img is None:
         raise RuntimeError(f"Cannot read preview: {tmp_png}")
@@ -474,12 +474,12 @@ def run_segmentation(session_dir):
 - [ ] **Step 4: 實作 `run_spec_fingerprint`**
 
 ```python
-def run_spec_fingerprint(qs_path, out_csv, session_dir):
+def run_spec_fingerprint(ocf_path, out_csv, session_dir):
     """Run spec_fingerprint binary with existing labelmap from session_dir."""
     rois = os.path.join(session_dir, "beans_rois.json")
     lmap = os.path.join(session_dir, "beans_labelmap.png")
     ret = subprocess.call(
-        [SPEC_FINGERPRINT, QSBS, QSDB, qs_path, rois, out_csv, lmap],
+        [SPEC_FINGERPRINT, OCFBS, OCFDB, ocf_path, rois, out_csv, lmap],
         env=_sdk_env()
     )
     if ret != 0:
@@ -679,10 +679,10 @@ def main():
     os.makedirs(session_dir, exist_ok=True)
     print(f"\n[UV SCAN] Session dir: {session_dir}\n")
 
-    ref_qs   = os.path.join(session_dir, "ref.qs")
+    ref_qs   = os.path.join(session_dir, "ref.ocf")
     ref_gray = os.path.join(session_dir, "capture_2500us_gray.png")
-    uv_qs    = os.path.join(session_dir, "uv_on.qs")
-    dark_qs  = os.path.join(session_dir, "dark.qs")
+    uv_qs    = os.path.join(session_dir, "uv_on.ocf")
+    dark_qs  = os.path.join(session_dir, "dark.ocf")
     uv_csv   = os.path.join(session_dir, "uv_on_spec.csv")
     dark_csv = os.path.join(session_dir, "dark_spec.csv")
     rois     = os.path.join(session_dir, "beans_rois.json")
@@ -693,7 +693,7 @@ def main():
     # ── Step 1: 白光參考拍攝 → 分割 ──────────────────────────────────────────
     input("[STEP 1/3] 白光開著，豆子擺好。按 Enter 拍分割參考圖...")
     print("  拍攝中...", flush=True)
-    capture_qs(ref_qs, 2500)
+    capture_ocf(ref_qs, 2500)
     print("  提取灰階...", flush=True)
     extract_gray(ref_qs, ref_gray)
     print("  分割豆子...", flush=True)
@@ -705,7 +705,7 @@ def main():
     # ── Step 2: UV 拍攝 ───────────────────────────────────────────────────────
     input(f"\n[STEP 2/3] 關掉白光，開 365nm UV LED。按 Enter（曝光 {args.exposure_uv}us）...")
     print("  拍攝中...", flush=True)
-    capture_qs(uv_qs, args.exposure_uv)
+    capture_ocf(uv_qs, args.exposure_uv)
     print("  提取光譜...", flush=True)
     run_spec_fingerprint(uv_qs, uv_csv, session_dir)
     print("  完成")
@@ -713,7 +713,7 @@ def main():
     # ── Step 3: 暗場拍攝 ──────────────────────────────────────────────────────
     input(f"\n[STEP 3/3] 關掉所有光源。按 Enter（曝光 {args.exposure_uv}us）...")
     print("  拍攝中...", flush=True)
-    capture_qs(dark_qs, args.exposure_uv)
+    capture_ocf(dark_qs, args.exposure_uv)
     print("  提取光譜...", flush=True)
     run_spec_fingerprint(dark_qs, dark_csv, session_dir)
     print("  完成")

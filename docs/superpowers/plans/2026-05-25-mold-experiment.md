@@ -17,7 +17,7 @@
 | **新建** | `mold_analysis.py` | 純分析函式：Mahalanobis、cross_validate、圖表輸出 |
 | **新建** | `mold_experiment.py` | 主控腳本：四步拍攝流程 + 分析 + 輸出 |
 | **新建** | `tests/test_mold_analysis.py` | `mold_analysis.py` 的 unit tests |
-| **只讀 import** | `uv_mold_scan.py` | 複用：`load_spec_csv`, `compute_fluorescence`, `compute_fl_score`, `capture_qs`, `extract_gray`, `run_segmentation`, `run_spec_fingerprint` |
+| **只讀 import** | `uv_mold_scan.py` | 複用：`load_spec_csv`, `compute_fluorescence`, `compute_fl_score`, `capture_ocf`, `extract_gray`, `run_segmentation`, `run_spec_fingerprint` |
 
 ---
 
@@ -337,7 +337,7 @@ from datetime import datetime
 
 from uv_mold_scan import (
     load_spec_csv, compute_fluorescence, compute_fl_score,
-    capture_qs, extract_gray, run_segmentation, run_spec_fingerprint,
+    capture_ocf, extract_gray, run_segmentation, run_spec_fingerprint,
 )
 from mold_analysis import (
     compute_mahalanobis, cross_validate,
@@ -359,12 +359,12 @@ def main():
     os.makedirs(session_dir, exist_ok=True)
     print(f"\n[MOLD EXPERIMENT] Session: {session_dir}\n")
 
-    ref_qs      = os.path.join(session_dir, "ref.qs")
+    ref_qs      = os.path.join(session_dir, "ref.ocf")
     ref_gray    = os.path.join(session_dir, "capture_2500us_gray.png")
-    white_qs    = os.path.join(session_dir, "white.qs")
+    white_qs    = os.path.join(session_dir, "white.ocf")
     white_csv   = os.path.join(session_dir, "white_spec.csv")
-    uv_qs       = os.path.join(session_dir, "uv_on.qs")
-    dark_qs     = os.path.join(session_dir, "dark.qs")
+    uv_qs       = os.path.join(session_dir, "uv_on.ocf")
+    dark_qs     = os.path.join(session_dir, "dark.ocf")
     uv_csv      = os.path.join(session_dir, "uv_spec.csv")
     dark_csv    = os.path.join(session_dir, "dark_spec.csv")
     scatter_png = os.path.join(session_dir, "scatter.png")
@@ -375,7 +375,7 @@ def main():
     # ── Step 1：白光灰階參考 → 分割 ──────────────────────────────────────────
     input("[STEP 1/4] 白光開，UV 關。豆子擺好。按 Enter 拍攝...")
     print("  拍攝灰階參考...", flush=True)
-    capture_qs(ref_qs, EXPOSURE_WHITE)
+    capture_ocf(ref_qs, EXPOSURE_WHITE)
     extract_gray(ref_qs, ref_gray)
     print("  分割豆子...", flush=True)
     n = run_segmentation(session_dir)
@@ -384,7 +384,7 @@ def main():
     # ── Step 2：白光 FPI 全波段掃描 → Mahalanobis ─────────────────────────────
     input(f"\n[STEP 2/4] 白光保持開啟。按 Enter 拍 FPI 全波段（{EXPOSURE_WHITE}us）...")
     print("  FPI 掃描中...", flush=True)
-    capture_qs(white_qs, EXPOSURE_WHITE)
+    capture_ocf(white_qs, EXPOSURE_WHITE)
     run_spec_fingerprint(white_qs, white_csv, session_dir)
     white_spec = load_spec_csv(white_csv)
     mahal = compute_mahalanobis(white_spec)
@@ -393,13 +393,13 @@ def main():
     # ── Step 3：UV 螢光拍攝 ───────────────────────────────────────────────────
     input(f"\n[STEP 3/4] 關白光，開 UV 365nm，蓋上遮光盒。按 Enter（{EXPOSURE_UV}us）...")
     print("  UV 拍攝中...", flush=True)
-    capture_qs(uv_qs, EXPOSURE_UV)
+    capture_ocf(uv_qs, EXPOSURE_UV)
     run_spec_fingerprint(uv_qs, uv_csv, session_dir)
 
     # ── Step 4：暗場 ──────────────────────────────────────────────────────────
     input(f"\n[STEP 4/4] 關所有光。按 Enter 拍暗場（{EXPOSURE_UV}us）...")
     print("  暗場拍攝中...", flush=True)
-    capture_qs(dark_qs, EXPOSURE_UV)
+    capture_ocf(dark_qs, EXPOSURE_UV)
     run_spec_fingerprint(dark_qs, dark_csv, session_dir)
 
     # ── 交叉分析 ──────────────────────────────────────────────────────────────
@@ -484,7 +484,7 @@ python mold_experiment.py --sigma 1.5
 ls ~/Desktop/mold_exp_*/
 ```
 
-應看到：`scatter.png`、`labeled.png`、`report.csv`、以及各個 `.qs` 原始檔
+應看到：`scatter.png`、`labeled.png`、`report.csv`、以及各個 `.ocf` 原始檔
 
 - [ ] **Step 4：開啟散點圖確認信號存在**
 

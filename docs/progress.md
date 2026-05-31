@@ -5,10 +5,10 @@
 ## 2026-05-31
 
 **完成：**
-- 新 SDK（QS_SDK_10Band_260529）完整分析
+- 新 SDK（OCF_SDK_10Band）完整分析
 - 驗證白板過爆問題（1250us 飽和，312us 正常）
-- 三種曝光白板 `.qs` 檔案已製作並轉換（bands_white）
-- 分析報告 `QS_SDK_analysis_report.md` 已完成，準備寄廠商
+- 三種曝光白板 `.ocf` 檔案已製作並轉換（bands_white）
+- 分析報告 `OCF_SDK_analysis_report.md` 已完成，準備寄廠商
 - 建立 Huyes 分豆機專案 Roadmap
 - 建立 Dev Log 網站（本站）
 
@@ -17,6 +17,6 @@
 - 繼續沿用舊 SDK（R²=0.92），等廠商提供光譜重建版本
 
 **下一步：**
-- 寄 QS 廠商分析報告（A5）
+- 寄 OCF 廠商分析報告（A5）
 - 採購電子零件 BOM（B1）
 - 確認 bean_26/27 黴菌菌落（A2）

@@ -733,8 +733,8 @@ Run the binary on the RPi5 with the screen connected. Verify:
 
 ```bash
 /home/kyle/KyleClaude/multispectral_demo/build/multispectral_demo \
-    /home/kyle/KyleClaude/camera_new.qsbs \
-    /home/kyle/KyleClaude/db_std.qsdb
+    /home/kyle/KyleClaude/camera_new.ocfbs \
+    /home/kyle/KyleClaude/db_std.ocfdb
 ```
 
 - [ ] **Step 6: Commit**
