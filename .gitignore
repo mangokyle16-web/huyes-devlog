@@ -1,0 +1,8 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+siamese/data/raw/*.csv
+siamese/models/*.pt
+siamese/models/norm_stats.json
+.DS_Store
