@@ -1,0 +1,6 @@
+{
+  "mac_mini_host": "kyleckagentdeMac-mini-2.local",
+  "mac_mini_port": 8765,
+  "timeout_sec": 10,
+  "retry_count": 3
+}

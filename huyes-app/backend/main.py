@@ -40,6 +40,11 @@ def startup():
     init_db()
 
 
+@app.get("/health")
+def health():
+    return {"status": "ok", "service": "huyes-api", "version": "0.1.0"}
+
+
 # ── Schemas ───────────────────────────────────────────────────────
 class BeanRecord(BaseModel):
     bean_id: int
