@@ -21,7 +21,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from database import Batch, Origin, get_db, init_db
+from database import Batch, Origin, PiEvent, get_db, init_db
 
 app = FastAPI(title="Huyes API", version="0.1.0")
 

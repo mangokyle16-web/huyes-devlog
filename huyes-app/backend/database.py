@@ -40,6 +40,17 @@ class Origin(Base):
     source      = Column(String)         # 爬取來源
 
 
+class PiEvent(Base):
+    """Pi5 主動推送的事件紀錄。"""
+    __tablename__ = "pi_events"
+    id          = Column(Integer, primary_key=True, autoincrement=True)
+    received_at = Column(DateTime, default=datetime.utcnow)
+    event_type  = Column(String)   # session_complete | alert | status | log
+    session_id  = Column(String, nullable=True)
+    payload     = Column(JSON)
+    read        = Column(Boolean, default=False)
+
+
 def get_db():
     db = SessionLocal()
     try:
