@@ -5,4 +5,7 @@ __pycache__/
 siamese/data/raw/*.csv
 siamese/models/*.pt
 siamese/models/norm_stats.json
+huyes-app/backend/huyes.db
+huyes-app/frontend/node_modules/
+huyes-app/frontend/dist/
 .DS_Store

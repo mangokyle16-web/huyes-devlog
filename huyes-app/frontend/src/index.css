@@ -1,0 +1,5 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #1a0a00; color: #f0e6d0; -webkit-font-smoothing: antialiased; }
+#root { width: 100%; }
+a { color: inherit; }
+button { font-family: inherit; }
