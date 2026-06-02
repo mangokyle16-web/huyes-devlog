@@ -1,0 +1,10 @@
+{
+  "formula": "ndiff",
+  "a": 7.9781,
+  "b": -174.6011,
+  "cal_white_850": 85.2811,
+  "cal_white_930": 95.9761,
+  "n_cal_points": 3,
+  "cal_r2": 0.7291,
+  "note": "2026-05-19 fixed-ROI ndiff, white-ref at ROI position, 3-batch provisional: R2=0.73 MAE=5.6"
+}

@@ -1,0 +1,7 @@
+GLIBC_2.17 {
+    open;
+    openat;
+    ioctl;
+    close;
+    mmap;
+};

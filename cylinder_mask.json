@@ -1,0 +1,10 @@
+{
+  "cx": 798.0535278320312,
+  "cy": 569.4999389648438,
+  "r": 839.8046264648438,
+  "image_w": 1600,
+  "image_h": 1200,
+  "source": "white_paper",
+  "otsu_threshold": 162.0,
+  "image_used": "/home/kyle/KyleClaude/cylinder_white_ref.png"
+}
