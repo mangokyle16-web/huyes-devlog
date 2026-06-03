@@ -10,7 +10,7 @@ import queue
 import numpy as np
 import cv2
 
-HEF_PATH   = "/home/kyle/KyleClaude/fastsam_s_v3.hef"
+HEF_PATH   = "/home/kyle/KyleClaude/fastsam_s_v4.hef"
 INPUT_SIZE = 256
 
 
