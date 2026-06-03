@@ -9,3 +9,7 @@ huyes-app/backend/huyes.db
 huyes-app/frontend/node_modules/
 huyes-app/frontend/dist/
 .DS_Store
+hailo-compile/*.whl
+hailo-compile/*.har
+hailo-compile/*.onnx
+hailo-compile/*.log

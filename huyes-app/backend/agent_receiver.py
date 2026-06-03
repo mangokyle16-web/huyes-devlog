@@ -150,3 +150,29 @@ def _parse_mold_report(csv_text: str) -> list[dict]:
 @app.get("/health")
 def health():
     return {"status": "ok", "service": "huyes-agent-receiver", "port": 8081}
+
+
+# ── 自動 BQS 計算（整合進 job_finished 流程）────────────────────
+def _compute_bqs_from_mold(mold_rows: list[dict]) -> list[dict]:
+    """把 mold_analysis 輸出轉成 BQS beans list。"""
+    beans = []
+    for row in mold_rows:
+        fl_norm = float(row.get("fl_norm", 0))
+        mahal   = float(row.get("mahal_dist", row.get("mahalanobis", 0)))
+        reject  = fl_norm >= 6.0
+        safety  = max(0.0, min(100.0, 100 - fl_norm * 15))
+        defect  = max(0.0, min(100.0, 100 - mahal * 30))
+        bqs     = defect * 0.55 + safety * 0.35 + 75.0 * 0.10
+        if reject:       grade = "淘汰"
+        elif bqs >= 90:  grade = "精選"
+        elif bqs >= 70:  grade = "標準"
+        elif bqs >= 40:  grade = "混豆"
+        else:             grade = "淘汰"
+        beans.append({
+            "bean_id": int(row.get("bean_id", 0)),
+            "bqs": round(bqs, 1), "grade": grade,
+            "defect": round(defect, 1), "roast": None,
+            "safety": round(safety, 1), "morphology": 75.0,
+            "reject": reject,
+        })
+    return beans

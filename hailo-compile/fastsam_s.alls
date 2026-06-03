@@ -1,0 +1,3 @@
+# FastSAM-s model script for Hailo-8
+# 4 outputs: proto masks, box predictions, scores, coordinates
+performance_param(compiler_optimization_level=max)
