@@ -1,0 +1,11 @@
+{
+  "device": "Hailo-8",
+  "architecture": "HAILO8",
+  "firmware": "4.20.0",
+  "sdk": "hailo_platform 4.20.0",
+  "tops": 26,
+  "interface": "PCIe (M.2)",
+  "device_file": "/dev/hailo0",
+  "status": "ready",
+  "installed": "2026-06-03"
+}
