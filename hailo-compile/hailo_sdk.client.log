@@ -248,3 +248,33 @@
 2026-06-03 07:26:13,730 - INFO - hailo_tools_runner.py:504 - To achieve optimal performance, set the compiler_optimization_level to "max" by adding performance_param(compiler_optimization_level=max) to the model script. Note that this may increase compilation time.
 2026-06-03 07:26:13,922 - ERROR - hailo_tools_runner.py:576 - Failed to produce compiled graph
 2026-06-03 07:31:27,445 - INFO - hailo_tools_runner.py:504 - To achieve optimal performance, set the compiler_optimization_level to "max" by adding performance_param(compiler_optimization_level=max) to the model script. Note that this may increase compilation time.
+2026-06-03 12:35:28,404 - INFO - parser.py:127 - Translation started on ONNX model fastsam_s
+2026-06-03 12:35:28,546 - INFO - parser.py:162 - Restored ONNX model fastsam_s (completion time: 00:00:00.14)
+2026-06-03 12:35:28,775 - INFO - parser.py:185 - Extracted ONNXRuntime meta-data for Hailo model (completion time: 00:00:00.37)
+2026-06-03 12:35:29,308 - INFO - parser.py:357 - Start nodes mapped from original model: 'images': 'fastsam_s/input_layer1'.
+2026-06-03 12:35:29,309 - INFO - parser.py:358 - End nodes mapped from original model: '/model.22/Concat_2', '/model.22/Sigmoid', '/model.22/proto/cv3/act/Mul', '/model.22/dfl/Reshape_1'.
+2026-06-03 12:35:29,358 - INFO - parser.py:272 - Translation completed on ONNX model fastsam_s (completion time: 00:00:00.95)
+2026-06-03 12:35:30,465 - IMPORTANT - sdk_backend.py:1009 - Starting Model Optimization
+2026-06-03 12:37:37,857 - IMPORTANT - sdk_backend.py:1050 - Model Optimization is done
+2026-06-03 12:37:39,091 - INFO - client_runner.py:1831 - Saved HAR to: /workspace/fastsam_s_v2.har
+2026-06-03 12:37:42,484 - INFO - hailo_tools_runner.py:504 - To achieve optimal performance, set the compiler_optimization_level to "max" by adding performance_param(compiler_optimization_level=max) to the model script. Note that this may increase compilation time.
+2026-06-03 12:58:18,159 - INFO - parser.py:127 - Translation started on ONNX model fastsam_s
+2026-06-03 12:58:18,354 - INFO - parser.py:162 - Restored ONNX model fastsam_s (completion time: 00:00:00.20)
+2026-06-03 12:58:18,585 - INFO - parser.py:185 - Extracted ONNXRuntime meta-data for Hailo model (completion time: 00:00:00.43)
+2026-06-03 12:58:19,114 - INFO - parser.py:357 - Start nodes mapped from original model: 'images': 'fastsam_s/input_layer1'.
+2026-06-03 12:58:19,114 - INFO - parser.py:358 - End nodes mapped from original model: '/model.22/Concat_2', '/model.22/Sigmoid', '/model.22/proto/cv3/act/Mul', '/model.22/dfl/Reshape_1'.
+2026-06-03 12:58:19,163 - INFO - parser.py:272 - Translation completed on ONNX model fastsam_s (completion time: 00:00:01.00)
+2026-06-03 12:58:20,252 - IMPORTANT - sdk_backend.py:1009 - Starting Model Optimization
+2026-06-03 13:00:02,005 - IMPORTANT - sdk_backend.py:1050 - Model Optimization is done
+2026-06-03 13:00:03,272 - INFO - client_runner.py:1831 - Saved HAR to: /workspace/fastsam_s_v3.har
+2026-06-03 13:00:06,636 - INFO - hailo_tools_runner.py:504 - To achieve optimal performance, set the compiler_optimization_level to "max" by adding performance_param(compiler_optimization_level=max) to the model script. Note that this may increase compilation time.
+2026-06-03 13:27:33,995 - INFO - parser.py:127 - Translation started on ONNX model fastsam_s
+2026-06-03 13:27:34,197 - INFO - parser.py:162 - Restored ONNX model fastsam_s (completion time: 00:00:00.20)
+2026-06-03 13:27:34,430 - INFO - parser.py:185 - Extracted ONNXRuntime meta-data for Hailo model (completion time: 00:00:00.44)
+2026-06-03 13:27:34,950 - INFO - parser.py:357 - Start nodes mapped from original model: 'images': 'fastsam_s/input_layer1'.
+2026-06-03 13:27:34,950 - INFO - parser.py:358 - End nodes mapped from original model: '/model.22/Concat_2', '/model.22/Sigmoid', '/model.22/proto/cv3/act/Mul', '/model.22/dfl/Reshape_1'.
+2026-06-03 13:27:34,999 - INFO - parser.py:272 - Translation completed on ONNX model fastsam_s (completion time: 00:00:01.00)
+2026-06-03 13:27:36,086 - IMPORTANT - sdk_backend.py:1009 - Starting Model Optimization
+2026-06-03 13:30:11,386 - IMPORTANT - sdk_backend.py:1050 - Model Optimization is done
+2026-06-03 13:30:12,613 - INFO - client_runner.py:1831 - Saved HAR to: /workspace/fastsam_s_v4.har
+2026-06-03 13:30:15,973 - INFO - hailo_tools_runner.py:504 - To achieve optimal performance, set the compiler_optimization_level to "max" by adding performance_param(compiler_optimization_level=max) to the model script. Note that this may increase compilation time.

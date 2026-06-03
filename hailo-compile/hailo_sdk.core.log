@@ -1,269 +1,269 @@
-[2026-06-03 07:31:27.716] [default] [info] Ran from command: "compile_fastsam.py"
-[2026-06-03 07:31:27.722] [default] [info] Loading network parameters
-[2026-06-03 07:31:27.891] [default] [info] Starting Hailo allocation and compilation flow
-[2026-06-03 07:31:27.915] [default] [info] Model name: fastsam_s
-[2026-06-03 07:31:30.786] [default] [info] Trying to solve in single context
-[2026-06-03 07:31:36.116] [default] [info] Single context flow failed: Failed to save enough resources to fit in the required parameters (in a recoverable manner): SCs: 378/384, 16bit SCs: 0/384, APUs: 128/120, IAs: 130/192, L3 weights: 299/768, L3 ios: 193/768, LCUs: 128/96, continuing in multi context
-[2026-06-03 07:31:40.213] [default] [info] Finding the best partition to contexts...
-[2026-06-03 07:31:58.038] [default] [info] Iteration #1 - Contexts: 2, Changed: context_0, Fast FPS: 118.576 (best: 0) Unikorn FPS: 76 (best: 0)
-[2026-06-03 07:31:58.038] [default] [info] Iteration #1 - Contexts: 2
-[2026-06-03 07:31:58.118] [default] [info] Iteration #2 - Contexts: 2, Changed: context_0, Fast FPS: 117.994 (best: 118.576)
-[2026-06-03 07:31:58.118] [default] [info] Iteration #2 - Contexts: 2
-[2026-06-03 07:32:08.874] [default] [info] Iteration #3 - Contexts: 2, Changed: context_0, Fast FPS: 169.714 (best: 118.576) Unikorn FPS: 109 (best: 76)
-[2026-06-03 07:32:08.874] [default] [info] Iteration #3 - Contexts: 2
-[2026-06-03 07:32:18.974] [default] [info] Iteration #4 - Contexts: 2, Changed: context_0, Fast FPS: 196.598 (best: 169.714) Unikorn FPS: 124 (best: 109)
-[2026-06-03 07:32:18.974] [default] [info] Iteration #4 - Contexts: 2
-[2026-06-03 07:32:30.529] [default] [info] Iteration #5 - Contexts: 2, Changed: context_0, Fast FPS: 224.203 (best: 196.598) Unikorn FPS: 149 (best: 124)
-[2026-06-03 07:32:30.529] [default] [info] Iteration #5 - Contexts: 2
-[2026-06-03 07:32:31.276] [default] [info] Iteration #6 - Contexts: 2, Changed: context_0, Fast FPS: 224.203 (best: 224.203)
-[2026-06-03 07:32:31.276] [default] [info] Iteration #6 - Contexts: 2
-[2026-06-03 07:32:31.710] [default] [info] Iteration #7 - Contexts: 2, Changed: context_0, Fast FPS: 224.203 (best: 224.203)
-[2026-06-03 07:32:31.710] [default] [info] Iteration #7 - Contexts: 2
-[2026-06-03 07:32:41.050] [default] [info] Iteration #8 - Contexts: 2, Changed: context_0, Fast FPS: 270.303 (best: 224.203) Unikorn FPS: 172 (best: 149)
-[2026-06-03 07:32:41.050] [default] [info] Iteration #8 - Contexts: 2
-[2026-06-03 07:32:41.450] [default] [info] Iteration #9 - Contexts: 2, Changed: context_0, Fast FPS: 270.297 (best: 270.303)
-[2026-06-03 07:32:41.450] [default] [info] Iteration #9 - Contexts: 2
-[2026-06-03 07:32:42.783] [default] [info] Iteration #10 - Contexts: 2, Changed: context_0, Fast FPS: 269.74 (best: 270.303)
-[2026-06-03 07:32:42.784] [default] [info] Iteration #10 - Contexts: 2
-[2026-06-03 07:32:42.889] [default] [info] Iteration #11 - Contexts: 2, Changed: context_0, Fast FPS: 269.74 (best: 270.303)
-[2026-06-03 07:32:42.889] [default] [info] Iteration #11 - Contexts: 2
-[2026-06-03 07:32:43.646] [default] [info] Iteration #12 - Contexts: 2, Changed: context_0, Fast FPS: 246.728 (best: 270.303)
-[2026-06-03 07:32:43.646] [default] [info] Iteration #12 - Contexts: 2
-[2026-06-03 07:32:43.812] [default] [info] Iteration #13 - Contexts: 2, Changed: context_0, Fast FPS: 246.728 (best: 270.303)
-[2026-06-03 07:32:43.812] [default] [info] Iteration #13 - Contexts: 2
-[2026-06-03 07:32:44.174] [default] [info] Iteration #14 - Contexts: 2, Changed: context_0, Fast FPS: 242.184 (best: 270.303)
-[2026-06-03 07:32:44.174] [default] [info] Iteration #14 - Contexts: 2
-[2026-06-03 07:32:44.341] [default] [info] Iteration #15 - Contexts: 2, Changed: context_0, Fast FPS: 246.48 (best: 270.303)
-[2026-06-03 07:32:44.341] [default] [info] Iteration #15 - Contexts: 2
-[2026-06-03 07:32:44.510] [default] [info] Iteration #16 - Contexts: 2, Changed: context_0, Fast FPS: 246.522 (best: 270.303)
-[2026-06-03 07:32:44.510] [default] [info] Iteration #16 - Contexts: 2
-[2026-06-03 07:33:14.171] [default] [info] Iteration #17 - Contexts: 2, Changed: context_0, Fast FPS: 277.563 (best: 270.303) Unikorn FPS: 209 (best: 172)
-[2026-06-03 07:33:14.171] [default] [info] Iteration #17 - Contexts: 2
-[2026-06-03 07:33:22.777] [default] [info] Iteration #18 - Contexts: 3, Changed: context_1, Fast FPS: 287.671 (best: 277.563) Unikorn FPS: 159 (best: 209)
-[2026-06-03 07:33:22.777] [default] [info] Iteration #18 - Contexts: 3
-[2026-06-03 07:33:30.549] [default] [info] Iteration #19 - Contexts: 3, Changed: context_1, Fast FPS: 291.131 (best: 287.671) Unikorn FPS: 161 (best: 209)
-[2026-06-03 07:33:30.549] [default] [info] Iteration #19 - Contexts: 3
-[2026-06-03 07:33:30.635] [default] [info] Iteration #20 - Contexts: 3, Changed: context_1, Fast FPS: 286.714 (best: 291.131)
-[2026-06-03 07:33:30.635] [default] [info] Iteration #20 - Contexts: 3
-[2026-06-03 07:33:30.708] [default] [info] Iteration #21 - Contexts: 3, Changed: context_1, Fast FPS: 286.714 (best: 291.131)
-[2026-06-03 07:33:30.709] [default] [info] Iteration #21 - Contexts: 3
-[2026-06-03 07:33:30.900] [default] [info] Iteration #22 - Contexts: 3, Changed: context_1, Fast FPS: 286.591 (best: 291.131)
-[2026-06-03 07:33:30.900] [default] [info] Iteration #22 - Contexts: 3
-[2026-06-03 07:33:30.976] [default] [info] Iteration #23 - Contexts: 3, Changed: context_1, Fast FPS: 286.591 (best: 291.131)
-[2026-06-03 07:33:30.976] [default] [info] Iteration #23 - Contexts: 3
-[2026-06-03 07:33:31.066] [default] [info] Iteration #24 - Contexts: 3, Changed: context_1, Fast FPS: 282.377 (best: 291.131)
-[2026-06-03 07:33:31.066] [default] [info] Iteration #24 - Contexts: 3
-[2026-06-03 07:33:31.143] [default] [info] Iteration #25 - Contexts: 3, Changed: context_1, Fast FPS: 282.467 (best: 291.131)
-[2026-06-03 07:33:31.143] [default] [info] Iteration #25 - Contexts: 3
-[2026-06-03 07:33:38.375] [default] [info] Iteration #26 - Contexts: 3, Changed: context_1, Fast FPS: 303.098 (best: 291.131) Unikorn FPS: 169 (best: 209)
-[2026-06-03 07:33:38.375] [default] [info] Iteration #26 - Contexts: 3
-[2026-06-03 07:33:38.462] [default] [info] Iteration #27 - Contexts: 3, Changed: context_1, Fast FPS: 303.098 (best: 303.098)
-[2026-06-03 07:33:38.462] [default] [info] Iteration #27 - Contexts: 3
-[2026-06-03 07:33:46.281] [default] [info] Iteration #28 - Contexts: 3, Changed: context_1, Fast FPS: 352.429 (best: 303.098) Unikorn FPS: 178 (best: 209)
-[2026-06-03 07:33:46.281] [default] [info] Iteration #28 - Contexts: 3
-[2026-06-03 07:33:46.374] [default] [info] Iteration #29 - Contexts: 3, Changed: context_1, Fast FPS: 352.062 (best: 352.429)
-[2026-06-03 07:33:46.374] [default] [info] Iteration #29 - Contexts: 3
-[2026-06-03 07:33:46.451] [default] [info] Iteration #30 - Contexts: 3, Changed: context_1, Fast FPS: 365.913 (best: 352.429), Failed on: Automri finished with too many resources on context_1
-[2026-06-03 07:33:46.451] [default] [info] Iteration #30 - Contexts: 3
-[2026-06-03 07:33:54.548] [default] [info] Iteration #31 - Contexts: 3, Changed: context_1, Fast FPS: 356.194 (best: 352.429) Unikorn FPS: 175 (best: 209)
-[2026-06-03 07:33:54.548] [default] [info] Iteration #31 - Contexts: 3
-[2026-06-03 07:33:54.646] [default] [info] Iteration #32 - Contexts: 3, Changed: context_1, Fast FPS: 355.792 (best: 356.194)
-[2026-06-03 07:33:54.646] [default] [info] Iteration #32 - Contexts: 3
-[2026-06-03 07:33:54.731] [default] [info] Iteration #33 - Contexts: 3, Changed: context_1, Fast FPS: 355.792 (best: 356.194)
-[2026-06-03 07:33:54.731] [default] [info] Iteration #33 - Contexts: 3
-[2026-06-03 07:33:55.129] [default] [info] Iteration #34 - Contexts: 3, Changed: context_1, Fast FPS: 352.18 (best: 356.194)
-[2026-06-03 07:33:55.129] [default] [info] Iteration #34 - Contexts: 3
-[2026-06-03 07:34:04.456] [default] [info] Iteration #35 - Contexts: 3, Changed: context_1, Fast FPS: 364.133 (best: 356.194) Unikorn FPS: 177 (best: 209)
-[2026-06-03 07:34:04.456] [default] [info] Iteration #35 - Contexts: 3
-[2026-06-03 07:34:04.900] [default] [info] Iteration #36 - Contexts: 3, Changed: context_1, Fast FPS: 349.981 (best: 364.133)
-[2026-06-03 07:34:04.900] [default] [info] Iteration #36 - Contexts: 3
-[2026-06-03 07:34:05.218] [default] [info] Iteration #37 - Contexts: 3, Changed: context_1, Fast FPS: 350.025 (best: 364.133)
-[2026-06-03 07:34:05.218] [default] [info] Iteration #37 - Contexts: 3
-[2026-06-03 07:34:05.653] [default] [info] Iteration #38 - Contexts: 3, Changed: context_1, Fast FPS: 361.031 (best: 364.133)
-[2026-06-03 07:34:05.654] [default] [info] Iteration #38 - Contexts: 3
-[2026-06-03 07:34:14.813] [default] [info] Iteration #39 - Contexts: 3, Changed: context_1, Fast FPS: 366.44 (best: 364.133) Unikorn FPS: 188 (best: 209)
-[2026-06-03 07:34:14.813] [default] [info] Iteration #39 - Contexts: 3
-[2026-06-03 07:34:24.214] [default] [info] Iteration #40 - Contexts: 3, Changed: context_1, Fast FPS: 366.451 (best: 366.44) Unikorn FPS: 188 (best: 209)
-[2026-06-03 07:34:24.214] [default] [info] Iteration #40 - Contexts: 3
-[2026-06-03 07:34:33.846] [default] [info] Iteration #41 - Contexts: 3, Changed: context_1, Fast FPS: 374.233 (best: 366.451) Unikorn FPS: 186 (best: 209)
-[2026-06-03 07:34:33.846] [default] [info] Iteration #41 - Contexts: 3
-[2026-06-03 07:34:33.972] [default] [info] Iteration #42 - Contexts: 3, Changed: context_1, Fast FPS: 374.21 (best: 374.233)
-[2026-06-03 07:34:33.972] [default] [info] Iteration #42 - Contexts: 3
-[2026-06-03 07:34:34.080] [default] [info] Iteration #43 - Contexts: 3, Changed: context_1, Fast FPS: 374.21 (best: 374.233)
-[2026-06-03 07:34:34.080] [default] [info] Iteration #43 - Contexts: 3
-[2026-06-03 07:34:34.187] [default] [info] Iteration #44 - Contexts: 3, Changed: context_1, Fast FPS: 374.21 (best: 374.233)
-[2026-06-03 07:34:34.188] [default] [info] Iteration #44 - Contexts: 3
-[2026-06-03 07:34:42.569] [default] [info] Iteration #45 - Contexts: 3, Changed: context_1, Fast FPS: 382.328 (best: 374.233) Unikorn FPS: 190 (best: 209)
-[2026-06-03 07:34:42.569] [default] [info] Iteration #45 - Contexts: 3
-[2026-06-03 07:34:42.695] [default] [info] Iteration #46 - Contexts: 3, Changed: context_1, Fast FPS: 382.328 (best: 382.328)
-[2026-06-03 07:34:42.695] [default] [info] Iteration #46 - Contexts: 3
-[2026-06-03 07:34:42.803] [default] [info] Iteration #47 - Contexts: 3, Changed: context_1, Fast FPS: 382.328 (best: 382.328)
-[2026-06-03 07:34:42.803] [default] [info] Iteration #47 - Contexts: 3
-[2026-06-03 07:34:42.911] [default] [info] Iteration #48 - Contexts: 3, Changed: context_1, Fast FPS: 382.328 (best: 382.328)
-[2026-06-03 07:34:42.911] [default] [info] Iteration #48 - Contexts: 3
-[2026-06-03 07:34:43.019] [default] [info] Iteration #49 - Contexts: 3, Changed: context_1, Fast FPS: 379.326 (best: 382.328)
-[2026-06-03 07:34:43.019] [default] [info] Iteration #49 - Contexts: 3
-[2026-06-03 07:34:51.304] [default] [info] Iteration #50 - Contexts: 3, Changed: context_1, Fast FPS: 388.605 (best: 382.328) Unikorn FPS: 187 (best: 209)
-[2026-06-03 07:34:51.304] [default] [info] Iteration #50 - Contexts: 3
-[2026-06-03 07:34:51.430] [default] [info] Iteration #51 - Contexts: 3, Changed: context_1, Fast FPS: 388.605 (best: 388.605)
-[2026-06-03 07:34:51.430] [default] [info] Iteration #51 - Contexts: 3
-[2026-06-03 07:34:51.539] [default] [info] Iteration #52 - Contexts: 3, Changed: context_1, Fast FPS: 388.605 (best: 388.605)
-[2026-06-03 07:34:51.539] [default] [info] Iteration #52 - Contexts: 3
-[2026-06-03 07:34:51.647] [default] [info] Iteration #53 - Contexts: 3, Changed: context_1, Fast FPS: 388.605 (best: 388.605)
-[2026-06-03 07:34:51.647] [default] [info] Iteration #53 - Contexts: 3
-[2026-06-03 07:34:51.755] [default] [info] Iteration #54 - Contexts: 3, Changed: context_1, Fast FPS: 388.605 (best: 388.605)
-[2026-06-03 07:34:51.755] [default] [info] Iteration #54 - Contexts: 3
-[2026-06-03 07:34:51.990] [default] [info] Iteration #55 - Contexts: 3, Changed: context_1, Fast FPS: 388.605 (best: 388.605)
-[2026-06-03 07:34:51.990] [default] [info] Iteration #55 - Contexts: 3
-[2026-06-03 07:34:52.100] [default] [info] Iteration #56 - Contexts: 3, Changed: context_1, Fast FPS: 376.557 (best: 388.605)
-[2026-06-03 07:34:52.101] [default] [info] Iteration #56 - Contexts: 3
-[2026-06-03 07:34:52.210] [default] [info] Iteration #57 - Contexts: 3, Changed: context_1, Fast FPS: 376.557 (best: 388.605)
-[2026-06-03 07:34:52.210] [default] [info] Iteration #57 - Contexts: 3
-[2026-06-03 07:34:52.321] [default] [info] Iteration #58 - Contexts: 3, Changed: context_1, Fast FPS: 384.294 (best: 388.605)
-[2026-06-03 07:34:52.321] [default] [info] Iteration #58 - Contexts: 3
-[2026-06-03 07:34:52.613] [default] [info] Iteration #59 - Contexts: 3, Changed: context_1, Fast FPS: 387.52 (best: 388.605)
-[2026-06-03 07:34:52.613] [default] [info] Iteration #59 - Contexts: 3
-[2026-06-03 07:34:53.189] [default] [info] Iteration #60 - Contexts: 3, Changed: context_0, Fast FPS: 384.097 (best: 388.605)
-[2026-06-03 07:34:53.189] [default] [info] Iteration #60 - Contexts: 3
-[2026-06-03 07:34:53.733] [default] [info] Iteration #61 - Contexts: 3, Changed: context_0, Fast FPS: 384.097 (best: 388.605)
-[2026-06-03 07:34:53.733] [default] [info] Iteration #61 - Contexts: 3
-[2026-06-03 07:35:03.661] [default] [info] Iteration #62 - Contexts: 3, Changed: context_0, Fast FPS: 389.54 (best: 388.605) Unikorn FPS: 170 (best: 209)
-[2026-06-03 07:35:03.661] [default] [info] Iteration #62 - Contexts: 3
-[2026-06-03 07:35:04.225] [default] [info] Iteration #63 - Contexts: 3, Changed: context_0, Fast FPS: 386.832 (best: 389.54)
-[2026-06-03 07:35:04.225] [default] [info] Iteration #63 - Contexts: 3
-[2026-06-03 07:35:04.358] [default] [info] Iteration #64 - Contexts: 3, Changed: context_1, Fast FPS: 386.832 (best: 389.54)
-[2026-06-03 07:35:04.358] [default] [info] Iteration #64 - Contexts: 3
-[2026-06-03 07:35:04.727] [default] [info] Iteration #65 - Contexts: 3, Changed: context_1, Fast FPS: 387.622 (best: 389.54)
-[2026-06-03 07:35:04.727] [default] [info] Iteration #65 - Contexts: 3
-[2026-06-03 07:35:14.646] [default] [info] Iteration #66 - Contexts: 3, Changed: context_0, Fast FPS: 401.518 (best: 389.54) Unikorn FPS: 163 (best: 209)
-[2026-06-03 07:35:14.646] [default] [info] Iteration #66 - Contexts: 3
-[2026-06-03 07:35:23.910] [default] [info] Iteration #67 - Contexts: 3, Changed: context_0, Fast FPS: 406.22 (best: 401.518) Unikorn FPS: 165 (best: 209)
-[2026-06-03 07:35:23.911] [default] [info] Iteration #67 - Contexts: 3
-[2026-06-03 07:35:33.304] [default] [info] Iteration #68 - Contexts: 3, Changed: context_0, Fast FPS: 406.22 (best: 406.22) Unikorn FPS: 166 (best: 209)
-[2026-06-03 07:35:33.304] [default] [info] Iteration #68 - Contexts: 3
-[2026-06-03 07:35:33.734] [default] [info] Iteration #69 - Contexts: 3, Changed: context_0, Fast FPS: 398.85 (best: 406.22)
-[2026-06-03 07:35:33.734] [default] [info] Iteration #69 - Contexts: 3
-[2026-06-03 07:35:33.900] [default] [info] Iteration #70 - Contexts: 3, Changed: context_1, Fast FPS: 385 (best: 406.22)
-[2026-06-03 07:35:33.900] [default] [info] Iteration #70 - Contexts: 3
-[2026-06-03 07:35:34.067] [default] [info] Iteration #71 - Contexts: 3, Changed: context_1, Fast FPS: 385 (best: 406.22)
-[2026-06-03 07:35:34.067] [default] [info] Iteration #71 - Contexts: 3
-[2026-06-03 07:35:34.233] [default] [info] Iteration #72 - Contexts: 3, Changed: context_1, Fast FPS: 385 (best: 406.22)
-[2026-06-03 07:35:34.233] [default] [info] Iteration #72 - Contexts: 3
-[2026-06-03 07:35:34.399] [default] [info] Iteration #73 - Contexts: 3, Changed: context_1, Fast FPS: 386.023 (best: 406.22)
-[2026-06-03 07:35:34.399] [default] [info] Iteration #73 - Contexts: 3
-[2026-06-03 07:35:34.568] [default] [info] Iteration #74 - Contexts: 3, Changed: context_1, Fast FPS: 387.443 (best: 406.22)
-[2026-06-03 07:35:34.568] [default] [info] Iteration #74 - Contexts: 3
-[2026-06-03 07:35:34.937] [default] [info] Iteration #75 - Contexts: 3, Changed: context_0, Fast FPS: 390.638 (best: 406.22)
-[2026-06-03 07:35:34.937] [default] [info] Iteration #75 - Contexts: 3
-[2026-06-03 07:35:35.113] [default] [info] Iteration #76 - Contexts: 3, Changed: context_1, Fast FPS: 390.638 (best: 406.22)
-[2026-06-03 07:35:35.113] [default] [info] Iteration #76 - Contexts: 3
-[2026-06-03 07:35:35.289] [default] [info] Iteration #77 - Contexts: 3, Changed: context_1, Fast FPS: 390.638 (best: 406.22)
-[2026-06-03 07:35:35.289] [default] [info] Iteration #77 - Contexts: 3
-[2026-06-03 07:35:35.465] [default] [info] Iteration #78 - Contexts: 3, Changed: context_1, Fast FPS: 384.393 (best: 406.22)
-[2026-06-03 07:35:35.465] [default] [info] Iteration #78 - Contexts: 3
-[2026-06-03 07:35:35.642] [default] [info] Iteration #79 - Contexts: 3, Changed: context_1, Fast FPS: 383.014 (best: 406.22)
-[2026-06-03 07:35:35.642] [default] [info] Iteration #79 - Contexts: 3
-[2026-06-03 07:35:35.819] [default] [info] Iteration #80 - Contexts: 3, Changed: context_1, Fast FPS: 385.393 (best: 406.22)
-[2026-06-03 07:35:35.819] [default] [info] Iteration #80 - Contexts: 3
-[2026-06-03 07:35:36.186] [default] [info] Iteration #81 - Contexts: 3, Changed: context_0, Fast FPS: 385.393 (best: 406.22)
-[2026-06-03 07:35:36.186] [default] [info] Iteration #81 - Contexts: 3
-[2026-06-03 07:35:37.196] [default] [info] Iteration #82 - Contexts: 3, Changed: context_1, Fast FPS: 348.991 (best: 406.22)
-[2026-06-03 07:35:37.196] [default] [info] Iteration #82 - Contexts: 3
-[2026-06-03 07:35:37.647] [default] [info] Iteration #83 - Contexts: 3, Changed: context_0, Fast FPS: 349.339 (best: 406.22)
-[2026-06-03 07:35:37.647] [default] [info] Iteration #83 - Contexts: 3
-[2026-06-03 07:35:38.096] [default] [info] Iteration #84 - Contexts: 3, Changed: context_0, Fast FPS: 351.084 (best: 406.22)
-[2026-06-03 07:35:38.096] [default] [info] Iteration #84 - Contexts: 3
-[2026-06-03 07:35:38.543] [default] [info] Iteration #85 - Contexts: 3, Changed: context_0, Fast FPS: 349.573 (best: 406.22)
-[2026-06-03 07:35:38.543] [default] [info] Iteration #85 - Contexts: 3
-[2026-06-03 07:35:38.991] [default] [info] Iteration #86 - Contexts: 3, Changed: context_0, Fast FPS: 351.084 (best: 406.22)
-[2026-06-03 07:35:38.991] [default] [info] Iteration #86 - Contexts: 3
-[2026-06-03 07:35:39.438] [default] [info] Iteration #87 - Contexts: 3, Changed: context_0, Fast FPS: 351.084 (best: 406.22)
-[2026-06-03 07:35:39.438] [default] [info] Iteration #87 - Contexts: 3
-[2026-06-03 07:35:39.886] [default] [info] Iteration #88 - Contexts: 3, Changed: context_0, Fast FPS: 351.084 (best: 406.22)
-[2026-06-03 07:35:39.886] [default] [info] Iteration #88 - Contexts: 3
-[2026-06-03 07:35:40.334] [default] [info] Iteration #89 - Contexts: 3, Changed: context_0, Fast FPS: 351.084 (best: 406.22)
-[2026-06-03 07:35:40.334] [default] [info] Iteration #89 - Contexts: 3
-[2026-06-03 07:35:40.783] [default] [info] Iteration #90 - Contexts: 3, Changed: context_0, Fast FPS: 351.084 (best: 406.22)
-[2026-06-03 07:35:40.784] [default] [info] Iteration #90 - Contexts: 3
-[2026-06-03 07:35:41.228] [default] [info] Iteration #91 - Contexts: 3, Changed: context_0, Fast FPS: 351.084 (best: 406.22)
-[2026-06-03 07:35:41.229] [default] [info] Iteration #91 - Contexts: 3
-[2026-06-03 07:35:41.673] [default] [info] Iteration #92 - Contexts: 3, Changed: context_0, Fast FPS: 349.67 (best: 406.22)
-[2026-06-03 07:35:41.673] [default] [info] Iteration #92 - Contexts: 3
-[2026-06-03 07:35:42.123] [default] [info] Iteration #93 - Contexts: 3, Changed: context_0, Fast FPS: 349.67 (best: 406.22)
-[2026-06-03 07:35:42.123] [default] [info] Iteration #93 - Contexts: 3
-[2026-06-03 07:35:44.399] [default] [info] Iteration #94 - Contexts: 3, Changed: context_0, Fast FPS: 348.864 (best: 406.22)
-[2026-06-03 07:35:44.399] [default] [info] Iteration #94 - Contexts: 3
-[2026-06-03 07:35:44.869] [default] [info] Iteration #95 - Contexts: 3, Changed: context_0, Fast FPS: 348.551 (best: 406.22)
-[2026-06-03 07:35:44.869] [default] [info] Iteration #95 - Contexts: 3
-[2026-06-03 07:35:45.336] [default] [info] Iteration #96 - Contexts: 3, Changed: context_0, Fast FPS: 348.551 (best: 406.22)
-[2026-06-03 07:35:45.336] [default] [info] Iteration #96 - Contexts: 3
-[2026-06-03 07:35:45.809] [default] [info] Iteration #97 - Contexts: 3, Changed: context_0, Fast FPS: 348.551 (best: 406.22)
-[2026-06-03 07:35:45.809] [default] [info] Iteration #97 - Contexts: 3
-[2026-06-03 07:35:46.270] [default] [info] Iteration #98 - Contexts: 3, Changed: context_0, Fast FPS: 346.396 (best: 406.22)
-[2026-06-03 07:35:46.270] [default] [info] Iteration #98 - Contexts: 3
-[2026-06-03 07:35:46.611] [default] [info] Iteration #99 - Contexts: 3, Changed: context_1, Fast FPS: 346.396 (best: 406.22)
-[2026-06-03 07:35:46.612] [default] [info] Iteration #99 - Contexts: 3
-[2026-06-03 07:35:46.959] [default] [info] Iteration #100 - Contexts: 3, Changed: context_1, Fast FPS: 350.688 (best: 406.22)
-[2026-06-03 07:35:46.959] [default] [info] Iteration #100 - Contexts: 3
-[2026-06-03 07:35:47.421] [default] [info] Iteration #101 - Contexts: 3, Changed: context_0, Fast FPS: 348.798 (best: 406.22)
-[2026-06-03 07:35:47.421] [default] [info] Iteration #101 - Contexts: 3
-[2026-06-03 07:35:47.778] [default] [info] Iteration #102 - Contexts: 3, Changed: context_1, Fast FPS: 350.93 (best: 406.22)
-[2026-06-03 07:35:47.778] [default] [info] Iteration #102 - Contexts: 3
-[2026-06-03 07:35:48.239] [default] [info] Iteration #103 - Contexts: 3, Changed: context_0, Fast FPS: 345.818 (best: 406.22)
-[2026-06-03 07:35:48.239] [default] [info] Iteration #103 - Contexts: 3
-[2026-06-03 07:35:48.701] [default] [info] Iteration #104 - Contexts: 3, Changed: context_0, Fast FPS: 351.238 (best: 406.22)
-[2026-06-03 07:35:48.701] [default] [info] Iteration #104 - Contexts: 3
-[2026-06-03 07:35:49.077] [default] [info] Iteration #105 - Contexts: 3, Changed: context_1, Fast FPS: 353.389 (best: 406.22)
-[2026-06-03 07:35:49.077] [default] [info] Iteration #105 - Contexts: 3
-[2026-06-03 07:35:49.543] [default] [info] Iteration #106 - Contexts: 3, Changed: context_0, Fast FPS: 350.979 (best: 406.22)
-[2026-06-03 07:35:49.543] [default] [info] Iteration #106 - Contexts: 3
-[2026-06-03 07:35:50.009] [default] [info] Iteration #107 - Contexts: 3, Changed: context_1, Fast FPS: 341.132 (best: 406.22)
-[2026-06-03 07:35:50.009] [default] [info] Iteration #107 - Contexts: 3
-[2026-06-03 07:35:50.484] [default] [info] Iteration #108 - Contexts: 3, Changed: context_0, Fast FPS: 348.804 (best: 406.22)
-[2026-06-03 07:35:50.484] [default] [info] Iteration #108 - Contexts: 3
-[2026-06-03 07:35:50.875] [default] [info] Iteration #109 - Contexts: 3, Changed: context_1, Fast FPS: 342.562 (best: 406.22)
-[2026-06-03 07:35:50.875] [default] [info] Iteration #109 - Contexts: 3
-[2026-06-03 07:35:51.341] [default] [info] Iteration #110 - Contexts: 3, Changed: context_0, Fast FPS: 342.562 (best: 406.22)
-[2026-06-03 07:35:51.341] [default] [info] Iteration #110 - Contexts: 3
-[2026-06-03 07:35:51.803] [default] [info] Iteration #111 - Contexts: 3, Changed: context_0, Fast FPS: 341.066 (best: 406.22)
-[2026-06-03 07:35:51.803] [default] [info] Iteration #111 - Contexts: 3
-[2026-06-03 07:35:52.278] [default] [info] Iteration #112 - Contexts: 3, Changed: context_0, Fast FPS: 346.271 (best: 406.22)
-[2026-06-03 07:35:52.278] [default] [info] Iteration #112 - Contexts: 3
-[2026-06-03 07:35:52.678] [default] [info] Iteration #113 - Contexts: 3, Changed: context_1, Fast FPS: 281.406 (best: 406.22)
-[2026-06-03 07:35:52.678] [default] [info] Iteration #113 - Contexts: 3
-[2026-06-03 07:35:53.148] [default] [info] Iteration #114 - Contexts: 3, Changed: context_0, Fast FPS: 280.241 (best: 406.22)
-[2026-06-03 07:35:53.148] [default] [info] Iteration #114 - Contexts: 3
-[2026-06-03 07:35:53.627] [default] [info] Iteration #115 - Contexts: 3, Changed: context_0, Fast FPS: 279.52 (best: 406.22)
-[2026-06-03 07:35:53.627] [default] [info] Iteration #115 - Contexts: 3
-[2026-06-03 07:35:54.098] [default] [info] Iteration #116 - Contexts: 3, Changed: context_0, Fast FPS: 283.523 (best: 406.22)
-[2026-06-03 07:35:54.098] [default] [info] Iteration #116 - Contexts: 3
-[2026-06-03 07:35:54.514] [default] [info] Iteration #117 - Contexts: 3, Changed: context_1, Fast FPS: 280.241 (best: 406.22)
-[2026-06-03 07:35:54.514] [default] [info] Iteration #117 - Contexts: 3
-[2026-06-03 07:35:54.986] [default] [info] Iteration #118 - Contexts: 3, Changed: context_0, Fast FPS: 284.357 (best: 406.22)
-[2026-06-03 07:35:54.986] [default] [info] Iteration #118 - Contexts: 3
-[2026-06-03 07:35:55.409] [default] [info] Iteration #119 - Contexts: 3, Changed: context_1, Fast FPS: 274.023 (best: 406.22)
-[2026-06-03 07:35:55.409] [default] [info] Iteration #119 - Contexts: 3
-[2026-06-03 07:35:55.880] [default] [info] Iteration #120 - Contexts: 3, Changed: context_0, Fast FPS: 273.104 (best: 406.22)
-[2026-06-03 07:35:55.880] [default] [info] Iteration #120 - Contexts: 3
-[2026-06-03 07:35:56.440] [default] [info] Iteration #121 - Contexts: 3, Changed: context_0, Fast FPS: 273.214 (best: 406.22)
-[2026-06-03 07:35:56.440] [default] [info] Iteration #121 - Contexts: 3
-[2026-06-03 07:35:56.890] [default] [info] Iteration #122 - Contexts: 3, Changed: context_1, Fast FPS: 275.973 (best: 406.22)
-[2026-06-03 07:35:56.890] [default] [info] Iteration #122 - Contexts: 3
-[2026-06-03 07:35:57.360] [default] [info] Iteration #123 - Contexts: 3, Changed: context_0, Fast FPS: 276.674 (best: 406.22)
-[2026-06-03 07:35:57.360] [default] [info] Iteration #123 - Contexts: 3
-[2026-06-03 07:35:57.914] [default] [info] Iteration #124 - Contexts: 3, Changed: context_1, Fast FPS: 274.038 (best: 406.22)
-[2026-06-03 07:35:57.915] [default] [info] Iteration #124 - Contexts: 3
-[2026-06-03 07:35:58.378] [default] [info] Iteration #125 - Contexts: 3, Changed: context_1, Fast FPS: 275.319 (best: 406.22)
-[2026-06-03 07:35:58.378] [default] [info] Iteration #125 - Contexts: 3
-[2026-06-03 07:35:58.643] [default] [info] Iteration #126 - Contexts: 4, Changed: context_2, Fast FPS: 285.261 (best: 406.22)
-[2026-06-03 07:35:58.643] [default] [info] Iteration #126 - Contexts: 4
-[2026-06-03 07:35:58.780] [default] [info] Iteration #127 - Contexts: 4, Changed: context_2, Fast FPS: 288.663 (best: 406.22)
-[2026-06-03 07:35:58.780] [default] [info] Iteration #127 - Contexts: 4
-[2026-06-03 07:35:59.101] [default] [info] Best unikorn FPS: 209.0 Time it took 4m 18s 884ms
-[2026-06-03 07:35:59.101] [default] [info] Winning Context Partition is at iteration #17 with unikorn FPS: 209
+[2026-06-03 13:30:16.262] [default] [info] Ran from command: "compile_fastsam_v4.py"
+[2026-06-03 13:30:16.269] [default] [info] Loading network parameters
+[2026-06-03 13:30:16.436] [default] [info] Starting Hailo allocation and compilation flow
+[2026-06-03 13:30:16.462] [default] [info] Model name: fastsam_s
+[2026-06-03 13:30:19.365] [default] [info] Trying to solve in single context
+[2026-06-03 13:30:24.799] [default] [info] Single context flow failed: Failed to save enough resources to fit in the required parameters (in a recoverable manner): SCs: 378/384, 16bit SCs: 0/384, APUs: 128/120, IAs: 130/192, L3 weights: 299/768, L3 ios: 193/768, LCUs: 128/96, continuing in multi context
+[2026-06-03 13:30:28.896] [default] [info] Finding the best partition to contexts...
+[2026-06-03 13:30:46.745] [default] [info] Iteration #1 - Contexts: 2, Changed: context_0, Fast FPS: 118.576 (best: 0) Unikorn FPS: 76 (best: 0)
+[2026-06-03 13:30:46.745] [default] [info] Iteration #1 - Contexts: 2
+[2026-06-03 13:30:46.823] [default] [info] Iteration #2 - Contexts: 2, Changed: context_0, Fast FPS: 117.994 (best: 118.576)
+[2026-06-03 13:30:46.823] [default] [info] Iteration #2 - Contexts: 2
+[2026-06-03 13:30:57.554] [default] [info] Iteration #3 - Contexts: 2, Changed: context_0, Fast FPS: 169.714 (best: 118.576) Unikorn FPS: 109 (best: 76)
+[2026-06-03 13:30:57.554] [default] [info] Iteration #3 - Contexts: 2
+[2026-06-03 13:31:07.557] [default] [info] Iteration #4 - Contexts: 2, Changed: context_0, Fast FPS: 196.598 (best: 169.714) Unikorn FPS: 124 (best: 109)
+[2026-06-03 13:31:07.557] [default] [info] Iteration #4 - Contexts: 2
+[2026-06-03 13:31:19.054] [default] [info] Iteration #5 - Contexts: 2, Changed: context_0, Fast FPS: 224.203 (best: 196.598) Unikorn FPS: 149 (best: 124)
+[2026-06-03 13:31:19.054] [default] [info] Iteration #5 - Contexts: 2
+[2026-06-03 13:31:19.785] [default] [info] Iteration #6 - Contexts: 2, Changed: context_0, Fast FPS: 224.203 (best: 224.203)
+[2026-06-03 13:31:19.785] [default] [info] Iteration #6 - Contexts: 2
+[2026-06-03 13:31:20.232] [default] [info] Iteration #7 - Contexts: 2, Changed: context_0, Fast FPS: 224.203 (best: 224.203)
+[2026-06-03 13:31:20.232] [default] [info] Iteration #7 - Contexts: 2
+[2026-06-03 13:31:29.541] [default] [info] Iteration #8 - Contexts: 2, Changed: context_0, Fast FPS: 270.303 (best: 224.203) Unikorn FPS: 172 (best: 149)
+[2026-06-03 13:31:29.541] [default] [info] Iteration #8 - Contexts: 2
+[2026-06-03 13:31:29.928] [default] [info] Iteration #9 - Contexts: 2, Changed: context_0, Fast FPS: 270.297 (best: 270.303)
+[2026-06-03 13:31:29.928] [default] [info] Iteration #9 - Contexts: 2
+[2026-06-03 13:31:31.265] [default] [info] Iteration #10 - Contexts: 2, Changed: context_0, Fast FPS: 269.74 (best: 270.303)
+[2026-06-03 13:31:31.265] [default] [info] Iteration #10 - Contexts: 2
+[2026-06-03 13:31:31.367] [default] [info] Iteration #11 - Contexts: 2, Changed: context_0, Fast FPS: 269.74 (best: 270.303)
+[2026-06-03 13:31:31.367] [default] [info] Iteration #11 - Contexts: 2
+[2026-06-03 13:31:32.113] [default] [info] Iteration #12 - Contexts: 2, Changed: context_0, Fast FPS: 246.728 (best: 270.303)
+[2026-06-03 13:31:32.113] [default] [info] Iteration #12 - Contexts: 2
+[2026-06-03 13:31:32.274] [default] [info] Iteration #13 - Contexts: 2, Changed: context_0, Fast FPS: 246.728 (best: 270.303)
+[2026-06-03 13:31:32.274] [default] [info] Iteration #13 - Contexts: 2
+[2026-06-03 13:31:32.634] [default] [info] Iteration #14 - Contexts: 2, Changed: context_0, Fast FPS: 242.184 (best: 270.303)
+[2026-06-03 13:31:32.634] [default] [info] Iteration #14 - Contexts: 2
+[2026-06-03 13:31:32.798] [default] [info] Iteration #15 - Contexts: 2, Changed: context_0, Fast FPS: 246.48 (best: 270.303)
+[2026-06-03 13:31:32.798] [default] [info] Iteration #15 - Contexts: 2
+[2026-06-03 13:31:32.962] [default] [info] Iteration #16 - Contexts: 2, Changed: context_0, Fast FPS: 246.522 (best: 270.303)
+[2026-06-03 13:31:32.962] [default] [info] Iteration #16 - Contexts: 2
+[2026-06-03 13:32:02.955] [default] [info] Iteration #17 - Contexts: 2, Changed: context_0, Fast FPS: 277.563 (best: 270.303) Unikorn FPS: 209 (best: 172)
+[2026-06-03 13:32:02.955] [default] [info] Iteration #17 - Contexts: 2
+[2026-06-03 13:32:11.574] [default] [info] Iteration #18 - Contexts: 3, Changed: context_1, Fast FPS: 287.671 (best: 277.563) Unikorn FPS: 159 (best: 209)
+[2026-06-03 13:32:11.575] [default] [info] Iteration #18 - Contexts: 3
+[2026-06-03 13:32:19.338] [default] [info] Iteration #19 - Contexts: 3, Changed: context_1, Fast FPS: 291.131 (best: 287.671) Unikorn FPS: 161 (best: 209)
+[2026-06-03 13:32:19.338] [default] [info] Iteration #19 - Contexts: 3
+[2026-06-03 13:32:19.423] [default] [info] Iteration #20 - Contexts: 3, Changed: context_1, Fast FPS: 286.714 (best: 291.131)
+[2026-06-03 13:32:19.423] [default] [info] Iteration #20 - Contexts: 3
+[2026-06-03 13:32:19.496] [default] [info] Iteration #21 - Contexts: 3, Changed: context_1, Fast FPS: 286.714 (best: 291.131)
+[2026-06-03 13:32:19.497] [default] [info] Iteration #21 - Contexts: 3
+[2026-06-03 13:32:19.684] [default] [info] Iteration #22 - Contexts: 3, Changed: context_1, Fast FPS: 286.591 (best: 291.131)
+[2026-06-03 13:32:19.684] [default] [info] Iteration #22 - Contexts: 3
+[2026-06-03 13:32:19.759] [default] [info] Iteration #23 - Contexts: 3, Changed: context_1, Fast FPS: 286.591 (best: 291.131)
+[2026-06-03 13:32:19.759] [default] [info] Iteration #23 - Contexts: 3
+[2026-06-03 13:32:19.847] [default] [info] Iteration #24 - Contexts: 3, Changed: context_1, Fast FPS: 282.377 (best: 291.131)
+[2026-06-03 13:32:19.847] [default] [info] Iteration #24 - Contexts: 3
+[2026-06-03 13:32:19.922] [default] [info] Iteration #25 - Contexts: 3, Changed: context_1, Fast FPS: 282.467 (best: 291.131)
+[2026-06-03 13:32:19.922] [default] [info] Iteration #25 - Contexts: 3
+[2026-06-03 13:32:27.127] [default] [info] Iteration #26 - Contexts: 3, Changed: context_1, Fast FPS: 303.098 (best: 291.131) Unikorn FPS: 169 (best: 209)
+[2026-06-03 13:32:27.127] [default] [info] Iteration #26 - Contexts: 3
+[2026-06-03 13:32:27.212] [default] [info] Iteration #27 - Contexts: 3, Changed: context_1, Fast FPS: 303.098 (best: 303.098)
+[2026-06-03 13:32:27.212] [default] [info] Iteration #27 - Contexts: 3
+[2026-06-03 13:32:35.025] [default] [info] Iteration #28 - Contexts: 3, Changed: context_1, Fast FPS: 352.429 (best: 303.098) Unikorn FPS: 178 (best: 209)
+[2026-06-03 13:32:35.025] [default] [info] Iteration #28 - Contexts: 3
+[2026-06-03 13:32:35.115] [default] [info] Iteration #29 - Contexts: 3, Changed: context_1, Fast FPS: 352.062 (best: 352.429)
+[2026-06-03 13:32:35.115] [default] [info] Iteration #29 - Contexts: 3
+[2026-06-03 13:32:35.191] [default] [info] Iteration #30 - Contexts: 3, Changed: context_1, Fast FPS: 365.913 (best: 352.429), Failed on: Automri finished with too many resources on context_1
+[2026-06-03 13:32:35.191] [default] [info] Iteration #30 - Contexts: 3
+[2026-06-03 13:32:43.288] [default] [info] Iteration #31 - Contexts: 3, Changed: context_1, Fast FPS: 356.194 (best: 352.429) Unikorn FPS: 175 (best: 209)
+[2026-06-03 13:32:43.288] [default] [info] Iteration #31 - Contexts: 3
+[2026-06-03 13:32:43.385] [default] [info] Iteration #32 - Contexts: 3, Changed: context_1, Fast FPS: 355.792 (best: 356.194)
+[2026-06-03 13:32:43.385] [default] [info] Iteration #32 - Contexts: 3
+[2026-06-03 13:32:43.468] [default] [info] Iteration #33 - Contexts: 3, Changed: context_1, Fast FPS: 355.792 (best: 356.194)
+[2026-06-03 13:32:43.468] [default] [info] Iteration #33 - Contexts: 3
+[2026-06-03 13:32:43.859] [default] [info] Iteration #34 - Contexts: 3, Changed: context_1, Fast FPS: 352.18 (best: 356.194)
+[2026-06-03 13:32:43.859] [default] [info] Iteration #34 - Contexts: 3
+[2026-06-03 13:32:53.178] [default] [info] Iteration #35 - Contexts: 3, Changed: context_1, Fast FPS: 364.133 (best: 356.194) Unikorn FPS: 177 (best: 209)
+[2026-06-03 13:32:53.178] [default] [info] Iteration #35 - Contexts: 3
+[2026-06-03 13:32:53.615] [default] [info] Iteration #36 - Contexts: 3, Changed: context_1, Fast FPS: 349.981 (best: 364.133)
+[2026-06-03 13:32:53.615] [default] [info] Iteration #36 - Contexts: 3
+[2026-06-03 13:32:53.938] [default] [info] Iteration #37 - Contexts: 3, Changed: context_1, Fast FPS: 350.025 (best: 364.133)
+[2026-06-03 13:32:53.938] [default] [info] Iteration #37 - Contexts: 3
+[2026-06-03 13:32:54.373] [default] [info] Iteration #38 - Contexts: 3, Changed: context_1, Fast FPS: 361.031 (best: 364.133)
+[2026-06-03 13:32:54.373] [default] [info] Iteration #38 - Contexts: 3
+[2026-06-03 13:33:03.513] [default] [info] Iteration #39 - Contexts: 3, Changed: context_1, Fast FPS: 366.44 (best: 364.133) Unikorn FPS: 188 (best: 209)
+[2026-06-03 13:33:03.513] [default] [info] Iteration #39 - Contexts: 3
+[2026-06-03 13:33:12.914] [default] [info] Iteration #40 - Contexts: 3, Changed: context_1, Fast FPS: 366.451 (best: 366.44) Unikorn FPS: 188 (best: 209)
+[2026-06-03 13:33:12.914] [default] [info] Iteration #40 - Contexts: 3
+[2026-06-03 13:33:22.541] [default] [info] Iteration #41 - Contexts: 3, Changed: context_1, Fast FPS: 374.233 (best: 366.451) Unikorn FPS: 186 (best: 209)
+[2026-06-03 13:33:22.541] [default] [info] Iteration #41 - Contexts: 3
+[2026-06-03 13:33:22.667] [default] [info] Iteration #42 - Contexts: 3, Changed: context_1, Fast FPS: 374.21 (best: 374.233)
+[2026-06-03 13:33:22.667] [default] [info] Iteration #42 - Contexts: 3
+[2026-06-03 13:33:22.774] [default] [info] Iteration #43 - Contexts: 3, Changed: context_1, Fast FPS: 374.21 (best: 374.233)
+[2026-06-03 13:33:22.774] [default] [info] Iteration #43 - Contexts: 3
+[2026-06-03 13:33:22.880] [default] [info] Iteration #44 - Contexts: 3, Changed: context_1, Fast FPS: 374.21 (best: 374.233)
+[2026-06-03 13:33:22.880] [default] [info] Iteration #44 - Contexts: 3
+[2026-06-03 13:33:31.262] [default] [info] Iteration #45 - Contexts: 3, Changed: context_1, Fast FPS: 382.328 (best: 374.233) Unikorn FPS: 190 (best: 209)
+[2026-06-03 13:33:31.262] [default] [info] Iteration #45 - Contexts: 3
+[2026-06-03 13:33:31.385] [default] [info] Iteration #46 - Contexts: 3, Changed: context_1, Fast FPS: 382.328 (best: 382.328)
+[2026-06-03 13:33:31.385] [default] [info] Iteration #46 - Contexts: 3
+[2026-06-03 13:33:31.491] [default] [info] Iteration #47 - Contexts: 3, Changed: context_1, Fast FPS: 382.328 (best: 382.328)
+[2026-06-03 13:33:31.491] [default] [info] Iteration #47 - Contexts: 3
+[2026-06-03 13:33:31.597] [default] [info] Iteration #48 - Contexts: 3, Changed: context_1, Fast FPS: 382.328 (best: 382.328)
+[2026-06-03 13:33:31.597] [default] [info] Iteration #48 - Contexts: 3
+[2026-06-03 13:33:31.704] [default] [info] Iteration #49 - Contexts: 3, Changed: context_1, Fast FPS: 379.326 (best: 382.328)
+[2026-06-03 13:33:31.704] [default] [info] Iteration #49 - Contexts: 3
+[2026-06-03 13:33:39.972] [default] [info] Iteration #50 - Contexts: 3, Changed: context_1, Fast FPS: 388.605 (best: 382.328) Unikorn FPS: 187 (best: 209)
+[2026-06-03 13:33:39.972] [default] [info] Iteration #50 - Contexts: 3
+[2026-06-03 13:33:40.095] [default] [info] Iteration #51 - Contexts: 3, Changed: context_1, Fast FPS: 388.605 (best: 388.605)
+[2026-06-03 13:33:40.095] [default] [info] Iteration #51 - Contexts: 3
+[2026-06-03 13:33:40.201] [default] [info] Iteration #52 - Contexts: 3, Changed: context_1, Fast FPS: 388.605 (best: 388.605)
+[2026-06-03 13:33:40.201] [default] [info] Iteration #52 - Contexts: 3
+[2026-06-03 13:33:40.307] [default] [info] Iteration #53 - Contexts: 3, Changed: context_1, Fast FPS: 388.605 (best: 388.605)
+[2026-06-03 13:33:40.307] [default] [info] Iteration #53 - Contexts: 3
+[2026-06-03 13:33:40.414] [default] [info] Iteration #54 - Contexts: 3, Changed: context_1, Fast FPS: 388.605 (best: 388.605)
+[2026-06-03 13:33:40.414] [default] [info] Iteration #54 - Contexts: 3
+[2026-06-03 13:33:40.647] [default] [info] Iteration #55 - Contexts: 3, Changed: context_1, Fast FPS: 388.605 (best: 388.605)
+[2026-06-03 13:33:40.647] [default] [info] Iteration #55 - Contexts: 3
+[2026-06-03 13:33:40.756] [default] [info] Iteration #56 - Contexts: 3, Changed: context_1, Fast FPS: 376.557 (best: 388.605)
+[2026-06-03 13:33:40.756] [default] [info] Iteration #56 - Contexts: 3
+[2026-06-03 13:33:40.864] [default] [info] Iteration #57 - Contexts: 3, Changed: context_1, Fast FPS: 376.557 (best: 388.605)
+[2026-06-03 13:33:40.864] [default] [info] Iteration #57 - Contexts: 3
+[2026-06-03 13:33:40.973] [default] [info] Iteration #58 - Contexts: 3, Changed: context_1, Fast FPS: 384.294 (best: 388.605)
+[2026-06-03 13:33:40.973] [default] [info] Iteration #58 - Contexts: 3
+[2026-06-03 13:33:41.265] [default] [info] Iteration #59 - Contexts: 3, Changed: context_1, Fast FPS: 387.52 (best: 388.605)
+[2026-06-03 13:33:41.265] [default] [info] Iteration #59 - Contexts: 3
+[2026-06-03 13:33:41.836] [default] [info] Iteration #60 - Contexts: 3, Changed: context_0, Fast FPS: 384.097 (best: 388.605)
+[2026-06-03 13:33:41.836] [default] [info] Iteration #60 - Contexts: 3
+[2026-06-03 13:33:42.374] [default] [info] Iteration #61 - Contexts: 3, Changed: context_0, Fast FPS: 384.097 (best: 388.605)
+[2026-06-03 13:33:42.374] [default] [info] Iteration #61 - Contexts: 3
+[2026-06-03 13:33:52.319] [default] [info] Iteration #62 - Contexts: 3, Changed: context_0, Fast FPS: 389.54 (best: 388.605) Unikorn FPS: 170 (best: 209)
+[2026-06-03 13:33:52.319] [default] [info] Iteration #62 - Contexts: 3
+[2026-06-03 13:33:52.878] [default] [info] Iteration #63 - Contexts: 3, Changed: context_0, Fast FPS: 386.832 (best: 389.54)
+[2026-06-03 13:33:52.878] [default] [info] Iteration #63 - Contexts: 3
+[2026-06-03 13:33:53.011] [default] [info] Iteration #64 - Contexts: 3, Changed: context_1, Fast FPS: 386.832 (best: 389.54)
+[2026-06-03 13:33:53.011] [default] [info] Iteration #64 - Contexts: 3
+[2026-06-03 13:33:53.377] [default] [info] Iteration #65 - Contexts: 3, Changed: context_1, Fast FPS: 387.622 (best: 389.54)
+[2026-06-03 13:33:53.377] [default] [info] Iteration #65 - Contexts: 3
+[2026-06-03 13:34:03.274] [default] [info] Iteration #66 - Contexts: 3, Changed: context_0, Fast FPS: 401.518 (best: 389.54) Unikorn FPS: 163 (best: 209)
+[2026-06-03 13:34:03.274] [default] [info] Iteration #66 - Contexts: 3
+[2026-06-03 13:34:12.489] [default] [info] Iteration #67 - Contexts: 3, Changed: context_0, Fast FPS: 406.22 (best: 401.518) Unikorn FPS: 165 (best: 209)
+[2026-06-03 13:34:12.489] [default] [info] Iteration #67 - Contexts: 3
+[2026-06-03 13:34:21.863] [default] [info] Iteration #68 - Contexts: 3, Changed: context_0, Fast FPS: 406.22 (best: 406.22) Unikorn FPS: 166 (best: 209)
+[2026-06-03 13:34:21.863] [default] [info] Iteration #68 - Contexts: 3
+[2026-06-03 13:34:22.286] [default] [info] Iteration #69 - Contexts: 3, Changed: context_0, Fast FPS: 398.85 (best: 406.22)
+[2026-06-03 13:34:22.286] [default] [info] Iteration #69 - Contexts: 3
+[2026-06-03 13:34:22.450] [default] [info] Iteration #70 - Contexts: 3, Changed: context_1, Fast FPS: 385 (best: 406.22)
+[2026-06-03 13:34:22.450] [default] [info] Iteration #70 - Contexts: 3
+[2026-06-03 13:34:22.614] [default] [info] Iteration #71 - Contexts: 3, Changed: context_1, Fast FPS: 385 (best: 406.22)
+[2026-06-03 13:34:22.614] [default] [info] Iteration #71 - Contexts: 3
+[2026-06-03 13:34:22.779] [default] [info] Iteration #72 - Contexts: 3, Changed: context_1, Fast FPS: 385 (best: 406.22)
+[2026-06-03 13:34:22.779] [default] [info] Iteration #72 - Contexts: 3
+[2026-06-03 13:34:22.942] [default] [info] Iteration #73 - Contexts: 3, Changed: context_1, Fast FPS: 386.023 (best: 406.22)
+[2026-06-03 13:34:22.942] [default] [info] Iteration #73 - Contexts: 3
+[2026-06-03 13:34:23.107] [default] [info] Iteration #74 - Contexts: 3, Changed: context_1, Fast FPS: 387.443 (best: 406.22)
+[2026-06-03 13:34:23.107] [default] [info] Iteration #74 - Contexts: 3
+[2026-06-03 13:34:23.473] [default] [info] Iteration #75 - Contexts: 3, Changed: context_0, Fast FPS: 390.638 (best: 406.22)
+[2026-06-03 13:34:23.473] [default] [info] Iteration #75 - Contexts: 3
+[2026-06-03 13:34:23.646] [default] [info] Iteration #76 - Contexts: 3, Changed: context_1, Fast FPS: 390.638 (best: 406.22)
+[2026-06-03 13:34:23.646] [default] [info] Iteration #76 - Contexts: 3
+[2026-06-03 13:34:23.821] [default] [info] Iteration #77 - Contexts: 3, Changed: context_1, Fast FPS: 390.638 (best: 406.22)
+[2026-06-03 13:34:23.821] [default] [info] Iteration #77 - Contexts: 3
+[2026-06-03 13:34:23.994] [default] [info] Iteration #78 - Contexts: 3, Changed: context_1, Fast FPS: 384.393 (best: 406.22)
+[2026-06-03 13:34:23.994] [default] [info] Iteration #78 - Contexts: 3
+[2026-06-03 13:34:24.168] [default] [info] Iteration #79 - Contexts: 3, Changed: context_1, Fast FPS: 383.014 (best: 406.22)
+[2026-06-03 13:34:24.168] [default] [info] Iteration #79 - Contexts: 3
+[2026-06-03 13:34:24.341] [default] [info] Iteration #80 - Contexts: 3, Changed: context_1, Fast FPS: 385.393 (best: 406.22)
+[2026-06-03 13:34:24.341] [default] [info] Iteration #80 - Contexts: 3
+[2026-06-03 13:34:24.705] [default] [info] Iteration #81 - Contexts: 3, Changed: context_0, Fast FPS: 385.393 (best: 406.22)
+[2026-06-03 13:34:24.705] [default] [info] Iteration #81 - Contexts: 3
+[2026-06-03 13:34:25.712] [default] [info] Iteration #82 - Contexts: 3, Changed: context_1, Fast FPS: 348.991 (best: 406.22)
+[2026-06-03 13:34:25.712] [default] [info] Iteration #82 - Contexts: 3
+[2026-06-03 13:34:26.157] [default] [info] Iteration #83 - Contexts: 3, Changed: context_0, Fast FPS: 349.339 (best: 406.22)
+[2026-06-03 13:34:26.157] [default] [info] Iteration #83 - Contexts: 3
+[2026-06-03 13:34:26.599] [default] [info] Iteration #84 - Contexts: 3, Changed: context_0, Fast FPS: 351.084 (best: 406.22)
+[2026-06-03 13:34:26.599] [default] [info] Iteration #84 - Contexts: 3
+[2026-06-03 13:34:27.044] [default] [info] Iteration #85 - Contexts: 3, Changed: context_0, Fast FPS: 349.573 (best: 406.22)
+[2026-06-03 13:34:27.045] [default] [info] Iteration #85 - Contexts: 3
+[2026-06-03 13:34:27.489] [default] [info] Iteration #86 - Contexts: 3, Changed: context_0, Fast FPS: 351.084 (best: 406.22)
+[2026-06-03 13:34:27.489] [default] [info] Iteration #86 - Contexts: 3
+[2026-06-03 13:34:27.938] [default] [info] Iteration #87 - Contexts: 3, Changed: context_0, Fast FPS: 351.084 (best: 406.22)
+[2026-06-03 13:34:27.938] [default] [info] Iteration #87 - Contexts: 3
+[2026-06-03 13:34:28.379] [default] [info] Iteration #88 - Contexts: 3, Changed: context_0, Fast FPS: 351.084 (best: 406.22)
+[2026-06-03 13:34:28.379] [default] [info] Iteration #88 - Contexts: 3
+[2026-06-03 13:34:28.828] [default] [info] Iteration #89 - Contexts: 3, Changed: context_0, Fast FPS: 351.084 (best: 406.22)
+[2026-06-03 13:34:28.828] [default] [info] Iteration #89 - Contexts: 3
+[2026-06-03 13:34:29.269] [default] [info] Iteration #90 - Contexts: 3, Changed: context_0, Fast FPS: 351.084 (best: 406.22)
+[2026-06-03 13:34:29.269] [default] [info] Iteration #90 - Contexts: 3
+[2026-06-03 13:34:29.710] [default] [info] Iteration #91 - Contexts: 3, Changed: context_0, Fast FPS: 351.084 (best: 406.22)
+[2026-06-03 13:34:29.710] [default] [info] Iteration #91 - Contexts: 3
+[2026-06-03 13:34:30.151] [default] [info] Iteration #92 - Contexts: 3, Changed: context_0, Fast FPS: 349.67 (best: 406.22)
+[2026-06-03 13:34:30.151] [default] [info] Iteration #92 - Contexts: 3
+[2026-06-03 13:34:30.588] [default] [info] Iteration #93 - Contexts: 3, Changed: context_0, Fast FPS: 349.67 (best: 406.22)
+[2026-06-03 13:34:30.588] [default] [info] Iteration #93 - Contexts: 3
+[2026-06-03 13:34:32.823] [default] [info] Iteration #94 - Contexts: 3, Changed: context_0, Fast FPS: 348.864 (best: 406.22)
+[2026-06-03 13:34:32.823] [default] [info] Iteration #94 - Contexts: 3
+[2026-06-03 13:34:33.285] [default] [info] Iteration #95 - Contexts: 3, Changed: context_0, Fast FPS: 348.551 (best: 406.22)
+[2026-06-03 13:34:33.285] [default] [info] Iteration #95 - Contexts: 3
+[2026-06-03 13:34:33.746] [default] [info] Iteration #96 - Contexts: 3, Changed: context_0, Fast FPS: 348.551 (best: 406.22)
+[2026-06-03 13:34:33.746] [default] [info] Iteration #96 - Contexts: 3
+[2026-06-03 13:34:34.208] [default] [info] Iteration #97 - Contexts: 3, Changed: context_0, Fast FPS: 348.551 (best: 406.22)
+[2026-06-03 13:34:34.208] [default] [info] Iteration #97 - Contexts: 3
+[2026-06-03 13:34:34.661] [default] [info] Iteration #98 - Contexts: 3, Changed: context_0, Fast FPS: 346.396 (best: 406.22)
+[2026-06-03 13:34:34.661] [default] [info] Iteration #98 - Contexts: 3
+[2026-06-03 13:34:35.000] [default] [info] Iteration #99 - Contexts: 3, Changed: context_1, Fast FPS: 346.396 (best: 406.22)
+[2026-06-03 13:34:35.000] [default] [info] Iteration #99 - Contexts: 3
+[2026-06-03 13:34:35.341] [default] [info] Iteration #100 - Contexts: 3, Changed: context_1, Fast FPS: 350.688 (best: 406.22)
+[2026-06-03 13:34:35.341] [default] [info] Iteration #100 - Contexts: 3
+[2026-06-03 13:34:35.796] [default] [info] Iteration #101 - Contexts: 3, Changed: context_0, Fast FPS: 348.798 (best: 406.22)
+[2026-06-03 13:34:35.796] [default] [info] Iteration #101 - Contexts: 3
+[2026-06-03 13:34:36.147] [default] [info] Iteration #102 - Contexts: 3, Changed: context_1, Fast FPS: 350.93 (best: 406.22)
+[2026-06-03 13:34:36.147] [default] [info] Iteration #102 - Contexts: 3
+[2026-06-03 13:34:36.602] [default] [info] Iteration #103 - Contexts: 3, Changed: context_0, Fast FPS: 345.818 (best: 406.22)
+[2026-06-03 13:34:36.602] [default] [info] Iteration #103 - Contexts: 3
+[2026-06-03 13:34:37.060] [default] [info] Iteration #104 - Contexts: 3, Changed: context_0, Fast FPS: 351.238 (best: 406.22)
+[2026-06-03 13:34:37.060] [default] [info] Iteration #104 - Contexts: 3
+[2026-06-03 13:34:37.430] [default] [info] Iteration #105 - Contexts: 3, Changed: context_1, Fast FPS: 353.389 (best: 406.22)
+[2026-06-03 13:34:37.430] [default] [info] Iteration #105 - Contexts: 3
+[2026-06-03 13:34:37.892] [default] [info] Iteration #106 - Contexts: 3, Changed: context_0, Fast FPS: 350.979 (best: 406.22)
+[2026-06-03 13:34:37.892] [default] [info] Iteration #106 - Contexts: 3
+[2026-06-03 13:34:38.350] [default] [info] Iteration #107 - Contexts: 3, Changed: context_1, Fast FPS: 341.132 (best: 406.22)
+[2026-06-03 13:34:38.350] [default] [info] Iteration #107 - Contexts: 3
+[2026-06-03 13:34:38.819] [default] [info] Iteration #108 - Contexts: 3, Changed: context_0, Fast FPS: 348.804 (best: 406.22)
+[2026-06-03 13:34:38.819] [default] [info] Iteration #108 - Contexts: 3
+[2026-06-03 13:34:39.205] [default] [info] Iteration #109 - Contexts: 3, Changed: context_1, Fast FPS: 342.562 (best: 406.22)
+[2026-06-03 13:34:39.205] [default] [info] Iteration #109 - Contexts: 3
+[2026-06-03 13:34:39.662] [default] [info] Iteration #110 - Contexts: 3, Changed: context_0, Fast FPS: 342.562 (best: 406.22)
+[2026-06-03 13:34:39.662] [default] [info] Iteration #110 - Contexts: 3
+[2026-06-03 13:34:40.120] [default] [info] Iteration #111 - Contexts: 3, Changed: context_0, Fast FPS: 341.066 (best: 406.22)
+[2026-06-03 13:34:40.120] [default] [info] Iteration #111 - Contexts: 3
+[2026-06-03 13:34:40.583] [default] [info] Iteration #112 - Contexts: 3, Changed: context_0, Fast FPS: 346.271 (best: 406.22)
+[2026-06-03 13:34:40.583] [default] [info] Iteration #112 - Contexts: 3
+[2026-06-03 13:34:40.978] [default] [info] Iteration #113 - Contexts: 3, Changed: context_1, Fast FPS: 281.406 (best: 406.22)
+[2026-06-03 13:34:40.978] [default] [info] Iteration #113 - Contexts: 3
+[2026-06-03 13:34:41.442] [default] [info] Iteration #114 - Contexts: 3, Changed: context_0, Fast FPS: 280.241 (best: 406.22)
+[2026-06-03 13:34:41.442] [default] [info] Iteration #114 - Contexts: 3
+[2026-06-03 13:34:41.915] [default] [info] Iteration #115 - Contexts: 3, Changed: context_0, Fast FPS: 279.52 (best: 406.22)
+[2026-06-03 13:34:41.915] [default] [info] Iteration #115 - Contexts: 3
+[2026-06-03 13:34:42.383] [default] [info] Iteration #116 - Contexts: 3, Changed: context_0, Fast FPS: 283.523 (best: 406.22)
+[2026-06-03 13:34:42.383] [default] [info] Iteration #116 - Contexts: 3
+[2026-06-03 13:34:42.793] [default] [info] Iteration #117 - Contexts: 3, Changed: context_1, Fast FPS: 280.241 (best: 406.22)
+[2026-06-03 13:34:42.793] [default] [info] Iteration #117 - Contexts: 3
+[2026-06-03 13:34:43.259] [default] [info] Iteration #118 - Contexts: 3, Changed: context_0, Fast FPS: 284.357 (best: 406.22)
+[2026-06-03 13:34:43.259] [default] [info] Iteration #118 - Contexts: 3
+[2026-06-03 13:34:43.677] [default] [info] Iteration #119 - Contexts: 3, Changed: context_1, Fast FPS: 274.023 (best: 406.22)
+[2026-06-03 13:34:43.677] [default] [info] Iteration #119 - Contexts: 3
+[2026-06-03 13:34:44.148] [default] [info] Iteration #120 - Contexts: 3, Changed: context_0, Fast FPS: 273.104 (best: 406.22)
+[2026-06-03 13:34:44.148] [default] [info] Iteration #120 - Contexts: 3
+[2026-06-03 13:34:44.703] [default] [info] Iteration #121 - Contexts: 3, Changed: context_0, Fast FPS: 273.214 (best: 406.22)
+[2026-06-03 13:34:44.703] [default] [info] Iteration #121 - Contexts: 3
+[2026-06-03 13:34:45.146] [default] [info] Iteration #122 - Contexts: 3, Changed: context_1, Fast FPS: 275.973 (best: 406.22)
+[2026-06-03 13:34:45.146] [default] [info] Iteration #122 - Contexts: 3
+[2026-06-03 13:34:45.609] [default] [info] Iteration #123 - Contexts: 3, Changed: context_0, Fast FPS: 276.674 (best: 406.22)
+[2026-06-03 13:34:45.609] [default] [info] Iteration #123 - Contexts: 3
+[2026-06-03 13:34:46.155] [default] [info] Iteration #124 - Contexts: 3, Changed: context_1, Fast FPS: 274.038 (best: 406.22)
+[2026-06-03 13:34:46.155] [default] [info] Iteration #124 - Contexts: 3
+[2026-06-03 13:34:46.614] [default] [info] Iteration #125 - Contexts: 3, Changed: context_1, Fast FPS: 275.319 (best: 406.22)
+[2026-06-03 13:34:46.614] [default] [info] Iteration #125 - Contexts: 3
+[2026-06-03 13:34:46.877] [default] [info] Iteration #126 - Contexts: 4, Changed: context_2, Fast FPS: 285.261 (best: 406.22)
+[2026-06-03 13:34:46.877] [default] [info] Iteration #126 - Contexts: 4
+[2026-06-03 13:34:47.014] [default] [info] Iteration #127 - Contexts: 4, Changed: context_2, Fast FPS: 288.663 (best: 406.22)
+[2026-06-03 13:34:47.014] [default] [info] Iteration #127 - Contexts: 4
+[2026-06-03 13:34:47.947] [default] [info] Best unikorn FPS: 209.0 Time it took 4m 19s 48ms
+[2026-06-03 13:34:47.947] [default] [info] Winning Context Partition is at iteration #17 with unikorn FPS: 209
 context_0: input_layer1, conv1, conv2, conv_feature_splitter1_1, conv_feature_splitter1_2, conv4, conv5, ew_add1, concat1, conv6, conv7, conv_feature_splitter2_1, conv_feature_splitter2_2, conv9, conv10, ew_add2, conv11, conv12, ew_add3, concat2, conv13, conv14, conv_feature_splitter3_1, conv_feature_splitter3_2, conv16, conv17, ew_add4, conv18, conv19, ew_add5, concat3, conv20, conv21, conv_feature_splitter4_1, conv_feature_splitter4_2, conv23, conv24, ew_add6, concat4, conv25, conv26, maxpool1, maxpool2, maxpool3, concat5, conv27, resize1, concat6, conv_feature_splitter5_1, conv_feature_splitter5_2, conv29, conv30, concat7, conv31, resize2, concat8, conv_feature_splitter6_1, conv_feature_splitter6_2, conv33, conv34, concat9, conv35
 context_1: conv40, sh_from_conv35_to_conv36-39, deconv1_defuse_conv, conv36, conv37, conv38, conv39, deconv1_defuse_fi0, concat10, conv41, conv42, conv43, conv47, conv_feature_splitter7_1, conv_feature_splitter7_2, conv44, conv45, conv46, conv48, conv50, format_conversion1, format_conversion2, format_conversion3, output_layer1, conv51, concat11, conv52, conv53, conv54, conv55, conv56, concat12, conv57, conv58, conv59, conv_feature_splitter8_1, conv_feature_splitter8_2, conv60, conv61, conv62, conv64, format_conversion4, format_conversion5, format_conversion6, conv65, concat13, conv66, conv67, conv68, conv69, conv70, conv71, conv72, conv73, conv74, conv75, format_conversion7, format_conversion8, format_conversion9, concat14, concat15, concat16, reduce_max_softmax1, activation1, output_layer2, ew_sub_softmax1, output_layer3, reduce_sum_softmax1, ew_mult_softmax1, conv76, output_layer4
-[2026-06-03 07:35:59.141] [default] [info] Adjust Edges Start State buffers:
+[2026-06-03 13:34:47.979] [default] [info] Adjust Edges Start State buffers:
 +-----------------------------+-----------------------------+--------------------------+
 | Src                         | Dst                         | Max buffers              |
 +-----------------------------+-----------------------------+--------------------------+
@@ -477,7 +477,7 @@ context_1: conv40, sh_from_conv35_to_conv36-39, deconv1_defuse_conv, conv36, con
 | format_conversion9          | concat16                    | 2 (L3 memory cuts: 1)    |
 | concat16                    | output_layer2               | 2 (L3 memory cuts: 3)    |
 +-----------------------------+-----------------------------+--------------------------+
-[2026-06-03 07:35:59.159] [default] [info] Adjust Edges After Merges and Joins buffers:
+[2026-06-03 13:34:47.995] [default] [info] Adjust Edges After Merges and Joins buffers:
 +-----------------------------+-----------------------------+--------------------------+
 | Src                         | Dst                         | Max buffers              |
 +-----------------------------+-----------------------------+--------------------------+
@@ -690,7 +690,7 @@ context_1: conv40, sh_from_conv35_to_conv36-39, deconv1_defuse_conv, conv36, con
 | format_conversion9          | concat16                    | 2 (L3 memory cuts: 1)    |
 | concat16                    | output_layer2               | 2 (L3 memory cuts: 3)    |
 +-----------------------------+-----------------------------+--------------------------+
-[2026-06-03 07:36:02.842] [default] [info] Adjust Edges Before Dimaffer buffers:
+[2026-06-03 13:34:51.721] [default] [info] Adjust Edges Before Dimaffer buffers:
 +-----------------------------+-----------------------------+-------------------------------+
 | Src                         | Dst                         | Max buffers                   |
 +-----------------------------+-----------------------------+-------------------------------+
@@ -903,7 +903,7 @@ context_1: conv40, sh_from_conv35_to_conv36-39, deconv1_defuse_conv, conv36, con
 | format_conversion9          | concat16                    | 2 (L3 memory cuts: 1)         |
 | concat16                    | output_layer2               | 1 (L3 memory cuts: 2)         |
 +-----------------------------+-----------------------------+-------------------------------+
-[2026-06-03 07:36:02.887] [default] [info] Adjust Edges After Dimaffer buffers:
+[2026-06-03 13:34:51.766] [default] [info] Adjust Edges After Dimaffer buffers:
 +-----------------------------+-----------------------------+-------------------------------+
 | Src                         | Dst                         | Max buffers                   |
 +-----------------------------+-----------------------------+-------------------------------+
@@ -1116,7 +1116,7 @@ context_1: conv40, sh_from_conv35_to_conv36-39, deconv1_defuse_conv, conv36, con
 | format_conversion9          | concat16                    | 2 (L3 memory cuts: 1)         |
 | concat16                    | output_layer2               | 1 (L3 memory cuts: 2)         |
 +-----------------------------+-----------------------------+-------------------------------+
-[2026-06-03 07:36:06.124] [default] [info] Pre-allocation Resources for context_0
+[2026-06-03 13:34:54.996] [default] [info] Pre-allocation Resources for context_0
 +-----------------------------------------------+-------------+-----------------------+-----------------------+----------------+-----+-----+
 | Node                                          | Subclusters | L3 Weight Memory Cuts | L3 Output Memory Cuts | L4 Memory Cuts | IBs | OBs |
 +-----------------------------------------------+-------------+-----------------------+-----------------------+----------------+-----+-----+
@@ -1203,7 +1203,7 @@ context_1: conv40, sh_from_conv35_to_conv36-39, deconv1_defuse_conv, conv36, con
 | context_0_to_context_1_0                      | 0           | 0                     | 0                     | 0.500          | 0   | 0   |
 +-----------------------------------------------+-------------+-----------------------+-----------------------+----------------+-----+-----+
 TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 (32.9102%), L3 Output memory cuts: 224 (21.875%), L3 total cuts: 561 (54.7852%), L4 memory cuts: 3 (10.7143%), IBs: 0 (0%), OBs: 0 (0%)
-[2026-06-03 07:36:06.132] [default] [info] Pre-allocation buffers for context_0 buffers:
+[2026-06-03 13:34:55.004] [default] [info] Pre-allocation buffers for context_0 buffers:
 +-----------------------------------------------+-----------------------------------------------+-------------------------------+
 | Src                                           | Dst                                           | Max buffers                   |
 +-----------------------------------------------+-----------------------------------------------+-------------------------------+
@@ -1322,7 +1322,7 @@ TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 
 | concat9                                       | conv35                                        | 5[S] (L3 memory cuts: 1)      |
 | conv35                                        | context_0_to_context_1_4                      | 1[RPC] (L3 memory cuts: 1)    |
 +-----------------------------------------------+-----------------------------------------------+-------------------------------+
-[2026-06-03 07:36:06.212] [default] [info] Pre-allocation Resources for context_1
+[2026-06-03 13:34:55.086] [default] [info] Pre-allocation Resources for context_1
 +------------------------------------------------+-------------+-----------------------+-----------------------+----------------+-----+-----+
 | Node                                           | Subclusters | L3 Weight Memory Cuts | L3 Output Memory Cuts | L4 Memory Cuts | IBs | OBs |
 +------------------------------------------------+-------------+-----------------------+-----------------------+----------------+-----+-----+
@@ -1410,7 +1410,7 @@ TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 
 | output_layer2                                  | 0           | 0                     | 0                     | 0.500          | 0   | 0   |
 +------------------------------------------------+-------------+-----------------------+-----------------------+----------------+-----+-----+
 TOTAL:  LCUs: 71 (55.4688%), Subclusters: 158 (30.8594%), Weight memory cuts:264 (25.7812%), L3 Output memory cuts: 115 (11.2305%), L3 total cuts: 379 (37.0117%), L4 memory cuts: 4 (14.2857%), IBs: 0 (0%), OBs: 0 (0%)
-[2026-06-03 07:36:06.218] [default] [info] Pre-allocation buffers for context_1 buffers:
+[2026-06-03 13:34:55.093] [default] [info] Pre-allocation buffers for context_1 buffers:
 +------------------------------------------------+------------------------------------------------+-------------------------------+
 | Src                                            | Dst                                            | Max buffers                   |
 +------------------------------------------------+------------------------------------------------+-------------------------------+
@@ -1511,12 +1511,12 @@ TOTAL:  LCUs: 71 (55.4688%), Subclusters: 158 (30.8594%), Weight memory cuts:264
 | concat16                                       | auto_reshape_from_concat16_to_output_layer2    | 1 (L3 memory cuts: 2)         |
 | auto_reshape_from_concat16_to_output_layer2    | output_layer2                                  | 2 (L4 memory cuts: 1)         |
 +------------------------------------------------+------------------------------------------------+-------------------------------+
-[2026-06-03 07:36:06.219] [default] [info] context_0 - Bottleneck FPS: 3656.98 (layer: conv2_sd0)
-[2026-06-03 07:36:06.219] [default] [info] context_1 - Bottleneck FPS: 1194.98 (layer: conv42)
-[2026-06-03 07:36:06.219] [default] [info] Using Multi-context flow
-[2026-06-03 07:36:06.219] [default] [info] Resources optimization guidelines: Strategy -> GREEDY Objective -> MAX_FPS
-[2026-06-03 07:36:06.219] [default] [info] Resources optimization params: max_control_utilization=60%, max_compute_utilization=60%, max_compute_16bit_utilization=60%, max_memory_utilization (weights)=60%, max_input_aligner_utilization=60%, max_apu_utilization=60%
-[2026-06-03 07:36:06.631] [default] [info] Pre-Allocation Layers FPS: 
+[2026-06-03 13:34:55.093] [default] [info] context_0 - Bottleneck FPS: 3656.98 (layer: conv2_sd0)
+[2026-06-03 13:34:55.093] [default] [info] context_1 - Bottleneck FPS: 1194.98 (layer: conv42)
+[2026-06-03 13:34:55.094] [default] [info] Using Multi-context flow
+[2026-06-03 13:34:55.094] [default] [info] Resources optimization guidelines: Strategy -> GREEDY Objective -> MAX_FPS
+[2026-06-03 13:34:55.094] [default] [info] Resources optimization params: max_control_utilization=60%, max_compute_utilization=60%, max_compute_16bit_utilization=60%, max_memory_utilization (weights)=60%, max_input_aligner_utilization=60%, max_apu_utilization=60%
+[2026-06-03 13:34:55.497] [default] [info] Pre-Allocation Layers FPS: 
 context_0: 
 	input_layer1: 8137.86
 	conv_feature_splitter1_1: 4274.01
@@ -1682,172 +1682,172 @@ context_1:
 	auto_reshape_from_concat16_to_output_layer2: 37047.3
 	auto_reshape_from_conv76_to_output_layer4: 287977
 	auto_reshape_from_activation1_to_output_layer3: 1.04987e+06
-[2026-06-03 07:36:06.637] [default] [info] Partition passed at control_util 0.75.
-[2026-06-03 07:36:23.525] [default] [info] input_layer1: Pass
-[2026-06-03 07:36:23.528] [default] [info] conv_feature_splitter1_1: Pass
-[2026-06-03 07:36:23.529] [default] [info] conv_feature_splitter1_2: Pass
-[2026-06-03 07:36:23.529] [default] [info] conv_feature_splitter2_2: Pass
-[2026-06-03 07:36:23.529] [default] [info] conv5: Pass
-[2026-06-03 07:36:23.529] [default] [info] ew_add1: Pass
-[2026-06-03 07:36:23.530] [default] [info] conv_feature_splitter2_1: Pass
-[2026-06-03 07:36:23.530] [default] [info] conv6: Pass
-[2026-06-03 07:36:23.530] [default] [info] conv9: Pass
-[2026-06-03 07:36:23.530] [default] [info] concat1: Pass
-[2026-06-03 07:36:23.531] [default] [info] conv10: Pass
-[2026-06-03 07:36:23.532] [default] [info] ew_add2: Pass
-[2026-06-03 07:36:23.533] [default] [info] conv12: Pass
-[2026-06-03 07:36:23.533] [default] [info] conv_feature_splitter3_1: Pass
-[2026-06-03 07:36:23.534] [default] [info] conv11: Pass
-[2026-06-03 07:36:23.536] [default] [info] concat2: Pass
-[2026-06-03 07:36:23.536] [default] [info] conv_feature_splitter3_2: Pass
-[2026-06-03 07:36:23.536] [default] [info] conv13: Pass
-[2026-06-03 07:36:23.536] [default] [info] conv16: Pass
-[2026-06-03 07:36:23.537] [default] [info] ew_add3: Pass
-[2026-06-03 07:36:23.537] [default] [info] conv17: Pass
-[2026-06-03 07:36:23.538] [default] [info] ew_add5: Pass
-[2026-06-03 07:36:23.539] [default] [info] conv19: Pass
-[2026-06-03 07:36:23.539] [default] [info] ew_add4: Pass
-[2026-06-03 07:36:23.539] [default] [info] conv18: Pass
-[2026-06-03 07:36:23.540] [default] [info] concat3: Pass
-[2026-06-03 07:36:23.542] [default] [info] conv_feature_splitter4_2: Pass
-[2026-06-03 07:36:23.542] [default] [info] conv_feature_splitter4_1: Pass
-[2026-06-03 07:36:23.542] [default] [info] conv20: Pass
-[2026-06-03 07:36:23.545] [default] [info] conv23: Pass
-[2026-06-03 07:36:23.545] [default] [info] ew_add6: Pass
-[2026-06-03 07:36:23.545] [default] [info] conv24: Pass
-[2026-06-03 07:36:23.545] [default] [info] concat4: Pass
-[2026-06-03 07:36:23.545] [default] [info] conv26: Pass
-[2026-06-03 07:36:23.545] [default] [info] maxpool2: Pass
-[2026-06-03 07:36:23.546] [default] [info] conv25: Pass
-[2026-06-03 07:36:23.546] [default] [info] maxpool3: Pass
-[2026-06-03 07:36:23.547] [default] [info] maxpool1: Pass
-[2026-06-03 07:36:23.547] [default] [info] resize1: Pass
-[2026-06-03 07:36:23.547] [default] [info] concat5: Pass
-[2026-06-03 07:36:23.548] [default] [info] conv27: Pass
-[2026-06-03 07:36:23.549] [default] [info] concat6: Pass
-[2026-06-03 07:36:23.552] [default] [info] conv_feature_splitter5_1: Pass
-[2026-06-03 07:36:23.553] [default] [info] resize2: Pass
-[2026-06-03 07:36:23.553] [default] [info] concat7: Pass
-[2026-06-03 07:36:23.553] [default] [info] conv29: Pass
-[2026-06-03 07:36:23.553] [default] [info] conv_feature_splitter5_2: Pass
-[2026-06-03 07:36:23.553] [default] [info] conv30: Pass
-[2026-06-03 07:36:23.553] [default] [info] concat8: Pass
-[2026-06-03 07:36:23.553] [default] [info] conv_feature_splitter6_1: Pass
-[2026-06-03 07:36:23.555] [default] [info] conv_feature_splitter6_2: Pass
-[2026-06-03 07:36:23.555] [default] [info] conv33: Pass
-[2026-06-03 07:36:23.555] [default] [info] conv31: Pass
-[2026-06-03 07:36:23.556] [default] [info] conv2_sd1: Pass
-[2026-06-03 07:36:23.559] [default] [info] conv2_sd0: Pass
-[2026-06-03 07:36:23.559] [default] [info] conv2_sd2: Pass
-[2026-06-03 07:36:23.560] [default] [info] concat9: Pass
-[2026-06-03 07:36:23.560] [default] [info] conv34: Pass
-[2026-06-03 07:36:23.561] [default] [info] conv35: Pass
-[2026-06-03 07:36:23.561] [default] [info] conv2_sd3: Pass
-[2026-06-03 07:36:23.561] [default] [info] context_0_to_context_1_2: Pass
-[2026-06-03 07:36:23.562] [default] [info] conv1_sd0: Pass
-[2026-06-03 07:36:23.562] [default] [info] conv7_sd0: Pass
-[2026-06-03 07:36:23.562] [default] [info] auto_reshape_from_input_layer1_to_conv1_sd0-2: Pass
-[2026-06-03 07:36:23.562] [default] [info] context_0_to_context_1_0: Pass
-[2026-06-03 07:36:23.563] [default] [info] conv2_sdc: Pass
-[2026-06-03 07:36:23.563] [default] [info] conv1_sdc: Pass
-[2026-06-03 07:36:23.563] [default] [info] conv1_sd1: Pass
-[2026-06-03 07:36:23.564] [default] [info] conv1_sd2: Pass
-[2026-06-03 07:36:23.564] [default] [info] context_0_to_context_1_4: Pass
-[2026-06-03 07:36:23.564] [default] [info] conv21_d1: Pass
-[2026-06-03 07:36:23.564] [default] [info] conv7_sd1: Pass
-[2026-06-03 07:36:23.565] [default] [info] conv21_dc: Pass
-[2026-06-03 07:36:23.565] [default] [info] conv4_sd1: Pass
-[2026-06-03 07:36:23.565] [default] [info] conv21_d0: Pass
-[2026-06-03 07:36:23.566] [default] [info] conv4_sd0: Pass
-[2026-06-03 07:36:23.566] [default] [info] conv14_d0: Pass
-[2026-06-03 07:36:23.566] [default] [info] conv14_dc: Pass
-[2026-06-03 07:36:23.566] [default] [info] conv14_d1: Pass
-[2026-06-03 07:36:23.566] [default] [info] conv7_sdc: Pass
-[2026-06-03 07:36:23.567] [default] [info] conv4_sdc: Pass
-[2026-06-03 07:36:23.588] [default] [info] output_layer1: Pass
-[2026-06-03 07:36:23.588] [default] [info] output_layer2: Pass
-[2026-06-03 07:36:23.588] [default] [info] output_layer3: Pass
-[2026-06-03 07:36:23.588] [default] [info] output_layer4: Pass
-[2026-06-03 07:36:23.591] [default] [info] conv48: Pass
-[2026-06-03 07:36:23.591] [default] [info] deconv1_defuse_fi0: Pass
-[2026-06-03 07:36:23.591] [default] [info] sh_from_conv35_to_conv36-39: Pass
-[2026-06-03 07:36:23.591] [default] [info] conv40: Pass
-[2026-06-03 07:36:23.591] [default] [info] deconv1_defuse_conv: Pass
-[2026-06-03 07:36:23.591] [default] [info] concat10: Pass
-[2026-06-03 07:36:23.591] [default] [info] conv36: Pass
-[2026-06-03 07:36:23.592] [default] [info] conv_feature_splitter7_1: Pass
-[2026-06-03 07:36:23.595] [default] [info] conv_feature_splitter8_1: Pass
-[2026-06-03 07:36:23.595] [default] [info] conv_feature_splitter7_2: Pass
-[2026-06-03 07:36:23.595] [default] [info] concat12: Pass
-[2026-06-03 07:36:23.596] [default] [info] conv51: Pass
-[2026-06-03 07:36:23.596] [default] [info] conv52: Pass
-[2026-06-03 07:36:23.596] [default] [info] conv50: Pass
-[2026-06-03 07:36:23.596] [default] [info] conv_feature_splitter8_2: Pass
-[2026-06-03 07:36:23.597] [default] [info] concat11: Pass
-[2026-06-03 07:36:23.599] [default] [info] conv53: Pass
-[2026-06-03 07:36:23.601] [default] [info] concat13: Pass
-[2026-06-03 07:36:23.601] [default] [info] conv67: Pass
-[2026-06-03 07:36:23.601] [default] [info] conv73: Pass
-[2026-06-03 07:36:23.601] [default] [info] format_conversion7: Pass
-[2026-06-03 07:36:23.601] [default] [info] conv64: Pass
-[2026-06-03 07:36:23.601] [default] [info] conv66: Pass
-[2026-06-03 07:36:23.602] [default] [info] conv70: Pass
-[2026-06-03 07:36:23.602] [default] [info] conv65: Pass
-[2026-06-03 07:36:23.602] [default] [info] conv68: Pass
-[2026-06-03 07:36:23.605] [default] [info] conv71: Pass
-[2026-06-03 07:36:23.605] [default] [info] conv72: Pass
-[2026-06-03 07:36:23.605] [default] [info] conv57: Pass
-[2026-06-03 07:36:23.605] [default] [info] format_conversion8: Pass
-[2026-06-03 07:36:23.606] [default] [info] format_conversion9: Pass
-[2026-06-03 07:36:23.606] [default] [info] conv74: Pass
-[2026-06-03 07:36:23.606] [default] [info] conv69: Pass
-[2026-06-03 07:36:23.606] [default] [info] conv75: Pass
-[2026-06-03 07:36:23.606] [default] [info] conv54: Pass
-[2026-06-03 07:36:23.609] [default] [info] conv60: Pass
-[2026-06-03 07:36:23.611] [default] [info] conv61: Pass
-[2026-06-03 07:36:23.611] [default] [info] conv55: Pass
-[2026-06-03 07:36:23.611] [default] [info] format_conversion5: Pass
-[2026-06-03 07:36:23.611] [default] [info] format_conversion4: Pass
-[2026-06-03 07:36:23.611] [default] [info] conv58: Pass
-[2026-06-03 07:36:23.613] [default] [info] conv59: Pass
-[2026-06-03 07:36:23.613] [default] [info] format_conversion6: Pass
-[2026-06-03 07:36:23.614] [default] [info] conv62: Pass
-[2026-06-03 07:36:23.614] [default] [info] conv56: Pass
-[2026-06-03 07:36:23.614] [default] [info] conv37: Pass
-[2026-06-03 07:36:23.614] [default] [info] conv44: Pass
-[2026-06-03 07:36:23.615] [default] [info] conv41: Pass
-[2026-06-03 07:36:23.615] [default] [info] reduce_sum_softmax1: Pass
-[2026-06-03 07:36:23.616] [default] [info] ew_sub_softmax1: Pass
-[2026-06-03 07:36:23.616] [default] [info] reduce_max_softmax1: Pass
-[2026-06-03 07:36:23.616] [default] [info] format_conversion1: Pass
-[2026-06-03 07:36:23.616] [default] [info] concat14: Pass
-[2026-06-03 07:36:23.618] [default] [info] conv47_sd0: Pass
-[2026-06-03 07:36:23.618] [default] [info] activation1: Pass
-[2026-06-03 07:36:23.618] [default] [info] ew_mult_softmax1: Pass
-[2026-06-03 07:36:23.618] [default] [info] conv47_sdc: Pass
-[2026-06-03 07:36:23.618] [default] [info] auto_reshape_from_conv76_to_output_layer4: Pass
-[2026-06-03 07:36:23.619] [default] [info] context_0_to_context_1_in_3: Pass
-[2026-06-03 07:36:23.619] [default] [info] auto_reshape_from_activation1_to_output_layer3: Pass
-[2026-06-03 07:36:23.619] [default] [info] context_0_to_context_1_in_5: Pass
-[2026-06-03 07:36:23.619] [default] [info] auto_reshape_from_concat16_to_output_layer2: Pass
-[2026-06-03 07:36:23.619] [default] [info] auto_reshape_from_conv48_to_output_layer1: Pass
-[2026-06-03 07:36:23.619] [default] [info] format_conversion2: Pass
-[2026-06-03 07:36:23.620] [default] [info] format_conversion3: Pass
-[2026-06-03 07:36:23.623] [default] [info] conv47_sd2: Pass
-[2026-06-03 07:36:23.623] [default] [info] conv47_sd3: Pass
-[2026-06-03 07:36:23.623] [default] [info] conv46: Pass
-[2026-06-03 07:36:23.623] [default] [info] conv76: Pass
-[2026-06-03 07:36:23.623] [default] [info] context_0_to_context_1_in_1: Pass
-[2026-06-03 07:36:23.623] [default] [info] conv42: Pass
-[2026-06-03 07:36:23.624] [default] [info] conv38: Pass
-[2026-06-03 07:36:23.624] [default] [info] conv43: Pass
-[2026-06-03 07:36:23.624] [default] [info] concat16: Pass
-[2026-06-03 07:36:23.625] [default] [info] concat15: Pass
-[2026-06-03 07:36:23.625] [default] [info] conv47_sd1: Pass
-[2026-06-03 07:36:23.626] [default] [info] conv45: Pass
-[2026-06-03 07:36:23.627] [default] [info] conv39: Pass
-[2026-06-03 07:36:23.627] [default] [info] Solving the allocation (Mapping), time per context: 59m 59s
-[2026-06-03 07:36:23.793] [default] [info] Resolve-prepost Buffers context_0 buffers:
+[2026-06-03 13:34:55.503] [default] [info] Partition passed at control_util 0.75.
+[2026-06-03 13:35:12.328] [default] [info] input_layer1: Pass
+[2026-06-03 13:35:12.330] [default] [info] conv_feature_splitter1_1: Pass
+[2026-06-03 13:35:12.332] [default] [info] conv_feature_splitter1_2: Pass
+[2026-06-03 13:35:12.332] [default] [info] conv5: Pass
+[2026-06-03 13:35:12.332] [default] [info] ew_add1: Pass
+[2026-06-03 13:35:12.332] [default] [info] concat1: Pass
+[2026-06-03 13:35:12.334] [default] [info] conv6: Pass
+[2026-06-03 13:35:12.335] [default] [info] conv_feature_splitter2_1: Pass
+[2026-06-03 13:35:12.335] [default] [info] conv_feature_splitter2_2: Pass
+[2026-06-03 13:35:12.335] [default] [info] ew_add2: Pass
+[2026-06-03 13:35:12.336] [default] [info] conv10: Pass
+[2026-06-03 13:35:12.336] [default] [info] conv9: Pass
+[2026-06-03 13:35:12.337] [default] [info] conv11: Pass
+[2026-06-03 13:35:12.338] [default] [info] conv12: Pass
+[2026-06-03 13:35:12.339] [default] [info] ew_add3: Pass
+[2026-06-03 13:35:12.341] [default] [info] conv13: Pass
+[2026-06-03 13:35:12.341] [default] [info] conv_feature_splitter3_1: Pass
+[2026-06-03 13:35:12.341] [default] [info] concat2: Pass
+[2026-06-03 13:35:12.342] [default] [info] conv_feature_splitter3_2: Pass
+[2026-06-03 13:35:12.342] [default] [info] ew_add4: Pass
+[2026-06-03 13:35:12.342] [default] [info] conv17: Pass
+[2026-06-03 13:35:12.343] [default] [info] conv16: Pass
+[2026-06-03 13:35:12.344] [default] [info] ew_add5: Pass
+[2026-06-03 13:35:12.344] [default] [info] concat3: Pass
+[2026-06-03 13:35:12.345] [default] [info] conv18: Pass
+[2026-06-03 13:35:12.347] [default] [info] conv19: Pass
+[2026-06-03 13:35:12.347] [default] [info] conv23: Pass
+[2026-06-03 13:35:12.347] [default] [info] conv24: Pass
+[2026-06-03 13:35:12.348] [default] [info] conv20: Pass
+[2026-06-03 13:35:12.348] [default] [info] ew_add6: Pass
+[2026-06-03 13:35:12.349] [default] [info] conv_feature_splitter4_1: Pass
+[2026-06-03 13:35:12.349] [default] [info] conv_feature_splitter4_2: Pass
+[2026-06-03 13:35:12.350] [default] [info] concat4: Pass
+[2026-06-03 13:35:12.350] [default] [info] conv26: Pass
+[2026-06-03 13:35:12.350] [default] [info] concat5: Pass
+[2026-06-03 13:35:12.350] [default] [info] maxpool2: Pass
+[2026-06-03 13:35:12.352] [default] [info] conv25: Pass
+[2026-06-03 13:35:12.352] [default] [info] maxpool1: Pass
+[2026-06-03 13:35:12.352] [default] [info] maxpool3: Pass
+[2026-06-03 13:35:12.352] [default] [info] conv27: Pass
+[2026-06-03 13:35:12.353] [default] [info] resize1: Pass
+[2026-06-03 13:35:12.358] [default] [info] concat6: Pass
+[2026-06-03 13:35:12.358] [default] [info] conv_feature_splitter5_1: Pass
+[2026-06-03 13:35:12.358] [default] [info] conv29: Pass
+[2026-06-03 13:35:12.358] [default] [info] conv30: Pass
+[2026-06-03 13:35:12.359] [default] [info] conv31: Pass
+[2026-06-03 13:35:12.359] [default] [info] conv_feature_splitter5_2: Pass
+[2026-06-03 13:35:12.359] [default] [info] concat8: Pass
+[2026-06-03 13:35:12.360] [default] [info] conv_feature_splitter6_1: Pass
+[2026-06-03 13:35:12.360] [default] [info] conv33: Pass
+[2026-06-03 13:35:12.360] [default] [info] resize2: Pass
+[2026-06-03 13:35:12.361] [default] [info] conv_feature_splitter6_2: Pass
+[2026-06-03 13:35:12.362] [default] [info] conv34: Pass
+[2026-06-03 13:35:12.363] [default] [info] conv21_dc: Pass
+[2026-06-03 13:35:12.363] [default] [info] conv2_sd3: Pass
+[2026-06-03 13:35:12.363] [default] [info] conv1_sd0: Pass
+[2026-06-03 13:35:12.364] [default] [info] conv1_sd2: Pass
+[2026-06-03 13:35:12.364] [default] [info] auto_reshape_from_input_layer1_to_conv1_sd0-2: Pass
+[2026-06-03 13:35:12.364] [default] [info] conv2_sd2: Pass
+[2026-06-03 13:35:12.365] [default] [info] conv7_sd0: Pass
+[2026-06-03 13:35:12.365] [default] [info] context_0_to_context_1_2: Pass
+[2026-06-03 13:35:12.365] [default] [info] context_0_to_context_1_0: Pass
+[2026-06-03 13:35:12.365] [default] [info] conv21_d1: Pass
+[2026-06-03 13:35:12.366] [default] [info] conv21_d0: Pass
+[2026-06-03 13:35:12.367] [default] [info] conv4_sd0: Pass
+[2026-06-03 13:35:12.367] [default] [info] conv7_sdc: Pass
+[2026-06-03 13:35:12.367] [default] [info] conv2_sdc: Pass
+[2026-06-03 13:35:12.368] [default] [info] conv1_sd1: Pass
+[2026-06-03 13:35:12.368] [default] [info] context_0_to_context_1_4: Pass
+[2026-06-03 13:35:12.368] [default] [info] concat7: Pass
+[2026-06-03 13:35:12.369] [default] [info] conv2_sd1: Pass
+[2026-06-03 13:35:12.369] [default] [info] concat9: Pass
+[2026-06-03 13:35:12.369] [default] [info] conv35: Pass
+[2026-06-03 13:35:12.369] [default] [info] conv14_d1: Pass
+[2026-06-03 13:35:12.370] [default] [info] conv1_sdc: Pass
+[2026-06-03 13:35:12.371] [default] [info] conv14_d0: Pass
+[2026-06-03 13:35:12.371] [default] [info] conv4_sd1: Pass
+[2026-06-03 13:35:12.371] [default] [info] conv4_sdc: Pass
+[2026-06-03 13:35:12.372] [default] [info] conv7_sd1: Pass
+[2026-06-03 13:35:12.372] [default] [info] conv14_dc: Pass
+[2026-06-03 13:35:12.372] [default] [info] conv2_sd0: Pass
+[2026-06-03 13:35:12.391] [default] [info] output_layer1: Pass
+[2026-06-03 13:35:12.391] [default] [info] output_layer2: Pass
+[2026-06-03 13:35:12.391] [default] [info] output_layer3: Pass
+[2026-06-03 13:35:12.391] [default] [info] output_layer4: Pass
+[2026-06-03 13:35:12.394] [default] [info] deconv1_defuse_fi0: Pass
+[2026-06-03 13:35:12.394] [default] [info] conv48: Pass
+[2026-06-03 13:35:12.394] [default] [info] sh_from_conv35_to_conv36-39: Pass
+[2026-06-03 13:35:12.394] [default] [info] deconv1_defuse_conv: Pass
+[2026-06-03 13:35:12.395] [default] [info] conv36: Pass
+[2026-06-03 13:35:12.395] [default] [info] conv40: Pass
+[2026-06-03 13:35:12.396] [default] [info] concat10: Pass
+[2026-06-03 13:35:12.396] [default] [info] conv_feature_splitter7_2: Pass
+[2026-06-03 13:35:12.397] [default] [info] conv51: Pass
+[2026-06-03 13:35:12.397] [default] [info] conv_feature_splitter7_1: Pass
+[2026-06-03 13:35:12.397] [default] [info] conv50: Pass
+[2026-06-03 13:35:12.398] [default] [info] concat11: Pass
+[2026-06-03 13:35:12.401] [default] [info] conv52: Pass
+[2026-06-03 13:35:12.401] [default] [info] conv_feature_splitter8_1: Pass
+[2026-06-03 13:35:12.401] [default] [info] conv_feature_splitter8_2: Pass
+[2026-06-03 13:35:12.401] [default] [info] concat12: Pass
+[2026-06-03 13:35:12.402] [default] [info] conv65: Pass
+[2026-06-03 13:35:12.402] [default] [info] conv64: Pass
+[2026-06-03 13:35:12.402] [default] [info] conv53: Pass
+[2026-06-03 13:35:12.402] [default] [info] concat13: Pass
+[2026-06-03 13:35:12.406] [default] [info] conv74: Pass
+[2026-06-03 13:35:12.406] [default] [info] conv67: Pass
+[2026-06-03 13:35:12.407] [default] [info] format_conversion8: Pass
+[2026-06-03 13:35:12.407] [default] [info] conv70: Pass
+[2026-06-03 13:35:12.407] [default] [info] conv71: Pass
+[2026-06-03 13:35:12.407] [default] [info] conv73: Pass
+[2026-06-03 13:35:12.408] [default] [info] conv66: Pass
+[2026-06-03 13:35:12.408] [default] [info] conv69: Pass
+[2026-06-03 13:35:12.408] [default] [info] format_conversion7: Pass
+[2026-06-03 13:35:12.409] [default] [info] conv68: Pass
+[2026-06-03 13:35:12.411] [default] [info] conv72: Pass
+[2026-06-03 13:35:12.411] [default] [info] conv60: Pass
+[2026-06-03 13:35:12.411] [default] [info] conv54: Pass
+[2026-06-03 13:35:12.412] [default] [info] conv57: Pass
+[2026-06-03 13:35:12.412] [default] [info] format_conversion9: Pass
+[2026-06-03 13:35:12.412] [default] [info] format_conversion4: Pass
+[2026-06-03 13:35:12.412] [default] [info] conv75: Pass
+[2026-06-03 13:35:12.414] [default] [info] conv55: Pass
+[2026-06-03 13:35:12.415] [default] [info] format_conversion6: Pass
+[2026-06-03 13:35:12.415] [default] [info] conv58: Pass
+[2026-06-03 13:35:12.416] [default] [info] conv37: Pass
+[2026-06-03 13:35:12.416] [default] [info] conv61: Pass
+[2026-06-03 13:35:12.416] [default] [info] conv56: Pass
+[2026-06-03 13:35:12.416] [default] [info] format_conversion5: Pass
+[2026-06-03 13:35:12.416] [default] [info] conv59: Pass
+[2026-06-03 13:35:12.417] [default] [info] conv62: Pass
+[2026-06-03 13:35:12.417] [default] [info] conv41: Pass
+[2026-06-03 13:35:12.418] [default] [info] conv44: Pass
+[2026-06-03 13:35:12.419] [default] [info] format_conversion1: Pass
+[2026-06-03 13:35:12.419] [default] [info] reduce_max_softmax1: Pass
+[2026-06-03 13:35:12.420] [default] [info] concat14: Pass
+[2026-06-03 13:35:12.420] [default] [info] ew_sub_softmax1: Pass
+[2026-06-03 13:35:12.423] [default] [info] reduce_sum_softmax1: Pass
+[2026-06-03 13:35:12.423] [default] [info] conv38: Pass
+[2026-06-03 13:35:12.423] [default] [info] conv42: Pass
+[2026-06-03 13:35:12.423] [default] [info] conv76: Pass
+[2026-06-03 13:35:12.423] [default] [info] ew_mult_softmax1: Pass
+[2026-06-03 13:35:12.423] [default] [info] concat15: Pass
+[2026-06-03 13:35:12.424] [default] [info] format_conversion2: Pass
+[2026-06-03 13:35:12.424] [default] [info] activation1: Pass
+[2026-06-03 13:35:12.425] [default] [info] conv45: Pass
+[2026-06-03 13:35:12.425] [default] [info] conv39: Pass
+[2026-06-03 13:35:12.426] [default] [info] conv43: Pass
+[2026-06-03 13:35:12.428] [default] [info] conv46: Pass
+[2026-06-03 13:35:12.428] [default] [info] format_conversion3: Pass
+[2026-06-03 13:35:12.430] [default] [info] concat16: Pass
+[2026-06-03 13:35:12.431] [default] [info] auto_reshape_from_concat16_to_output_layer2: Pass
+[2026-06-03 13:35:12.431] [default] [info] auto_reshape_from_conv76_to_output_layer4: Pass
+[2026-06-03 13:35:12.431] [default] [info] conv47_sd1: Pass
+[2026-06-03 13:35:12.431] [default] [info] conv47_sdc: Pass
+[2026-06-03 13:35:12.432] [default] [info] auto_reshape_from_conv48_to_output_layer1: Pass
+[2026-06-03 13:35:12.432] [default] [info] auto_reshape_from_activation1_to_output_layer3: Pass
+[2026-06-03 13:35:12.432] [default] [info] context_0_to_context_1_in_3: Pass
+[2026-06-03 13:35:12.432] [default] [info] conv47_sd2: Pass
+[2026-06-03 13:35:12.432] [default] [info] conv47_sd3: Pass
+[2026-06-03 13:35:12.433] [default] [info] conv47_sd0: Pass
+[2026-06-03 13:35:12.433] [default] [info] context_0_to_context_1_in_1: Pass
+[2026-06-03 13:35:12.433] [default] [info] context_0_to_context_1_in_5: Pass
+[2026-06-03 13:35:12.434] [default] [info] Solving the allocation (Mapping), time per context: 59m 59s
+[2026-06-03 13:35:12.600] [default] [info] Resolve-prepost Buffers context_0 buffers:
 +-----------------------------------------------+-----------------------------------------------+----------------------------+
 | Src                                           | Dst                                           | Max buffers                |
 +-----------------------------------------------+-----------------------------------------------+----------------------------+
@@ -1973,7 +1973,7 @@ context_1:
 | conv35                                        | output_from_cluster_unknown_167_i0            | 2 (L3 memory cuts: 1)      |
 | output_from_cluster_unknown_167_i0            | context_0_to_context_1_4                      | 1 (L3 memory cuts: 1)      |
 +-----------------------------------------------+-----------------------------------------------+----------------------------+
-[2026-06-03 07:36:23.911] [default] [info] Resolve-prepost Buffers context_1 buffers:
+[2026-06-03 13:35:12.715] [default] [info] Resolve-prepost Buffers context_1 buffers:
 +------------------------------------------------+------------------------------------------------+----------------------------+
 | Src                                            | Dst                                            | Max buffers                |
 +------------------------------------------------+------------------------------------------------+----------------------------+
@@ -2089,7 +2089,7 @@ context_1:
 | auto_reshape_from_concat16_to_output_layer2    | output_from_prepost_183_i0                     | 2 (L4 memory cuts: 1)      |
 | output_from_prepost_183_i0                     | output_layer2                                  | 2 (L4 memory cuts: 1)      |
 +------------------------------------------------+------------------------------------------------+----------------------------+
-[2026-06-03 07:36:23.983] [default] [info] Context:0/0 Iteration 0: Mapping prepost...          
+[2026-06-03 13:35:12.787] [default] [info] Context:0/0 Iteration 0: Mapping prepost...          
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
  worker1                                                                                                  
@@ -2097,7 +2097,7 @@ context_1:
  worker3                                                                                                  
 
   00:00
-[2026-06-03 07:36:25.904] [default] [info] Context:0/1 Iteration 0: Trying parallel splits...   
+[2026-06-03 13:35:14.649] [default] [info] Context:0/1 Iteration 0: Trying parallel splits...   
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0                                                                                                  
  worker1                                                                                                  
@@ -2105,7 +2105,7 @@ context_1:
  worker3                                                                                                  
 
   00:02
-[2026-06-03 07:36:26.175] [default] [info] Context:0/1 Iteration 0: Trying parallel splits...   
+[2026-06-03 13:35:14.919] [default] [info] Context:0/1 Iteration 0: Trying parallel splits...   
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0                                                                                                  
  worker1                                                                                                  
@@ -2113,7 +2113,7 @@ context_1:
  worker3  *          *          *          *          *          *          *          *          V       
 
   00:02
-[2026-06-03 07:36:26.222] [default] [info] Context:0/1 Iteration 0: Trying parallel splits...   
+[2026-06-03 13:35:14.966] [default] [info] Context:0/1 Iteration 0: Trying parallel splits...   
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0                                                                                                  
  worker1  *          *          *          *          *          *          *          *          V       
@@ -2121,7 +2121,7 @@ context_1:
  worker3  *          *          *          *          *          *          *          *          V       
 
   00:02
-[2026-06-03 07:36:26.234] [default] [info] Context:0/1 Iteration 0: Trying parallel splits...   
+[2026-06-03 13:35:14.978] [default] [info] Context:0/1 Iteration 0: Trying parallel splits...   
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0                                                                                                  
  worker1  *          *          *          *          *          *          *          *          V       
@@ -2129,7 +2129,7 @@ context_1:
  worker3  *          *          *          *          *          *          *          *          V       
 
   00:02
-[2026-06-03 07:36:26.253] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:14.999] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
  worker1  *          *          *          *          *          *          *          *          V       
@@ -2137,7 +2137,7 @@ context_1:
  worker3  *          *          *          *          *          *          *          *          V       
 
   00:02
-[2026-06-03 07:36:26.318] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:15.064] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
  worker1  *          *          *          *          *          *          *          *          V       
@@ -2145,7 +2145,15 @@ context_1:
  worker3  *          *          *          *          *          *          *          *          V       
 
   00:02
-[2026-06-03 07:36:26.330] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:15.078] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+          cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
+ worker0  *          *          *          *          *          *          *          *          V       
+ worker1  *          *          *          *          *          *          *          *          V       
+ worker2  *          *          *          *          *          *          *          *          V       
+ worker3  *          *          *          *          *          *          V          *          V       
+
+  00:02
+[2026-06-03 13:35:15.091] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
  worker1  *          *          *          *          *          *          *          *          V       
@@ -2153,15 +2161,7 @@ context_1:
  worker3  *          V          *          *          *          *          V          *          V       
 
   00:02
-[2026-06-03 07:36:26.343] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
-          cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
- worker0  *          *          *          *          *          *          *          *          V       
- worker1  *          *          *          *          *          *          *          *          V       
- worker2  *          *          *          *          *          *          *          *          V       
- worker3  *          V          V          *          V          *          V          *          V       
-
-  00:02
-[2026-06-03 07:36:26.354] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:15.103] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
  worker1  *          *          *          *          *          *          *          *          V       
@@ -2169,7 +2169,7 @@ context_1:
  worker3  V          V          V          *          V          *          V          *          V       
 
   00:02
-[2026-06-03 07:36:26.368] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:15.120] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
  worker1  *          *          *          *          *          *          *          *          V       
@@ -2177,7 +2177,7 @@ context_1:
  worker3  V          V          V          *          V          *          V          *          V       
 
   00:02
-[2026-06-03 07:36:26.383] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:15.136] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
  worker1  *          *          *          *          *          *          *          *          V       
@@ -2185,7 +2185,7 @@ context_1:
  worker3  V          V          V          *          V          *          V          *          V       
 
   00:02
-[2026-06-03 07:36:26.599] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:15.345] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
  worker1  *          *          *          *          *          *          *          *          V       
@@ -2193,7 +2193,7 @@ context_1:
  worker3  V          V          V          *          V          *          V          *          V       
 
   00:02
-[2026-06-03 07:36:26.618] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:15.360] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
  worker1  *          V          *          *          *          *          *          *          V       
@@ -2201,31 +2201,31 @@ context_1:
  worker3  V          V          V          *          V          *          V          *          V       
 
   00:02
-[2026-06-03 07:36:26.629] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:15.373] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+          cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
+ worker0  *          *          *          *          *          *          *          *          V       
+ worker1  *          V          *          *          *          *          *          V          V       
+ worker2  *          *          *          *          *          *          *          *          V       
+ worker3  V          V          V          *          V          *          V          *          V       
+
+  00:02
+[2026-06-03 13:35:15.389] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
  worker1  *          V          V          *          *          *          *          V          V       
  worker2  *          *          *          *          *          *          *          *          V       
  worker3  V          V          V          *          V          *          V          *          V       
 
-  00:03
-[2026-06-03 07:36:26.645] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
-          cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
- worker0  *          *          *          *          *          *          *          *          V       
- worker1  *          V          V          *          *          *          *          V          V       
- worker2  *          *          *          *          *          *          *          *          V       
- worker3  V          V          V          *          V          *          V          *          V       
-
-  00:03
-[2026-06-03 07:36:26.677] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+  00:02
+[2026-06-03 13:35:15.414] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
  worker1  *          V          V          *          V          *          *          V          V       
  worker2  *          *          *          *          *          *          *          *          V       
  worker3  V          V          V          *          V          *          V          *          V       
 
-  00:03
-[2026-06-03 07:36:26.793] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+  00:02
+[2026-06-03 13:35:15.555] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
  worker1  *          V          V          *          V          V          *          V          V       
@@ -2233,7 +2233,7 @@ context_1:
  worker3  V          V          V          *          V          *          V          *          V       
 
   00:03
-[2026-06-03 07:36:27.063] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:15.798] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
  worker1  *          V          V          *          V          V          *          V          V       
@@ -2241,7 +2241,7 @@ context_1:
  worker3  V          V          V          *          V          *          V          *          V       
 
   00:03
-[2026-06-03 07:36:27.079] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:15.828] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
  worker1  *          V          V          *          V          V          *          V          V       
@@ -2249,7 +2249,7 @@ context_1:
  worker3  V          V          V          *          V          *          V          *          V       
 
   00:03
-[2026-06-03 07:36:27.096] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:15.845] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
  worker1  *          V          V          *          V          V          *          V          V       
@@ -2257,7 +2257,7 @@ context_1:
  worker3  V          V          V          *          V          *          V          *          V       
 
   00:03
-[2026-06-03 07:36:27.110] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:15.857] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
  worker1  *          V          V          *          V          V          *          V          V       
@@ -2265,7 +2265,7 @@ context_1:
  worker3  V          V          V          *          V          *          V          *          V       
 
   00:03
-[2026-06-03 07:36:27.122] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:15.873] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
  worker1  *          V          V          *          V          V          *          V          V       
@@ -2273,7 +2273,7 @@ context_1:
  worker3  V          V          V          *          V          *          V          *          V       
 
   00:03
-[2026-06-03 07:36:27.156] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:15.922] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
  worker1  *          V          V          *          V          V          *          V          V       
@@ -2281,7 +2281,7 @@ context_1:
  worker3  V          V          V          *          V          *          V          *          V       
 
   00:03
-[2026-06-03 07:36:27.172] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:15.936] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          V          V       
  worker1  *          V          V          *          V          V          *          V          V       
@@ -2289,23 +2289,15 @@ context_1:
  worker3  V          V          V          *          V          *          V          *          V       
 
   00:03
-[2026-06-03 07:36:27.186] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:15.961] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
- worker0  *          V          V          *          *          *          *          V          V       
- worker1  *          V          V          *          V          V          *          V          V       
- worker2  *          V          *          V          V          *          *          V          V       
- worker3  V          V          V          *          V          *          V          *          V       
-
-  00:03
-[2026-06-03 07:36:27.201] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
-          cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
- worker0  *          V          V          *          *          *          *          V          V       
+ worker0  *          *          *          *          *          *          *          V          V       
  worker1  *          V          V          *          V          V          *          V          V       
  worker2  *          V          V          V          V          *          *          V          V       
  worker3  V          V          V          *          V          *          V          *          V       
 
   00:03
-[2026-06-03 07:36:27.215] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:15.976] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          V          V          *          *          V          *          V          V       
  worker1  *          V          V          *          V          V          *          V          V       
@@ -2313,103 +2305,111 @@ context_1:
  worker3  V          V          V          *          V          *          V          *          V       
 
   00:03
-[2026-06-03 07:36:27.229] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:15.993] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
- worker0  *          V          V          *          *          V          *          V          V       
+ worker0  V          V          V          *          *          V          *          V          V       
  worker1  *          V          V          *          V          V          *          V          V       
  worker2  *          V          V          V          V          *          *          V          V       
  worker3  V          V          V          *          V          *          V          *          V       
 
   00:03
-[2026-06-03 07:36:27.241] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:16.010] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
- worker0  *          V          V          *          *          V          *          V          V       
+ worker0  V          V          V          *          *          V          *          V          V       
  worker1  *          V          V          *          V          V          *          V          V       
- worker2  *          V          V          V          V          V          *          V          V       
+ worker2  *          V          V          V          V          *          *          V          V       
  worker3  V          V          V          *          V          *          V          *          V       
 
   00:03
-[2026-06-03 07:36:27.254] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:16.025] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
- worker0  *          V          V          *          *          V          *          V          V       
+ worker0  V          V          V          *          *          V          *          V          V       
  worker1  *          V          V          *          V          V          *          V          V       
- worker2  *          V          V          V          V          V          *          V          V       
+ worker2  *          V          V          V          V          *          *          V          V       
  worker3  V          V          V          *          V          *          V          *          V       
 
   00:03
-[2026-06-03 07:36:28.127] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:16.045] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
- worker0  *          V          V          *          *          V          *          V          V       
+ worker0  V          V          V          *          *          V          *          V          V       
  worker1  *          V          V          *          V          V          *          V          V       
- worker2  *          V          V          V          V          V          *          V          V       
+ worker2  *          V          V          V          V          *          *          V          V       
+ worker3  V          V          V          *          V          *          V          *          V       
+
+  00:03
+[2026-06-03 13:35:17.152] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+          cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
+ worker0  V          V          V          *          *          V          *          V          V       
+ worker1  *          V          V          *          V          V          *          V          V       
+ worker2  *          V          V          V          V          *          *          V          V       
  worker3  V          V          V          V          V          *          V          *          V       
 
   00:04
-[2026-06-03 07:36:28.207] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:17.242] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
- worker0  *          V          V          *          *          V          *          V          V       
+ worker0  V          V          V          *          *          V          *          V          V       
  worker1  *          V          V          *          V          V          *          V          V       
- worker2  *          V          V          V          V          V          *          V          V       
+ worker2  *          V          V          V          V          *          *          V          V       
  worker3  V          V          V          V          V          V          V          *          V       
 
   00:04
-[2026-06-03 07:36:28.638] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:17.771] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
- worker0  *          V          V          *          *          V          *          V          V       
+ worker0  V          V          V          *          *          V          *          V          V       
  worker1  *          V          V          V          V          V          *          V          V       
- worker2  *          V          V          V          V          V          *          V          V       
+ worker2  *          V          V          V          V          *          *          V          V       
  worker3  V          V          V          V          V          V          V          *          V       
 
   00:05
-[2026-06-03 07:36:28.862] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:17.926] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
- worker0  *          V          V          *          *          V          *          V          V       
+ worker0  V          V          V          *          *          V          *          V          V       
  worker1  V          V          V          V          V          V          *          V          V       
- worker2  *          V          V          V          V          V          *          V          V       
+ worker2  *          V          V          V          V          *          *          V          V       
  worker3  V          V          V          V          V          V          V          *          V       
 
   00:05
-[2026-06-03 07:36:28.920] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:17.949] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
- worker0  *          V          V          *          *          V          *          V          V       
+ worker0  V          V          V          *          *          V          *          V          V       
  worker1  V          V          V          V          V          V          V          V          V       
- worker2  *          V          V          V          V          V          *          V          V       
+ worker2  *          V          V          V          V          *          *          V          V       
  worker3  V          V          V          V          V          V          V          *          V       
 
   00:05
-[2026-06-03 07:36:29.073] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:18.101] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          V          V          *          V          *          V          V       
  worker1  V          V          V          V          V          V          V          V          V       
- worker2  *          V          V          V          V          V          *          V          V       
+ worker2  *          V          V          V          V          *          *          V          V       
  worker3  V          V          V          V          V          V          V          *          V       
 
   00:05
-[2026-06-03 07:36:29.139] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:18.314] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          V          V          *          V          V          V          V       
  worker1  V          V          V          V          V          V          V          V          V       
- worker2  *          V          V          V          V          V          *          V          V       
+ worker2  *          V          V          V          V          *          *          V          V       
  worker3  V          V          V          V          V          V          V          *          V       
 
   00:05
-[2026-06-03 07:36:29.351] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
-          cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
- worker0  V          V          V          V          *          V          V          V          V       
- worker1  V          V          V          V          V          V          V          V          V       
- worker2  V          V          V          V          V          V          *          V          V       
- worker3  V          V          V          V          V          V          V          *          V       
-
-  00:05
-[2026-06-03 07:36:29.940] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:18.340] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          V          V          *          V          V          V          V       
  worker1  V          V          V          V          V          V          V          V          V       
  worker2  V          V          V          V          V          V          *          V          V       
- worker3  V          V          V          V          V          V          V          V          V       
+ worker3  V          V          V          V          V          V          V          *          V       
+
+  00:05
+[2026-06-03 13:35:19.055] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+          cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
+ worker0  V          V          V          V          *          V          V          V          V       
+ worker1  V          V          V          V          V          V          V          V          V       
+ worker2  V          V          V          V          V          V          V          V          V       
+ worker3  V          V          V          V          V          V          V          *          V       
 
   00:06
-[2026-06-03 07:36:30.014] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:19.244] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          V          V          *          V          V          V          V       
  worker1  V          V          V          V          V          V          V          V          V       
@@ -2417,15 +2417,15 @@ context_1:
  worker3  V          V          V          V          V          V          V          V          V       
 
   00:06
-[2026-06-03 07:36:30.029] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:19.457] [default] [info] Context:0/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          V          V          V          V          V          V          V       
  worker1  V          V          V          V          V          V          V          V          V       
  worker2  V          V          V          V          V          V          V          V          V       
  worker3  V          V          V          V          V          V          V          V          V       
 
-  00:06
-[2026-06-03 07:36:30.060] [default] [info] Post-Split Resources for context_0, iteration 1 (CP)
+  00:07
+[2026-06-03 13:35:19.487] [default] [info] Post-Split Resources for context_0, iteration 1 (CP)
 +-----------------------------------------------+-------------+-----------------------+-----------------------+----------------+-----+-----+
 | Node                                          | Subclusters | L3 Weight Memory Cuts | L3 Output Memory Cuts | L4 Memory Cuts | IBs | OBs |
 +-----------------------------------------------+-------------+-----------------------+-----------------------+----------------+-----+-----+
@@ -2613,7 +2613,7 @@ context_1:
 | context_0_to_context_1_0                      | 0           | 0                     | 0                     | 0.500          | 0   | 0   |
 +-----------------------------------------------+-------------+-----------------------+-----------------------+----------------+-----+-----+
 TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 (32.9102%), L3 Output memory cuts: 235 (22.9492%), L3 total cuts: 572 (55.8594%), L4 memory cuts: 2 (7.14286%), IBs: 55 (85.9375%), OBs: 44 (68.75%)
-[2026-06-03 07:36:30.075] [default] [info] Post-Split Buffers for context_0, iteration 1 (CP) buffers:
+[2026-06-03 13:35:19.502] [default] [info] Post-Split Buffers for context_0, iteration 1 (CP) buffers:
 +-----------------------------------------------+-----------------------------------------------+----------------------------+
 | Src                                           | Dst                                           | Max buffers                |
 +-----------------------------------------------+-----------------------------------------------+----------------------------+
@@ -2833,7 +2833,7 @@ TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 
 | output_from_cluster_1_252_i1                  | context_0_to_context_1_2                      | 2 (L3 memory cuts: 1)      |
 | output_from_cluster_5_245_i1                  | context_0_to_context_1_0                      | 2 (L3 memory cuts: 1)      |
 +-----------------------------------------------+-----------------------------------------------+----------------------------+
-[2026-06-03 07:36:30.318] [default] [info] Post-Final-Split Resources for context_0, iteration 4
+[2026-06-03 13:35:19.744] [default] [info] Post-Final-Split Resources for context_0, iteration 4
 +-----------------------------------------------+-------------+-----------------------+-----------------------+----------------+-----+-----+
 | Node                                          | Subclusters | L3 Weight Memory Cuts | L3 Output Memory Cuts | L4 Memory Cuts | IBs | OBs |
 +-----------------------------------------------+-------------+-----------------------+-----------------------+----------------+-----+-----+
@@ -3021,15 +3021,15 @@ TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 
 | context_0_to_context_1_0                      | 0           | 0                     | 0                     | 0.500          | 0   | 0   |
 +-----------------------------------------------+-------------+-----------------------+-----------------------+----------------+-----+-----+
 TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 (32.9102%), L3 Output memory cuts: 235 (22.9492%), L3 total cuts: 572 (55.8594%), L4 memory cuts: 2 (7.14286%), IBs: 55 (85.9375%), OBs: 44 (68.75%)
-[2026-06-03 07:36:31.457] [default] [info] Context:1/1 Iteration 0: Trying parallel splits...   
+[2026-06-03 13:35:20.858] [default] [info] Context:1/1 Iteration 0: Trying parallel splits...   
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0                                                                                                  
  worker1                                                                                                  
  worker2                                                                                                  
  worker3                                                                                                  
 
-  00:07
-[2026-06-03 07:36:31.657] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+  00:08
+[2026-06-03 13:35:21.056] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
  worker1                                                                                                  
@@ -3037,7 +3037,7 @@ TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 
  worker3                                                                                                  
 
   00:08
-[2026-06-03 07:36:31.668] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.069] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
  worker1  *          *          *          *          *          *          *          *          V       
@@ -3045,7 +3045,7 @@ TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 
  worker3                                                                                                  
 
   00:08
-[2026-06-03 07:36:31.681] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.081] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
  worker1  *          *          *          *          *          *          *          *          V       
@@ -3053,7 +3053,7 @@ TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 
  worker3  *          *          *          *          *          *          *          *          V       
 
   00:08
-[2026-06-03 07:36:31.716] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.115] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
  worker1  *          *          *          *          *          *          *          *          V       
@@ -3061,47 +3061,39 @@ TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 
  worker3  *          *          *          *          *          *          *          *          V       
 
   00:08
-[2026-06-03 07:36:31.729] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.128] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
- worker1  V          V          *          *          *          *          *          *          V       
+ worker1  V          V          *          *          *          *          *          V          V       
  worker2                                                                                                  
  worker3  *          *          *          *          *          *          *          *          V       
 
   00:08
-[2026-06-03 07:36:31.746] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.140] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
- worker1  V          V          *          *          *          *          *          *          V       
+ worker1  V          V          *          *          *          *          *          V          V       
  worker2                                                                                                  
- worker3  *          V          *          *          *          *          *          *          V       
+ worker3  *          V          V          *          *          *          *          *          V       
 
   00:08
-[2026-06-03 07:36:31.758] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.153] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
- worker1  V          V          *          *          *          *          *          *          V       
+ worker1  V          V          *          *          *          *          *          V          V       
  worker2                                                                                                  
- worker3  *          V          V          *          V          V          *          V          V       
+ worker3  *          V          V          *          *          V          *          V          V       
 
   00:08
-[2026-06-03 07:36:31.771] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.166] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
- worker1  V          V          *          *          V          V          V          V          V       
- worker2                                                                                                  
- worker3  *          V          V          *          V          V          *          V          V       
-
-  00:08
-[2026-06-03 07:36:31.783] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
-          cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
- worker0  *          *          *          *          *          *          *          *          V       
- worker1  V          V          *          *          V          V          V          V          V       
+ worker1  V          V          *          *          *          *          *          V          V       
  worker2                                                                                                  
  worker3  *          V          V          *          V          V          *          V          V       
 
   00:08
-[2026-06-03 07:36:31.795] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.179] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          *          *          *          *          *          *          *          V       
  worker1  V          V          *          *          V          V          V          V          V       
@@ -3109,15 +3101,15 @@ TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 
  worker3  *          V          V          *          V          V          *          V          V       
 
   00:08
-[2026-06-03 07:36:31.806] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.191] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
- worker0  *          V          *          *          *          *          *          *          V       
+ worker0  *          *          *          *          *          *          *          *          V       
  worker1  V          V          *          *          V          V          V          V          V       
  worker2                                                                                                  
  worker3  *          V          V          *          V          V          *          V          V       
 
   00:08
-[2026-06-03 07:36:31.818] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.206] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  *          V          *          *          *          V          *          *          V       
  worker1  V          V          *          *          V          V          V          V          V       
@@ -3125,55 +3117,47 @@ TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 
  worker3  *          V          V          *          V          V          *          V          V       
 
   00:08
-[2026-06-03 07:36:31.832] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.222] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
- worker0  V          V          *          V          *          V          V          *          V       
+ worker0  V          V          *          V          *          V          *          *          V       
  worker1  V          V          *          *          V          V          V          V          V       
  worker2                                                                                                  
  worker3  *          V          V          *          V          V          *          V          V       
 
   00:08
-[2026-06-03 07:36:31.844] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.237] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
- worker0  V          V          *          V          *          V          V          *          V       
+ worker0  V          V          *          V          *          V          *          *          V       
  worker1  V          V          *          *          V          V          V          V          V       
  worker2                                                                                                  
  worker3  *          V          V          *          V          V          *          V          V       
 
   00:08
-[2026-06-03 07:36:31.858] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.252] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
- worker0  V          V          *          V          *          V          V          *          V       
+ worker0  V          V          *          V          *          V          *          *          V       
  worker1  V          V          *          *          V          V          V          V          V       
  worker2  *          *          *          *          *          *          *          *          V       
  worker3  *          V          V          *          V          V          *          V          V       
 
   00:08
-[2026-06-03 07:36:31.871] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.265] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
- worker0  V          V          *          V          *          V          V          *          V       
+ worker0  V          V          *          V          *          V          *          *          V       
+ worker1  V          V          *          *          V          V          V          V          V       
+ worker2  V          *          V          *          V          *          V          V          V       
+ worker3  *          V          V          *          V          V          *          V          V       
+
+  00:08
+[2026-06-03 13:35:21.281] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+          cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
+ worker0  V          V          *          V          *          V          *          *          V       
  worker1  V          V          *          *          V          V          V          V          V       
  worker2  V          *          V          V          V          *          V          V          V       
  worker3  *          V          V          *          V          V          *          V          V       
 
   00:08
-[2026-06-03 07:36:31.883] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
-          cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
- worker0  V          V          *          V          *          V          V          *          V       
- worker1  V          V          *          *          V          V          V          V          V       
- worker2  V          *          V          V          V          *          V          V          V       
- worker3  *          V          V          *          V          V          *          V          V       
-
-  00:08
-[2026-06-03 07:36:31.898] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
-          cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
- worker0  V          V          *          V          *          V          V          *          V       
- worker1  V          V          *          *          V          V          V          V          V       
- worker2  V          *          V          V          V          *          V          V          V       
- worker3  *          V          V          *          V          V          *          V          V       
-
-  00:08
-[2026-06-03 07:36:31.911] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.293] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          *          V          *          V          V          V          V       
  worker1  V          V          *          *          V          V          V          V          V       
@@ -3181,7 +3165,7 @@ TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 
  worker3  *          V          V          *          V          V          *          V          V       
 
   00:08
-[2026-06-03 07:36:31.923] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.306] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          *          V          *          V          V          V          V       
  worker1  V          V          *          *          V          V          V          V          V       
@@ -3189,7 +3173,7 @@ TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 
  worker3  *          V          V          *          V          V          *          V          V       
 
   00:08
-[2026-06-03 07:36:31.936] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.318] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          *          V          *          V          V          V          V       
  worker1  V          V          *          *          V          V          V          V          V       
@@ -3197,7 +3181,7 @@ TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 
  worker3  *          V          V          *          V          V          *          V          V       
 
   00:08
-[2026-06-03 07:36:31.949] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.330] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          *          V          *          V          V          V          V       
  worker1  V          V          *          *          V          V          V          V          V       
@@ -3205,7 +3189,7 @@ TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 
  worker3  *          V          V          *          V          V          *          V          V       
 
   00:08
-[2026-06-03 07:36:31.961] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.342] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          *          V          *          V          V          V          V       
  worker1  V          V          *          *          V          V          V          V          V       
@@ -3213,7 +3197,7 @@ TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 
  worker3  *          V          V          *          V          V          *          V          V       
 
   00:08
-[2026-06-03 07:36:31.975] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.354] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          *          V          *          V          V          V          V       
  worker1  V          V          *          *          V          V          V          V          V       
@@ -3221,7 +3205,7 @@ TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 
  worker3  *          V          V          *          V          V          *          V          V       
 
   00:08
-[2026-06-03 07:36:31.986] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.367] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          *          V          *          V          V          V          V       
  worker1  V          V          *          *          V          V          V          V          V       
@@ -3229,7 +3213,7 @@ TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 
  worker3  *          V          V          *          V          V          *          V          V       
 
   00:08
-[2026-06-03 07:36:31.999] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.380] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          *          V          *          V          V          V          V       
  worker1  V          V          *          *          V          V          V          V          V       
@@ -3237,7 +3221,7 @@ TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 
  worker3  *          V          V          *          V          V          *          V          V       
 
   00:08
-[2026-06-03 07:36:32.011] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.394] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          *          V          *          V          V          V          V       
  worker1  V          V          *          *          V          V          V          V          V       
@@ -3245,7 +3229,7 @@ TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 
  worker3  *          V          V          *          V          V          *          V          V       
 
   00:08
-[2026-06-03 07:36:32.026] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.407] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          *          V          *          V          V          V          V       
  worker1  V          V          *          *          V          V          V          V          V       
@@ -3253,7 +3237,7 @@ TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 
  worker3  *          V          V          *          V          V          *          V          V       
 
   00:08
-[2026-06-03 07:36:32.041] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.421] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          *          V          *          V          V          V          V       
  worker1  V          V          *          *          V          V          V          V          V       
@@ -3261,7 +3245,7 @@ TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 
  worker3  *          V          V          *          V          V          *          V          V       
 
   00:08
-[2026-06-03 07:36:32.054] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.434] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          *          V          *          V          V          V          V       
  worker1  V          V          *          *          V          V          V          V          V       
@@ -3269,39 +3253,55 @@ TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 
  worker3  *          V          V          *          V          V          *          V          V       
 
   00:08
-[2026-06-03 07:36:32.066] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:21.451] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          *          V          *          V          V          V          V       
  worker1  V          V          *          *          V          V          V          V          V       
  worker2  V          *          V          V          V          *          V          V          V       
  worker3  *          V          V          *          V          V          *          V          V       
 
-  00:08
-[2026-06-03 07:36:32.079] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+  00:09
+[2026-06-03 13:35:21.468] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          *          V          *          V          V          V          V       
  worker1  V          V          *          *          V          V          V          V          V       
  worker2  V          *          V          V          V          *          V          V          V       
  worker3  *          V          V          *          V          V          *          V          V       
 
-  00:08
-[2026-06-03 07:36:32.262] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+  00:09
+[2026-06-03 13:35:21.485] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+          cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
+ worker0  V          V          *          V          *          V          V          V          V       
+ worker1  V          V          *          *          V          V          V          V          V       
+ worker2  V          *          V          V          V          *          V          V          V       
+ worker3  *          V          V          *          V          V          *          V          V       
+
+  00:09
+[2026-06-03 13:35:21.499] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+          cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
+ worker0  V          V          *          V          *          V          V          V          V       
+ worker1  V          V          *          *          V          V          V          V          V       
+ worker2  V          *          V          V          V          *          V          V          V       
+ worker3  *          V          V          *          V          V          *          V          V       
+
+  00:09
+[2026-06-03 13:35:21.662] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          *          V          V          V          V          V          V       
  worker1  V          V          *          *          V          V          V          V          V       
  worker2  V          *          V          V          V          *          V          V          V       
  worker3  *          V          V          *          V          V          *          V          V       
 
-  00:08
-[2026-06-03 07:36:33.324] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+  00:09
+[2026-06-03 13:35:22.935] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          *          V          V          V          V          V          V       
  worker1  V          V          *          *          V          V          V          V          V       
  worker2  V          *          V          V          V          *          V          V          V       
  worker3  *          V          V          V          V          V          V          V          V       
 
-  00:09
-[2026-06-03 07:36:33.670] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+  00:10
+[2026-06-03 13:35:23.280] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          *          V          V          V          V          V          V       
  worker1  V          V          *          *          V          V          V          V          V       
@@ -3309,39 +3309,39 @@ TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 
  worker3  *          V          V          V          V          V          V          V          V       
 
   00:10
-[2026-06-03 07:36:33.956] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+[2026-06-03 13:35:23.543] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          *          V          V          V          V          V          V       
  worker1  V          V          *          *          V          V          V          V          V       
  worker2  V          V          V          V          V          *          V          V          V       
  worker3  V          V          V          V          V          V          V          V          V       
 
-  00:10
-[2026-06-03 07:36:34.000] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+  00:11
+[2026-06-03 13:35:23.694] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          V          V          V          V          V          V          V       
  worker1  V          V          *          *          V          V          V          V          V       
  worker2  V          V          V          V          V          *          V          V          V       
  worker3  V          V          V          V          V          V          V          V          V       
 
-  00:10
-[2026-06-03 07:36:34.174] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+  00:11
+[2026-06-03 13:35:23.827] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          V          V          V          V          V          V          V       
  worker1  V          V          V          *          V          V          V          V          V       
  worker2  V          V          V          V          V          *          V          V          V       
  worker3  V          V          V          V          V          V          V          V          V       
 
-  00:10
-[2026-06-03 07:36:35.336] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
+  00:11
+[2026-06-03 13:35:24.943] [default] [info] Context:1/1 Iteration 4: Trying parallel mapping...  
           cluster_0  cluster_1  cluster_2  cluster_3  cluster_4  cluster_5  cluster_6  cluster_7  prepost 
  worker0  V          V          V          V          V          V          V          V          V       
  worker1  V          V          V          *          V          V          V          V          V       
  worker2  V          V          V          V          V          V          V          V          V       
  worker3  V          V          V          V          V          V          V          V          V       
 
-  00:11
-[2026-06-03 07:36:35.367] [default] [info] Post-Split Resources for context_1, iteration 1 (CP)
+  00:12
+[2026-06-03 13:35:24.972] [default] [info] Post-Split Resources for context_1, iteration 1 (CP)
 +------------------------------------------------+-------------+-----------------------+-----------------------+----------------+-----+-----+
 | Node                                           | Subclusters | L3 Weight Memory Cuts | L3 Output Memory Cuts | L4 Memory Cuts | IBs | OBs |
 +------------------------------------------------+-------------+-----------------------+-----------------------+----------------+-----+-----+
@@ -3525,7 +3525,7 @@ TOTAL:  LCUs: 76 (59.375%), Subclusters: 300 (58.5938%), Weight memory cuts:337 
 | output_layer1                                  | 0           | 0                     | 0                     | 0.500          | 0   | 0   |
 +------------------------------------------------+-------------+-----------------------+-----------------------+----------------+-----+-----+
 TOTAL:  LCUs: 71 (55.4688%), Subclusters: 158 (30.8594%), Weight memory cuts:264 (25.7812%), L3 Output memory cuts: 165 (16.1133%), L3 total cuts: 429 (41.8945%), L4 memory cuts: 8 (28.5714%), IBs: 46 (71.875%), OBs: 42 (65.625%)
-[2026-06-03 07:36:35.380] [default] [info] Post-Split Buffers for context_1, iteration 1 (CP) buffers:
+[2026-06-03 13:35:24.986] [default] [info] Post-Split Buffers for context_1, iteration 1 (CP) buffers:
 +------------------------------------------------+------------------------------------------------+----------------------------+
 | Src                                            | Dst                                            | Max buffers                |
 +------------------------------------------------+------------------------------------------------+----------------------------+
@@ -3722,7 +3722,7 @@ TOTAL:  LCUs: 71 (55.4688%), Subclusters: 158 (30.8594%), Weight memory cuts:264
 | auto_reshape_from_conv48_to_output_layer1      | output_from_prepost_357_i1                     | 2 (L4 memory cuts: 1)      |
 | output_from_prepost_357_i1                     | output_layer1                                  | 2 (L4 memory cuts: 1)      |
 +------------------------------------------------+------------------------------------------------+----------------------------+
-[2026-06-03 07:36:35.560] [default] [info] Post-Final-Split Resources for context_1, iteration 4
+[2026-06-03 13:35:25.166] [default] [info] Post-Final-Split Resources for context_1, iteration 4
 +------------------------------------------------+-------------+-----------------------+-----------------------+----------------+-----+-----+
 | Node                                           | Subclusters | L3 Weight Memory Cuts | L3 Output Memory Cuts | L4 Memory Cuts | IBs | OBs |
 +------------------------------------------------+-------------+-----------------------+-----------------------+----------------+-----+-----+
@@ -3906,57 +3906,57 @@ TOTAL:  LCUs: 71 (55.4688%), Subclusters: 158 (30.8594%), Weight memory cuts:264
 | output_layer1                                  | 0           | 0                     | 0                     | 0.500          | 0   | 0   |
 +------------------------------------------------+-------------+-----------------------+-----------------------+----------------+-----+-----+
 TOTAL:  LCUs: 71 (55.4688%), Subclusters: 158 (30.8594%), Weight memory cuts:264 (25.7812%), L3 Output memory cuts: 165 (16.1133%), L3 total cuts: 429 (41.8945%), L4 memory cuts: 8 (28.5714%), IBs: 46 (71.875%), OBs: 42 (65.625%)
-[2026-06-03 07:36:35.624] [default] [info] context_0 (context_0):
+[2026-06-03 13:35:25.226] [default] [info] context_0 (context_0):
 Iterations: 4
 Reverts on cluster mapping: 0
 Reverts on inter-cluster connectivity: 0
 Reverts on pre-mapping validation: 0
 Reverts on split failed: 0
-[2026-06-03 07:36:35.624] [default] [info] context_1 (context_1):
+[2026-06-03 13:35:25.226] [default] [info] context_1 (context_1):
 Iterations: 4
 Reverts on cluster mapping: 0
 Reverts on inter-cluster connectivity: 0
 Reverts on pre-mapping validation: 0
 Reverts on split failed: 0
-[2026-06-03 07:36:35.635] [default] [info] Resolver passed at control_util 0.75 with 208.37 FPS. Setting new partition.
-[2026-06-03 07:36:38.733] [default] [info] context context_0 Post-Allocation FPS from simulation: 2497.31
-[2026-06-03 07:36:38.834] [default] [info] context context_1 Post-Allocation FPS from simulation: 1051.79
-[2026-06-03 07:36:38.841] [default] [info] context_0 utilization: 
-[2026-06-03 07:36:38.841] [default] [info] +-----------+---------------------+---------------------+--------------------+
-[2026-06-03 07:36:38.841] [default] [info] | Cluster   | Control Utilization | Compute Utilization | Memory Utilization |
-[2026-06-03 07:36:38.841] [default] [info] +-----------+---------------------+---------------------+--------------------+
-[2026-06-03 07:36:38.841] [default] [info] | cluster_0 | 56.3%               | 70.3%               | 61.7%              |
-[2026-06-03 07:36:38.841] [default] [info] | cluster_1 | 56.3%               | 67.2%               | 57.8%              |
-[2026-06-03 07:36:38.841] [default] [info] | cluster_2 | 31.3%               | 20.3%               | 33.6%              |
-[2026-06-03 07:36:38.841] [default] [info] | cluster_3 | 56.3%               | 81.3%               | 63.3%              |
-[2026-06-03 07:36:38.841] [default] [info] | cluster_4 | 100%                | 96.9%               | 86.7%              |
-[2026-06-03 07:36:38.841] [default] [info] | cluster_5 | 100%                | 67.2%               | 57.8%              |
-[2026-06-03 07:36:38.841] [default] [info] | cluster_6 | 62.5%               | 53.1%               | 76.6%              |
-[2026-06-03 07:36:38.841] [default] [info] | cluster_7 | 12.5%               | 12.5%               | 9.4%               |
-[2026-06-03 07:36:38.841] [default] [info] +-----------+---------------------+---------------------+--------------------+
-[2026-06-03 07:36:38.841] [default] [info] | Total     | 59.4%               | 58.6%               | 55.9%              |
-[2026-06-03 07:36:38.841] [default] [info] +-----------+---------------------+---------------------+--------------------+
-[2026-06-03 07:36:38.841] [default] [info] context_1 utilization: 
-[2026-06-03 07:36:38.841] [default] [info] +-----------+---------------------+---------------------+--------------------+
-[2026-06-03 07:36:38.841] [default] [info] | Cluster   | Control Utilization | Compute Utilization | Memory Utilization |
-[2026-06-03 07:36:38.841] [default] [info] +-----------+---------------------+---------------------+--------------------+
-[2026-06-03 07:36:38.841] [default] [info] | cluster_0 | 75%                 | 37.5%               | 46.1%              |
-[2026-06-03 07:36:38.841] [default] [info] | cluster_1 | 18.8%               | 4.7%                | 11.7%              |
-[2026-06-03 07:36:38.841] [default] [info] | cluster_2 | 75%                 | 43.8%               | 77.3%              |
-[2026-06-03 07:36:38.841] [default] [info] | cluster_3 | 68.8%               | 26.6%               | 39.8%              |
-[2026-06-03 07:36:38.841] [default] [info] | cluster_4 | 18.8%               | 15.6%               | 18%                |
-[2026-06-03 07:36:38.841] [default] [info] | cluster_5 | 18.8%               | 37.5%               | 23.4%              |
-[2026-06-03 07:36:38.841] [default] [info] | cluster_6 | 93.8%               | 39.1%               | 60.2%              |
-[2026-06-03 07:36:38.841] [default] [info] | cluster_7 | 75%                 | 42.2%               | 58.6%              |
-[2026-06-03 07:36:38.841] [default] [info] +-----------+---------------------+---------------------+--------------------+
-[2026-06-03 07:36:38.841] [default] [info] | Total     | 55.5%               | 30.9%               | 41.9%              |
-[2026-06-03 07:36:38.841] [default] [info] +-----------+---------------------+---------------------+--------------------+
-[2026-06-03 07:36:38.873] [default] [info] Successful Mapping (allocation time: 5m 8s)
-[2026-06-03 07:36:38.895] [default] [info] Compiling context_0...
-[2026-06-03 07:36:40.435] [default] [info] Compiling context_1...
-[2026-06-03 07:36:45.871] [default] [info] Bandwidth of model inputs: 1.5 Mbps, outputs: 1.37939 Mbps (for a single frame)
-[2026-06-03 07:36:45.871] [default] [info] Bandwidth of DDR buffers: 0.0 Mbps (for a single frame)
-[2026-06-03 07:36:45.871] [default] [info] Bandwidth of inter context tensors: 3.5 Mbps (for a single frame)
-[2026-06-03 07:36:45.934] [default] [info] Building HEF...
-[2026-06-03 07:36:50.629] [default] [info] Successful Compilation (compilation time: 11s)
-[2026-06-03 07:36:50.830] [default] [info] Builder successful
+[2026-06-03 13:35:25.236] [default] [info] Resolver passed at control_util 0.75 with 208.37 FPS. Setting new partition.
+[2026-06-03 13:35:28.321] [default] [info] context context_0 Post-Allocation FPS from simulation: 2497.31
+[2026-06-03 13:35:28.420] [default] [info] context context_1 Post-Allocation FPS from simulation: 1051.79
+[2026-06-03 13:35:28.427] [default] [info] context_0 utilization: 
+[2026-06-03 13:35:28.427] [default] [info] +-----------+---------------------+---------------------+--------------------+
+[2026-06-03 13:35:28.427] [default] [info] | Cluster   | Control Utilization | Compute Utilization | Memory Utilization |
+[2026-06-03 13:35:28.427] [default] [info] +-----------+---------------------+---------------------+--------------------+
+[2026-06-03 13:35:28.427] [default] [info] | cluster_0 | 56.3%               | 70.3%               | 61.7%              |
+[2026-06-03 13:35:28.427] [default] [info] | cluster_1 | 56.3%               | 67.2%               | 57.8%              |
+[2026-06-03 13:35:28.427] [default] [info] | cluster_2 | 31.3%               | 20.3%               | 33.6%              |
+[2026-06-03 13:35:28.427] [default] [info] | cluster_3 | 56.3%               | 81.3%               | 63.3%              |
+[2026-06-03 13:35:28.427] [default] [info] | cluster_4 | 100%                | 96.9%               | 86.7%              |
+[2026-06-03 13:35:28.427] [default] [info] | cluster_5 | 100%                | 67.2%               | 57.8%              |
+[2026-06-03 13:35:28.427] [default] [info] | cluster_6 | 62.5%               | 53.1%               | 76.6%              |
+[2026-06-03 13:35:28.427] [default] [info] | cluster_7 | 12.5%               | 12.5%               | 9.4%               |
+[2026-06-03 13:35:28.427] [default] [info] +-----------+---------------------+---------------------+--------------------+
+[2026-06-03 13:35:28.427] [default] [info] | Total     | 59.4%               | 58.6%               | 55.9%              |
+[2026-06-03 13:35:28.427] [default] [info] +-----------+---------------------+---------------------+--------------------+
+[2026-06-03 13:35:28.427] [default] [info] context_1 utilization: 
+[2026-06-03 13:35:28.427] [default] [info] +-----------+---------------------+---------------------+--------------------+
+[2026-06-03 13:35:28.427] [default] [info] | Cluster   | Control Utilization | Compute Utilization | Memory Utilization |
+[2026-06-03 13:35:28.427] [default] [info] +-----------+---------------------+---------------------+--------------------+
+[2026-06-03 13:35:28.427] [default] [info] | cluster_0 | 75%                 | 37.5%               | 46.1%              |
+[2026-06-03 13:35:28.427] [default] [info] | cluster_1 | 18.8%               | 4.7%                | 11.7%              |
+[2026-06-03 13:35:28.427] [default] [info] | cluster_2 | 75%                 | 43.8%               | 77.3%              |
+[2026-06-03 13:35:28.427] [default] [info] | cluster_3 | 68.8%               | 26.6%               | 39.8%              |
+[2026-06-03 13:35:28.427] [default] [info] | cluster_4 | 18.8%               | 15.6%               | 18%                |
+[2026-06-03 13:35:28.427] [default] [info] | cluster_5 | 18.8%               | 37.5%               | 23.4%              |
+[2026-06-03 13:35:28.427] [default] [info] | cluster_6 | 93.8%               | 39.1%               | 60.2%              |
+[2026-06-03 13:35:28.427] [default] [info] | cluster_7 | 75%                 | 42.2%               | 58.6%              |
+[2026-06-03 13:35:28.427] [default] [info] +-----------+---------------------+---------------------+--------------------+
+[2026-06-03 13:35:28.427] [default] [info] | Total     | 55.5%               | 30.9%               | 41.9%              |
+[2026-06-03 13:35:28.427] [default] [info] +-----------+---------------------+---------------------+--------------------+
+[2026-06-03 13:35:28.459] [default] [info] Successful Mapping (allocation time: 5m 9s)
+[2026-06-03 13:35:28.481] [default] [info] Compiling context_0...
+[2026-06-03 13:35:30.009] [default] [info] Compiling context_1...
+[2026-06-03 13:35:35.433] [default] [info] Bandwidth of model inputs: 1.5 Mbps, outputs: 1.37939 Mbps (for a single frame)
+[2026-06-03 13:35:35.433] [default] [info] Bandwidth of DDR buffers: 0.0 Mbps (for a single frame)
+[2026-06-03 13:35:35.433] [default] [info] Bandwidth of inter context tensors: 3.5 Mbps (for a single frame)
+[2026-06-03 13:35:35.488] [default] [info] Building HEF...
+[2026-06-03 13:35:40.212] [default] [info] Successful Compilation (compilation time: 11s)
+[2026-06-03 13:35:40.385] [default] [info] Builder successful
