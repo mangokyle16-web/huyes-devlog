@@ -2,6 +2,79 @@
 
 ---
 
+## 2026-06-04
+
+**完成：**
+- 評估 Ruflo（前 claude-flow）安裝適用性 → 決定暫不安裝（overhead > benefit）
+- 調查國際咖啡豆多光譜資料庫現況 → 確認商業化產品空白，Huyes 有機會成為全球第一
+- 驚喜提案四：「光譜搜尋引擎 — 從分類器到有生命的知識庫」
+  - FAISS 向量資料庫：每顆豆的光譜向量成為可搜尋的知識資產
+  - 零樣本辨識：新品種無需重訓，靠近鄰繼承標籤
+  - QAT 解法：大量真實灰階資料 → FastSAM on Hailo-8 品質等同 CPU
+
+**決定：**
+- Kyle 今天開始拍攝大量咖啡豆資料庫
+- 資料庫採集時額外記錄：origin / process / roast_level / batch_id
+
+**下一步：**
+- 資料庫採集開始
+- Siamese MLP 編譯成 Hailo HEF
+- FAISS 向量資料庫整合進 agent_receiver
+
+---
+
+## 2026-06-03
+
+**完成（Mac Mini）：**
+- Huyes PWA 前端完成（React + Vite + PWA，可加到 iPhone 主畫面）
+  - Home / BatchReport / ShareCard / OriginCard 四個頁面
+- FastAPI 後端 port 8765（批次管理、QR Code、產地搜尋）
+- Agent Receiver port 8081（接收 Pi5 webhook 事件）
+- Pi5 ↔ Mac Mini 雙向通訊打通（SSH 金鑰 + webhook）
+- Git 同步：兩台共用 huyes-devlog repo，歷史合併完成
+- Siamese 訓練 pipeline 完成（model.py / dataset.py / train.py / evaluate.py）
+- BQS 系統設計完成（4 分項：缺陷/烘焙/食安/形態）
+- SBIR Phase 2 申請書草稿完成（台灣食品數據股份有限公司）
+- Hailo-8 SDK 4.20.0 安裝完成，/dev/hailo0 正常
+- FastSAM ONNX 匯出（45MB），Docker DFC 環境建置（3.28.0）
+- FastSAM HEF 四版量化嘗試（v1-v4），驗證 int8 量化限制
+- fastsam_hailo.py：NetworkGroup API + thread queue，23ms 推論速度
+- spec_raw.csv → Siamese CSV 轉換腳本（convert_spec_raw.py）
+- 59 張真實豆子灰階影像採集，作為量化校正資料
+
+**完成（Pi5）：**
+- health_server.py 正式加入 repo（Flask API port 8080）
+- PI_CONNECTION.md 正式 commit（含 Tailscale IP）
+- DIRECTIVE_FROM_BRAIN.md 確認分工架構
+
+**結論：**
+- FastSAM on Hailo-8：int8 量化 + 灰階輸入無法達到 CPU 品質，暫停
+- **決定：FastSAM 分割保留 CPU，Hailo-8 專門跑 Siamese MLP**
+
+**驚喜提案：**
+- 提案一：BQS Q-Grader 自動化評分系統
+- 提案二：SBIR × 嘖嘖 × Computex 三軌並行商業策略
+- 提案三：Roast Copilot — 烘焙中即時光譜引導
+
+---
+
+## 2026-06-02
+
+**完成（Mac Mini，首日啟用）：**
+- Mac Mini 確認為專案大腦，Pi5 確認為執行端
+- 組織架構確立：Kyle（顧問）→ Mac Mini Claude（總負責）→ Pi5（執行）
+- PyTorch 2.12.0 MPS 環境建置完成
+- Siamese pipeline 測試通過（假資料 val_f1=1.0，MPS 加速正常）
+- scripts/export_dataset.py（Pi5 採集資料匯出 CSV）
+- DIVISION_OF_LABOR.md 完整分工架構文件
+
+**Pi5 連線：**
+- SSH 金鑰授權完成（raspberrypi.local）
+- Pi5 health endpoint 確認（port 8080）
+- Tailscale IP：100.65.98.76
+
+---
+
 ## 2026-05-31
 
 **完成：**
