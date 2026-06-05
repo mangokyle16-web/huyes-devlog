@@ -13,6 +13,7 @@
 #include "qs_agriculture.h"
 #include <cstdint>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <chrono>
 #include <thread>
