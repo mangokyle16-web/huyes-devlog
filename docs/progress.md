@@ -2,6 +2,38 @@
 
 ---
 
+## 2026-06-05（晚）
+
+**完成：**
+- 分析皮帶輸送速度：實測 **4.6 cm/s**，計算多光譜相機需求 **≥ 13 fps**（但實際受 SDK 計算瓶頸限制）
+- 完整建立 Pi5 多光譜擷取 pipeline（`spectral_capture/` 目錄）：
+  - `qab_parser.py`、`bean_detector.py`（NIR Otsu 分割）、`frame_reader.py`（subprocess driver）
+  - `collector.py`（SQLite）、`main.py` 端到端（stub 模式 11/11 tests pass）
+- 偵測並排除多個 SDK 問題：
+  - `uvc_fix.so` LD_PRELOAD 解決 UVC 裝置初始化
+  - `freeQsData()` 是所有 SDK buffer 的正確釋放函式
+  - `registerQsCameraCallback + openQsCamera(true)` 為正確的 async 模式
+  - `qsToQab` 速度瓶頸：17-20 秒/幀（OpenCV guided filter on Pi5）
+- 架構轉向：改用 `capture_one` + `qs_file_processor` 異步管線
+  - `capture_one`：0.5 秒/幀擷取 .qs 檔案
+  - `qs_file_processor`：C++ 批次處理器，輸出 float32 binary
+  - `capture_pipeline.py`：整合 Python 管線 + SQLite 記錄
+- **實際採集成果：46 幀，720 筆豆子光譜向量寫入 SQLite** ✅
+- 今日 Git commits：17 個（多光譜 pipeline 完整實作）
+
+**關鍵發現：**
+- CM020D SDK 版本：QS02-V01.1.251217D-CM020D-L
+- QAB 格式：LLBA header + 5-band agriculture data（450/560/650/730/840nm）
+- `qsToQab` 在 Pi5 需要 10-20 秒（OpenCV guided filter 未最佳化）
+- 植被指數（NDVI/GNDVI/NDRE/OSAVI/LCI）作為 5 個 spectral bands
+
+**下一步：**
+- 明天繼續採集更多 bean 樣本（目標 1000+ 筆/品種）
+- 評估是否優化 `qsToQab`（多執行緒 / OpenCV NEON）
+- 開始 Siamese MLP Phase 2（特徵提取 + pair generation）
+
+---
+
 ## 2026-06-04
 
 **完成：**
