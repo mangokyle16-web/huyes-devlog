@@ -1,6 +1,8 @@
 """
 Coffee bean detection using NIR band (840nm) Otsu threshold.
-Green PVC belt: NIR ~0.72 (high). Coffee beans: NIR ~0.35 (low). High contrast.
+Green PVC belt: NIR ~3.5 radiance (high). Coffee beans: NIR ~1.2 (low). High contrast.
+Values are calibrated radiance from qabToGray() — not normalized 0-1.
+Otsu threshold is scale-invariant so it works regardless of absolute range.
 """
 import cv2
 import numpy as np
@@ -24,7 +26,10 @@ def detect_beans(cube: np.ndarray) -> list[BeanDetection]:
     Returns:
         list of BeanDetection sorted by cx (left→right)
     """
-    nir = (cube[:, :, NIR_BAND_IDX] * 255).astype(np.uint8)
+    # Normalize NIR band to uint8 for OpenCV threshold (scale-invariant)
+    nir_f = cube[:, :, NIR_BAND_IDX]
+    nir_max = float(nir_f.max()) or 1.0
+    nir = (nir_f / nir_max * 255).clip(0, 255).astype(np.uint8)
 
     # Otsu threshold: beans (dark) vs belt background (bright)
     _, mask = cv2.threshold(nir, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)

@@ -1,37 +1,58 @@
 """
-QAB binary → numpy cube (H, W, 5) float32 [0,1]
+Parse qs_daemon binary band data → numpy cube (H, W, N_BANDS) float32
 
-QAB format (QS SDK qsToQab() output):
-  5 bands sequential: band0[H×W uint16] | band1[H×W uint16] | ... | band4[H×W uint16]
-  Wavelengths: 450 / 560 / 650 / 730 / 840 nm
+Protocol (data section after the 24-byte frame header):
+  [n_bands: uint32 LE]
+  [width:   uint32 LE]
+  [height:  uint32 LE]
+  [dtype:   uint32 LE]  -- 4 = float32
+  [band_data: float32 × n_bands × H × W]  -- band-first layout
+
+Band wavelengths: 450 / 560 / 650 / 730 / 840 nm
+Values: calibrated radiance from qabToGray() (positive float, ~0–10 range)
 """
+import struct
 import numpy as np
-from spectral_capture.config import CAMERA_W, CAMERA_H, N_BANDS
 
-BYTES_PER_PIXEL = 2  # uint16
-EXPECTED_BYTES  = CAMERA_H * CAMERA_W * N_BANDS * BYTES_PER_PIXEL
+SUBHEADER_FMT  = "<IIII"   # n_bands, width, height, dtype
+SUBHEADER_SIZE = struct.calcsize(SUBHEADER_FMT)  # 16 bytes
 
 
 class QABFormatError(ValueError):
     pass
 
 
-def parse_qab(qab_bytes: bytes) -> np.ndarray:
+def parse_qab(data: bytes) -> np.ndarray:
     """
-    QAB bytes → numpy array (H, W, N_BANDS) float32, normalized to [0, 1]
+    Parse qs_daemon frame data → numpy array (H, W, N_BANDS) float32
 
     Args:
-        qab_bytes: raw bytes from qsToQab()
+        data: bytes from the data section of a qs_daemon frame
+              (everything after the 24-byte frame_id/ts_us/data_size header)
 
     Returns:
-        cube: shape (CAMERA_H, CAMERA_W, N_BANDS), dtype float32
+        cube: shape (height, width, n_bands), dtype float32
     """
-    if len(qab_bytes) != EXPECTED_BYTES:
+    if len(data) < SUBHEADER_SIZE:
         raise QABFormatError(
-            f"QAB size mismatch: got {len(qab_bytes)}, "
-            f"expected {EXPECTED_BYTES} ({CAMERA_H}×{CAMERA_W}×{N_BANDS}×{BYTES_PER_PIXEL})"
+            f"Data too short for sub-header: {len(data)} < {SUBHEADER_SIZE}"
         )
-    raw = np.frombuffer(qab_bytes, dtype=np.uint16)
-    # Shape: (N_BANDS, H, W) → transpose to (H, W, N_BANDS)
-    cube = raw.reshape(N_BANDS, CAMERA_H, CAMERA_W).transpose(1, 2, 0)
-    return cube.astype(np.float32) / 65535.0
+
+    n_bands, width, height, dtype_bytes = struct.unpack_from(SUBHEADER_FMT, data, 0)
+
+    if dtype_bytes != 4:
+        raise QABFormatError(f"Unsupported dtype: {dtype_bytes} (expected 4 = float32)")
+    if n_bands == 0 or width == 0 or height == 0:
+        raise QABFormatError(f"Invalid dimensions: bands={n_bands} W={width} H={height}")
+
+    expected_bytes = SUBHEADER_SIZE + n_bands * width * height * 4
+    if len(data) != expected_bytes:
+        raise QABFormatError(
+            f"Data size mismatch: got {len(data)}, "
+            f"expected {expected_bytes} ({height}×{width}×{n_bands}×float32)"
+        )
+
+    raw = np.frombuffer(data, dtype="<f4", offset=SUBHEADER_SIZE)
+    # Band-first layout → (H, W, N_BANDS)
+    cube = raw.reshape(n_bands, height, width).transpose(1, 2, 0)
+    return np.ascontiguousarray(cube)

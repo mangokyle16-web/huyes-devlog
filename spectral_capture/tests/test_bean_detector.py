@@ -31,12 +31,8 @@ def test_bean_bbox_within_image():
         assert y + h <= 1200
 
 def test_belt_background_not_detected():
-    """Empty green belt (no beans) should return 0 detections"""
-    cube = np.zeros((1200, 1600, 5), dtype=np.float32)
-    cube[:, :, 4] = 0.72   # NIR = high reflectance (green belt)
-    cube[:, :, 0] = 0.15
-    cube[:, :, 1] = 0.45
-    cube[:, :, 2] = 0.25
-    cube[:, :, 3] = 0.20
+    """Uniform scene (no contrast) should return 0 detections — Otsu needs contrast."""
+    # All pixels identical → Otsu threshold finds no separation → mask is uniform
+    cube = np.full((1200, 1600, 5), 3.5, dtype=np.float32)  # uniform radiance
     beans = detect_beans(cube)
-    assert len(beans) == 0, f"Expected 0 beans on empty belt, got {len(beans)}"
+    assert len(beans) == 0, f"Expected 0 beans on uniform scene, got {len(beans)}"

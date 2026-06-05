@@ -1,51 +1,61 @@
 """
-Generates synthetic QAB binary for testing without a camera.
-Format: N_BANDS sequential uint16 bands, each H×W.
+Generates synthetic qs_daemon frame data for testing without a camera.
+
+Format matches the new qs_daemon protocol:
+  [n_bands: uint32 LE][width: uint32 LE][height: uint32 LE][dtype: uint32 LE=4]
+  [band_data: float32 × n_bands × H × W]  -- band-first layout
+
+Band values are calibrated radiance-like (~0–10 range), NOT 0-1 reflectance.
+Background (green belt): high NIR (~3.5), moderate visible.
+Beans: lower NIR (~1.2), distinct spectral signature.
 """
 import numpy as np
 import struct
 import cv2
 from pathlib import Path
+import sys
 
-# Import NIR_BAND_IDX from config
-config_path = Path(__file__).parent.parent.parent / "config.py"
-import importlib.util
-spec = importlib.util.spec_from_file_location("config", config_path)
-config = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(config)
-NIR_BAND_IDX = config.NIR_BAND_IDX
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+from spectral_capture.config import NIR_BAND_IDX
 
 W, H, N = 1600, 1200, 5
 
+# Calibrated radiance-like values (from qabToGray output, ~0–10 range)
+BG_VALS   = np.array([1.80, 3.20, 2.10, 1.90, 3.50], dtype=np.float32)  # green belt
+BEAN_VALS = np.array([0.60, 0.90, 1.10, 1.40, 1.20], dtype=np.float32)  # coffee bean
+
+
 def make_fake_qab(n_beans: int = 5, seed: int = 42) -> bytes:
+    """
+    Returns bytes in qs_daemon format: 16-byte sub-header + float32 band data.
+    Total: 16 + 5 × 1200 × 1600 × 4 = 38,400,016 bytes.
+    """
     rng = np.random.default_rng(seed)
-    bg_vals   = np.array([0.15, 0.45, 0.25, 0.20, 0.72])
-    bean_vals = np.array([0.08, 0.14, 0.18, 0.22, 0.35])
 
     cube = np.zeros((N, H, W), dtype=np.float32)
     for b in range(N):
-        cube[b] = bg_vals[b]
+        cube[b] = BG_VALS[b]
 
     for i in range(n_beans):
         cx = int(rng.integers(100, W - 100))
         cy = int(rng.integers(100, H - 100))
         rx, ry = int(rng.integers(12, 22)), int(rng.integers(8, 15))
         for b in range(N):
-            band = cube[b]
-            val = bean_vals[b] + rng.uniform(-0.02, 0.02)
+            val = float(BEAN_VALS[b]) + rng.uniform(-0.05, 0.05)
             if i == 0 and b == NIR_BAND_IDX:
-                val = bean_vals[b] * 0.7  # defect bean: lower NIR only
-            cv2.ellipse(band, (cx, cy), (rx, ry), 0, 0, 360, float(val), -1)
+                val = float(BEAN_VALS[b]) * 0.7  # defect bean: lower NIR only
+            cv2.ellipse(cube[b], (cx, cy), (rx, ry), 0, 0, 360, val, -1)
 
-    cube_u16 = (cube * 65535).clip(0, 65535).astype(np.uint16)
-    return cube_u16.tobytes()
+    # Sub-header: n_bands, width, height, dtype(4=float32)
+    subheader = struct.pack("<IIII", N, W, H, 4)
+    return subheader + cube.tobytes()
 
 
 if __name__ == "__main__":
     out = Path(__file__).parent / "fake_5bean.qab"
     data = make_fake_qab(n_beans=5)
     out.write_bytes(data)
-    expected = W * H * N * 2
+    expected = 16 + N * H * W * 4
     assert len(data) == expected, f"Expected {expected}, got {len(data)}"
     print(f"Written {len(data):,} bytes → {out}")
     print("OK")
