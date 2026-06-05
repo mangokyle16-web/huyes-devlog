@@ -94,7 +94,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    if (openQsCamera(cameras[0], false) != QS_ERR_SUCCESS) {
+    if (openQsCamera(cameras[0], true /*async — required for callback*/) != QS_ERR_SUCCESS) {
         fprintf(stderr, "[qs_daemon] ERROR: openQsCamera failed\n");
         return 1;
     }
