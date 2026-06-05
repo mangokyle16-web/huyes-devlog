@@ -8,8 +8,8 @@ DB_PATH       = PROJECT_ROOT / "data" / "beans.db"
 CAMERA_W      = 1600
 CAMERA_H      = 1200
 N_BANDS       = 5
-BAND_NM       = [450, 560, 650, 730, 840]
-NIR_BAND_IDX  = 4
+BAND_NM       = ["NDVI", "GNDVI", "NDRE", "OSAVI", "LCI"]  # vegetation indices
+NIR_BAND_IDX  = 0  # NDVI is the primary segmentation band (green belt ~0, beans vary)
 TARGET_FPS    = 13
 FRAME_BUDGET_MS = 77  # ms per frame at 13 fps
 

@@ -11,12 +11,13 @@ def test_parse_returns_correct_shape():
     cube = parse_qab(data)
     assert cube.shape == (1200, 1600, 5), f"Got {cube.shape}"
 
-def test_parse_dtype_and_positive():
-    """Values are calibrated radiance (positive float, not bounded to 0-1)."""
+def test_parse_dtype_and_range():
+    """Values are vegetation indices in [-1, 1] range."""
     data = make_fake_qab()
     cube = parse_qab(data)
     assert cube.dtype == np.float32
-    assert cube.min() >= 0.0, f"Unexpected negative values: min={cube.min()}"
+    assert cube.min() >= -1.0, f"Below -1: {cube.min()}"
+    assert cube.max() <= 1.0,  f"Above  1: {cube.max()}"
 
 def test_parse_wrong_size_raises():
     import pytest
@@ -29,5 +30,5 @@ def test_nir_band_background_is_higher():
     cube = parse_qab(data)
     nir = cube[:, :, 4]
     corner_mean = np.mean(nir[:50, :50])
-    # Background BG_VALS[4]=3.5, beans BEAN_VALS[4]=1.2 → corner should be > 2.0
-    assert corner_mean > 2.0, f"Corner NIR {corner_mean:.3f} not high enough"
+    # Background BG_VALS[0]=0.75 (NDVI), beans BEAN_VALS[0]=0.10 → corner should be > 0.4
+    assert corner_mean > 0.4, f"Corner NDVI {corner_mean:.3f} not high enough"

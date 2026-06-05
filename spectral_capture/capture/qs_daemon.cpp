@@ -4,19 +4,24 @@
  * Output protocol (stdout binary), per frame:
  *   [frame_id: uint64 LE]
  *   [timestamp_us: int64 LE]
- *   [data_size: uint64 LE]          -- bytes that follow (= 16 + n_bands*W*H*4)
+ *   [data_size: uint64 LE]          -- bytes that follow (= 16 + 5*W*H*4)
  *   [n_bands: uint32 LE]            -- always 5
- *   [width: uint32 LE]              -- image width (pixels)
- *   [height: uint32 LE]             -- image height (pixels)
+ *   [width: uint32 LE]
+ *   [height: uint32 LE]
  *   [dtype: uint32 LE]              -- 4 = float32
- *   [band_data: float32 × n_bands × H × W]  -- layout: band-first (band0[H×W], band1[H×W], ...)
+ *   [band_data: float32 × 5 × H × W] -- band-first: NDVI, GNDVI, NDRE, OSAVI, LCI
  *
- * Band wavelengths: 450 / 560 / 650 / 730 / 840 nm
- * stderr: status messages (does not pollute binary output)
+ * Bands are vegetation indices (scale-invariant, good for spectral fingerprinting):
+ *   Band 0: NDVI  (NIR-Red)/(NIR+Red)
+ *   Band 1: GNDVI (NIR-Green)/(NIR+Green)
+ *   Band 2: NDRE  (NIR-RedEdge)/(NIR+RedEdge)
+ *   Band 3: OSAVI (NIR-Red)/(NIR+Red+0.16)
+ *   Band 4: LCI   (NIR-RedEdge)/(NIR+Red)
  *
- * Build: make (on Pi5 with QS SDK installed)
+ * stderr: status messages only
+ *
+ * Build: make  (on Pi5 with QS SDK installed)
  * Run:   ./qs_daemon [qsbs_path] [fps]
- *        ./qs_daemon msi.qsbs 13
  */
 #include "qs_camera.h"
 #include "qs_fileio.h"
@@ -24,7 +29,6 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <vector>
 #include <chrono>
 #include <thread>
@@ -55,7 +59,6 @@ int main(int argc, char* argv[]) {
     signal(SIGINT,  onSigint);
     signal(SIGTERM, onSigint);
 
-    // Load calibration
     uint8_t* qsbsData = nullptr; size_t qsbsSize = 0;
     if (loadQsbsFile(qsbs_path, &qsbsData, &qsbsSize) != QS_ERR_SUCCESS) {
         fprintf(stderr, "[qs_daemon] ERROR: cannot load %s\n", qsbs_path);
@@ -88,54 +91,57 @@ int main(int argc, char* argv[]) {
     while (g_running) {
         auto t0 = std::chrono::steady_clock::now();
 
-        // Capture
         size_t   qsSize = 0;
         uint8_t* qsData = getQsData(cameras[0], &qsSize);
         if (!qsData) {
-            fprintf(stderr, "[qs_daemon] WARN: getQsData null, skipping\n");
+            fprintf(stderr, "[qs_daemon] WARN: getQsData null\n");
             continue;
         }
 
-        // QS → QAB (5-band agriculture image)
         uint8_t* qabData = nullptr; size_t qabSize = 0;
         if (qsToQab(agCtx, qsData, qsSize, &qabData, &qabSize) != QS_ERR_SUCCESS) {
-            fprintf(stderr, "[qs_daemon] WARN: qsToQab failed, skipping\n");
+            fprintf(stderr, "[qs_daemon] WARN: qsToQab failed\n");
             freeQsData(qsData);
             continue;
         }
 
-        // QAB → grayscale bands: double[5][height][width] (SDK-decoded, calibrated)
-        double*  grayData = nullptr;
-        int      width = 0, height = 0;
-        if (qabToGray(qabData, qabSize, 1.0, &grayData, &width, &height) != QS_ERR_SUCCESS) {
-            fprintf(stderr, "[qs_daemon] WARN: qabToGray failed, skipping\n");
-            free(qabData);
-            freeQsData(qsData);
-            continue;
+        // Compute 5 vegetation indices (all use same interface, confirmed working)
+        double*  ndvi=nullptr,*gndvi=nullptr,*ndre=nullptr,*osavi=nullptr,*lci=nullptr;
+        uint32_t W=0,H=0, w2=0,h2=0, w3=0,h3=0, w4=0,h4=0, w5=0,h5=0;
+        bool ok = true;
+        ok &= (qabToNdvi (qabData,qabSize,&ndvi, &W,&H  ) == QS_ERR_SUCCESS);
+        ok &= (qabToGndvi(qabData,qabSize,&gndvi,&w2,&h2) == QS_ERR_SUCCESS);
+        ok &= (qabToNdre (qabData,qabSize,&ndre, &w3,&h3) == QS_ERR_SUCCESS);
+        ok &= (qabToOsavi(qabData,qabSize,&osavi,&w4,&h4) == QS_ERR_SUCCESS);
+        ok &= (qabToLci  (qabData,qabSize,&lci,  &w5,&h5) == QS_ERR_SUCCESS);
+
+        if (!ok || W == 0 || H == 0) {
+            fprintf(stderr, "[qs_daemon] WARN: index computation failed\n");
+        } else {
+            // Pack 5 index images into float32 band-first array
+            const size_t n_px = (size_t)W * H;
+            std::vector<float> f32(5 * n_px);
+            const double* bands[5] = {ndvi, gndvi, ndre, osavi, lci};
+            for (int b = 0; b < 5; ++b)
+                for (size_t i = 0; i < n_px; ++i)
+                    f32[b * n_px + i] = static_cast<float>(bands[b][i]);
+
+            const uint64_t data_size = 16 + 5 * n_px * 4;
+            write_u64(frame_id);
+            write_i64(now_us());
+            write_u64(data_size);
+            write_u32(5);
+            write_u32(W);
+            write_u32(H);
+            write_u32(4);   // float32
+            fwrite(f32.data(), 4, 5 * n_px, stdout);
+            fflush(stdout);
+            ++frame_id;
         }
 
-        // Convert double[5][H][W] → float32 (half the bandwidth, plenty of precision)
-        const uint32_t N_BANDS = 5;
-        const size_t   n_vals  = (size_t)N_BANDS * width * height;
-        std::vector<float> f32(n_vals);
-        for (size_t i = 0; i < n_vals; i++)
-            f32[i] = static_cast<float>(grayData[i]);
-
-        // Write frame: standard 24-byte header + 16-byte sub-header + float32 data
-        const uint64_t data_size = 16 + n_vals * 4;
-        write_u64(frame_id);
-        write_i64(now_us());
-        write_u64(data_size);
-        write_u32(N_BANDS);
-        write_u32((uint32_t)width);
-        write_u32((uint32_t)height);
-        write_u32(4);  // dtype = 4 bytes (float32)
-        fwrite(f32.data(), 4, n_vals, stdout);
-        fflush(stdout);
-
-        ++frame_id;
-        delete[] grayData;  // qabToGray allocates with new[]
-        delete[] qabData;   // qsToQab allocates with new[]
+        delete[] ndvi; delete[] gndvi; delete[] ndre;
+        delete[] osavi; delete[] lci;
+        delete[] qabData;
         freeQsData(qsData);
 
         auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(

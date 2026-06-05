@@ -20,9 +20,12 @@ from spectral_capture.config import NIR_BAND_IDX
 
 W, H, N = 1600, 1200, 5
 
-# Calibrated radiance-like values (from qabToGray output, ~0–10 range)
-BG_VALS   = np.array([1.80, 3.20, 2.10, 1.90, 3.50], dtype=np.float32)  # green belt
-BEAN_VALS = np.array([0.60, 0.90, 1.10, 1.40, 1.20], dtype=np.float32)  # coffee bean
+# Vegetation index values (range -1 to 1):
+# Bands: NDVI, GNDVI, NDRE, OSAVI, LCI
+# Green belt has high chlorophyll → high NDVI/GNDVI/NDRE
+# Coffee beans: lower vegetation indices (brown/tan object, no chlorophyll)
+BG_VALS   = np.array([ 0.75,  0.70,  0.55,  0.68,  0.50], dtype=np.float32)
+BEAN_VALS = np.array([ 0.10,  0.08,  0.05,  0.09,  0.04], dtype=np.float32)
 
 
 def make_fake_qab(n_beans: int = 5, seed: int = 42) -> bytes:
