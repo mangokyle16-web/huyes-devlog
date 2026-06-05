@@ -164,10 +164,10 @@ int main(int argc, char* argv[]) {
             fprintf(stderr, "[qs_daemon] WARN: index computation failed\n");
         }
 
-        // Free SDK-allocated arrays (allocated with new[])
-        delete[] ndvi; delete[] gndvi; delete[] ndre;
-        delete[] osavi; delete[] lci;
-        delete[] qabData;
+        // Free SDK-allocated arrays via freeQsData (SDK uses its own allocator)
+        freeQsData(ndvi); freeQsData(gndvi); freeQsData(ndre);
+        freeQsData(osavi); freeQsData(lci);
+        freeQsData(qabData);
 
         // Frame rate control
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
