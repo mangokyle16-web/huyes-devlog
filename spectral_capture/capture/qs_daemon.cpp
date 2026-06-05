@@ -33,6 +33,10 @@ static void write_i64(int64_t  v) { fwrite(&v, 8, 1, stdout); }
 int main(int argc, char* argv[]) {
     const char* qsbs_path = (argc >= 2) ? argv[1] : "msi.qsbs";
     const int   target_fps = (argc >= 3) ? atoi(argv[2]) : 13;
+    if (target_fps <= 0 || target_fps > 120) {
+        fprintf(stderr, "[qs_daemon] ERROR: invalid fps %d (must be 1-120)\n", target_fps);
+        return 1;
+    }
     const int   frame_ms   = 1000 / target_fps;
 
     signal(SIGINT,  onSigint);
@@ -66,7 +70,9 @@ int main(int argc, char* argv[]) {
     fprintf(stderr, "[qs_daemon] ready @ %d fps\n", target_fps);
 
     // Set stdout to binary mode
-    freopen(nullptr, "wb", stdout);
+    if (!freopen(nullptr, "wb", stdout)) {
+        fprintf(stderr, "[qs_daemon] WARNING: could not set binary mode on stdout\n");
+    }
 
     uint64_t frame_id = 0;
     while (g_running) {
@@ -97,7 +103,7 @@ int main(int argc, char* argv[]) {
 
         ++frame_id;
         freeQsData(qsData);
-        delete[] qabData;
+        delete[] qabData;  // qsToQab allocates with new[] (matches main.cpp pattern)
 
         // Frame rate control
         auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
