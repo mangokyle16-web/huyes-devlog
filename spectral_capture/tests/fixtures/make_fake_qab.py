@@ -4,7 +4,16 @@ Format: N_BANDS sequential uint16 bands, each H×W.
 """
 import numpy as np
 import struct
+import cv2
 from pathlib import Path
+
+# Import NIR_BAND_IDX from config
+config_path = Path(__file__).parent.parent.parent / "config.py"
+import importlib.util
+spec = importlib.util.spec_from_file_location("config", config_path)
+config = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(config)
+NIR_BAND_IDX = config.NIR_BAND_IDX
 
 W, H, N = 1600, 1200, 5
 
@@ -17,7 +26,6 @@ def make_fake_qab(n_beans: int = 5, seed: int = 42) -> bytes:
     for b in range(N):
         cube[b] = bg_vals[b]
 
-    import cv2
     for i in range(n_beans):
         cx = int(rng.integers(100, W - 100))
         cy = int(rng.integers(100, H - 100))
@@ -25,8 +33,8 @@ def make_fake_qab(n_beans: int = 5, seed: int = 42) -> bytes:
         for b in range(N):
             band = cube[b]
             val = bean_vals[b] + rng.uniform(-0.02, 0.02)
-            if i == 0:
-                val = bean_vals[b] * 0.7  # defect bean: lower NIR
+            if i == 0 and b == NIR_BAND_IDX:
+                val = bean_vals[b] * 0.7  # defect bean: lower NIR only
             cv2.ellipse(band, (cx, cy), (rx, ry), 0, 0, 360, float(val), -1)
 
     cube_u16 = (cube * 65535).clip(0, 65535).astype(np.uint16)
