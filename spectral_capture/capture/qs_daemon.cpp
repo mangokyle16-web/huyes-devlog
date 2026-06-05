@@ -134,8 +134,8 @@ int main(int argc, char* argv[]) {
         fflush(stdout);
 
         ++frame_id;
-        free(grayData);
-        free(qabData);
+        delete[] grayData;  // qabToGray allocates with new[]
+        delete[] qabData;   // qsToQab allocates with new[]
         freeQsData(qsData);
 
         auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
