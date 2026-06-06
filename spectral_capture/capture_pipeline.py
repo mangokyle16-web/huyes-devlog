@@ -6,9 +6,10 @@ capture_one grabs .qs files fast (~0.5s each).
 qs_file_processor converts to spectral vectors (~20s each).
 Results written to SQLite for Siamese network training.
 
-Run: python3 spectral_capture/capture_pipeline.py [--origin Taiwan] [--roast green]
+Run: python3 spectral_capture/capture_pipeline.py --origin 台灣阿里山 --process washed --roast green --batch-id 20260607-001
 """
 import subprocess, struct, time, os, sys, signal, argparse, sqlite3
+import datetime
 from pathlib import Path
 import numpy as np
 
@@ -30,32 +31,48 @@ def init_db(db_path):
     conn = sqlite3.connect(str(db_path), check_same_thread=False)
     conn.executescript('''
         CREATE TABLE IF NOT EXISTS bean_spectra (
-            id          INTEGER PRIMARY KEY AUTOINCREMENT,
-            captured_at REAL NOT NULL,
-            qs_file     TEXT NOT NULL,
-            bean_cx     INTEGER NOT NULL,
-            bean_cy     INTEGER NOT NULL,
-            area_px     INTEGER NOT NULL,
+            id           INTEGER PRIMARY KEY AUTOINCREMENT,
+            captured_at  REAL    NOT NULL,
+            capture_date TEXT    DEFAULT '',
+            qs_file      TEXT    NOT NULL,
+            bean_cx      INTEGER NOT NULL,
+            bean_cy      INTEGER NOT NULL,
+            area_px      INTEGER NOT NULL,
             b0 REAL, b1 REAL, b2 REAL, b3 REAL, b4 REAL,
-            origin      TEXT DEFAULT '',
-            roast_level TEXT DEFAULT 'green',
-            label       TEXT DEFAULT 'unknown'
+            origin       TEXT DEFAULT '',
+            process      TEXT DEFAULT 'unknown',
+            roast_level  TEXT DEFAULT 'green',
+            bean_type    TEXT DEFAULT 'green',
+            batch_id     TEXT DEFAULT '',
+            label        TEXT DEFAULT 'unknown'
         );
-        CREATE INDEX IF NOT EXISTS idx_captured_at ON bean_spectra(captured_at);
+        CREATE INDEX IF NOT EXISTS idx_captured_at   ON bean_spectra(captured_at);
+        CREATE INDEX IF NOT EXISTS idx_batch_id      ON bean_spectra(batch_id);
+        CREATE INDEX IF NOT EXISTS idx_capture_date  ON bean_spectra(capture_date);
     ''')
+    # Migrate existing DB: add new columns if missing
+    existing = {row[1] for row in conn.execute("PRAGMA table_info(bean_spectra)")}
+    for col, defval in [
+        ('capture_date', "''"), ('process', "'unknown'"),
+        ('bean_type', "'green'"), ('batch_id', "''"),
+    ]:
+        if col not in existing:
+            conn.execute(f"ALTER TABLE bean_spectra ADD COLUMN {col} TEXT DEFAULT {defval}")
     conn.commit()
     return conn
 
 
-def insert_beans(conn, qs_file, ts, beans, origin, roast):
-    rows = [(ts, qs_file, b['cx'], b['cy'], b['area'],
+def insert_beans(conn, qs_file, ts, beans, args):
+    rows = [(ts, args.date, qs_file, b['cx'], b['cy'], b['area'],
              float(b['spec'][0]), float(b['spec'][1]), float(b['spec'][2]),
              float(b['spec'][3]), float(b['spec'][4]),
-             origin, roast) for b in beans]
+             args.origin, args.process, args.roast, args.bean_type, args.batch_id)
+            for b in beans]
     conn.executemany(
         'INSERT INTO bean_spectra '
-        '(captured_at, qs_file, bean_cx, bean_cy, area_px, b0,b1,b2,b3,b4, origin,roast_level) '
-        'VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', rows)
+        '(captured_at, capture_date, qs_file, bean_cx, bean_cy, area_px, '
+        ' b0,b1,b2,b3,b4, origin,process,roast_level,bean_type,batch_id) '
+        'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', rows)
     conn.commit()
 
 
@@ -104,9 +121,13 @@ def process_qs_file(qs_path, capture_env):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument('--origin', default='unknown')
-    p.add_argument('--roast', default='green')
-    p.add_argument('--interval', type=float, default=CAPTURE_INTERVAL_S)
+    p.add_argument('--origin',    default='unknown')
+    p.add_argument('--process',   default='unknown')
+    p.add_argument('--roast',     default='green')
+    p.add_argument('--bean-type', default='green', dest='bean_type')
+    p.add_argument('--batch-id',  default='batch-001', dest='batch_id')
+    p.add_argument('--date',      default=datetime.date.today().isoformat())
+    p.add_argument('--interval',  type=float, default=CAPTURE_INTERVAL_S)
     args = p.parse_args()
 
     QUEUE_DIR.mkdir(parents=True, exist_ok=True)
@@ -126,7 +147,9 @@ def main():
 
     frame_n = 0
     total_beans = 0
-    print(f'[pipeline] origin={args.origin} roast={args.roast} interval={args.interval}s')
+    print(f'[pipeline] origin={args.origin} process={args.process} '
+          f'roast={args.roast} bean_type={args.bean_type} '
+          f'batch={args.batch_id} date={args.date} interval={args.interval}s')
     print('[pipeline] Ctrl+C to stop')
 
     while not stop:
@@ -134,7 +157,6 @@ def main():
         ts = t_cycle
         qs_path = QUEUE_DIR / f'frame_{frame_n:06d}.qs'
 
-        # 1. Capture .qs file
         print(f'[capture] frame {frame_n}...', flush=True)
         cap = subprocess.run(
             [str(CAPTURE_ONE), str(QSBS), str(qs_path)],
@@ -146,7 +168,6 @@ def main():
         sz = qs_path.stat().st_size
         print(f'[capture] saved {qs_path.name} ({sz:,}b)', flush=True)
 
-        # 2. Process .qs → spectral cube
         print('[process] qsToQab + 5 indices (may take ~20s)...', flush=True)
         t_proc = time.time()
         cube = process_qs_file(qs_path, capture_env)
@@ -155,7 +176,7 @@ def main():
 
         if cube is not None:
             beans = detect_beans(cube)
-            insert_beans(conn, str(qs_path), ts, beans, args.origin, args.roast)
+            insert_beans(conn, str(qs_path), ts, beans, args)
             total_beans += len(beans)
             print(f'[detect]  frame={frame_n} beans={len(beans)} total={total_beans}', flush=True)
 
@@ -169,7 +190,7 @@ def main():
             time.sleep(wait)
 
     stats = conn.execute(
-        'SELECT COUNT(*), MIN(captured_at), MAX(captured_at) FROM bean_spectra'
+        'SELECT COUNT(*), MIN(capture_date), MAX(capture_date) FROM bean_spectra'
     ).fetchone()
     conn.close()
     print(f'\n[pipeline] done. {frame_n} frames, {total_beans} beans. DB: {stats}')

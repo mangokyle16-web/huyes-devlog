@@ -63,9 +63,13 @@ def _recent_log(n: int = 8) -> list:
 
 
 class StartRequest(BaseModel):
-    origin: str = "unknown"
-    roast: str = "green"
-    interval: int = 30
+    origin:       str = "unknown"
+    process:      str = "unknown"
+    roast_level:  str = "green"
+    batch_id:     str = "batch-001"
+    capture_date: str = ""
+    bean_type:    str = "green"   # "green" or "roast"
+    interval:     int = 30
 
 
 @app.get("/api/status")
@@ -82,12 +86,18 @@ def start_capture(req: StartRequest):
     global _proc
     if _is_running():
         return {"status": "already_running"}
+    import datetime
+    date = req.capture_date or datetime.date.today().isoformat()
     _proc = subprocess.Popen(
         [
             sys.executable, "-u", str(PIPELINE),
-            "--origin", req.origin,
-            "--roast",  req.roast,
-            "--interval", str(req.interval),
+            "--origin",       req.origin,
+            "--process",      req.process,
+            "--roast",        req.roast_level,
+            "--batch-id",     req.batch_id,
+            "--date",         date,
+            "--bean-type",    req.bean_type,
+            "--interval",     str(req.interval),
         ],
         stdout=LOG_PATH.open("w"),
         stderr=subprocess.STDOUT,

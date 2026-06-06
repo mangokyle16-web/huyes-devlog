@@ -15,100 +15,66 @@
     padding: 16px;
   }
   h1 { font-size: 18px; font-weight: 600; color: #a5d6a7; margin-bottom: 4px; }
-  .subtitle { font-size: 12px; color: #78909c; margin-bottom: 20px; }
+  .subtitle { font-size: 12px; color: #78909c; margin-bottom: 16px; }
 
-  .card {
-    background: #1a1d27;
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 12px;
-  }
-  .status-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-  .dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    background: #546e7a;
-  }
+  .card { background: #1a1d27; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+
+  .status-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: #546e7a; }
   .dot.running { background: #66bb6a; box-shadow: 0 0 6px #66bb6a; }
   .status-label { font-size: 15px; font-weight: 500; }
 
-  .stat-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-  .stat {
-    background: #0f1117;
-    border-radius: 8px;
-    padding: 10px 12px;
-  }
-  .stat-val {
-    font-size: 24px;
-    font-weight: 700;
-    color: #a5d6a7;
-    line-height: 1.1;
-  }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat { background: #0f1117; border-radius: 8px; padding: 10px 12px; }
+  .stat-val { font-size: 24px; font-weight: 700; color: #a5d6a7; line-height: 1.1; }
   .stat-key { font-size: 11px; color: #78909c; margin-top: 2px; }
 
   .btn {
-    width: 100%;
-    padding: 16px;
-    border: none;
-    border-radius: 12px;
-    font-size: 17px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.15s;
+    width: 100%; padding: 16px; border: none; border-radius: 12px;
+    font-size: 17px; font-weight: 600; cursor: pointer; transition: opacity 0.15s;
   }
   .btn:active { opacity: 0.7; }
   .btn-start { background: #388e3c; color: #fff; margin-bottom: 12px; }
   .btn-stop  { background: #b71c1c; color: #fff; margin-bottom: 12px; }
 
+  /* Bean type toggle */
+  .toggle-row {
+    display: flex; gap: 8px; margin-bottom: 12px;
+  }
+  .toggle-btn {
+    flex: 1; padding: 10px; border: 2px solid #37474f; border-radius: 8px;
+    background: #0f1117; color: #78909c; font-size: 14px; font-weight: 600;
+    cursor: pointer; text-align: center; transition: all 0.15s;
+  }
+  .toggle-btn.active-green { border-color: #66bb6a; color: #66bb6a; background: #1a2e1a; }
+  .toggle-btn.active-roast { border-color: #ffb74d; color: #ffb74d; background: #2e251a; }
+
+  .section-title {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: #546e7a; margin-bottom: 10px;
+  }
   .param-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid #1e2130;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 0; border-bottom: 1px solid #1e2130;
   }
   .param-row:last-child { border-bottom: none; }
   .param-label { font-size: 13px; color: #b0bec5; }
-  select, input[type=number], input[type=text] {
-    background: #0f1117;
-    color: #e8eaf6;
-    border: 1px solid #37474f;
-    border-radius: 6px;
-    padding: 6px 8px;
-    font-size: 13px;
-    width: 120px;
-    text-align: right;
+  select, input[type=number], input[type=text], input[type=date] {
+    background: #0f1117; color: #e8eaf6; border: 1px solid #37474f;
+    border-radius: 6px; padding: 6px 8px; font-size: 13px;
+    width: 148px; text-align: right;
   }
+  input[type=date] { color-scheme: dark; }
+  .hidden { display: none; }
 
   .log-lines {
-    font-family: monospace;
-    font-size: 11px;
-    color: #78909c;
-    line-height: 1.6;
-    max-height: 180px;
-    overflow-y: auto;
+    font-family: monospace; font-size: 11px; color: #78909c;
+    line-height: 1.6; max-height: 160px; overflow-y: auto;
   }
   .log-line { padding: 1px 0; }
   .log-line.ok     { color: #81c784; }
   .log-line.warn   { color: #ffb74d; }
   .log-line.detect { color: #4dd0e1; }
-
-  .section-title {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #546e7a;
-    margin-bottom: 8px;
-  }
 </style>
 </head>
 <body>
@@ -116,6 +82,7 @@
 <h1>🌿 Huyes 採集指揮台</h1>
 <p class="subtitle">Pi5 多光譜豆子採集控制</p>
 
+<!-- Status -->
 <div class="card">
   <div class="status-row">
     <div class="dot" id="dot"></div>
@@ -133,43 +100,85 @@
   </div>
 </div>
 
+<!-- Control buttons -->
 <button class="btn btn-start" id="btn-start" onclick="startCapture()">▶ 開始採集</button>
 <button class="btn btn-stop"  id="btn-stop"  onclick="stopCapture()" style="display:none">⏸ 暫停採集</button>
 
+<!-- Metadata form -->
 <div class="card">
-  <div class="section-title">採集設定</div>
+  <div class="section-title">豆子資訊</div>
+
+  <!-- Bean type toggle -->
+  <div class="toggle-row">
+    <div class="toggle-btn active-green" id="btn-green" onclick="setBeanType('green')">🌱 生豆</div>
+    <div class="toggle-btn" id="btn-roast" onclick="setBeanType('roast')">☕ 烘培豆</div>
+  </div>
+
   <div class="param-row">
-    <span class="param-label">產地</span>
-    <input type="text" id="param-origin" value="Taiwan">
+    <span class="param-label">產地 Origin</span>
+    <input type="text" id="param-origin" placeholder="e.g. 台灣阿里山">
   </div>
   <div class="param-row">
-    <span class="param-label">烘焙程度</span>
+    <span class="param-label">處理法 Process</span>
+    <select id="param-process">
+      <option value="washed">水洗 Washed</option>
+      <option value="natural">日曬 Natural</option>
+      <option value="honey">蜜處理 Honey</option>
+      <option value="wet_hulled">濕剝 Wet-hulled</option>
+      <option value="anaerobic">厭氧 Anaerobic</option>
+      <option value="other">其他 Other</option>
+    </select>
+  </div>
+  <!-- Roast level: only for roasted beans -->
+  <div class="param-row" id="row-roast">
+    <span class="param-label">烘焙程度 Roast</span>
     <select id="param-roast">
-      <option value="green">生豆 green</option>
-      <option value="light">淺焙 light</option>
-      <option value="medium">中焙 medium</option>
-      <option value="dark">深焙 dark</option>
+      <option value="light">淺焙 Light</option>
+      <option value="medium_light">中淺焙 Medium-Light</option>
+      <option value="medium">中焙 Medium</option>
+      <option value="medium_dark">中深焙 Medium-Dark</option>
+      <option value="dark">深焙 Dark</option>
     </select>
   </div>
   <div class="param-row">
-    <span class="param-label">採集間隔（秒）</span>
-    <input type="number" id="param-interval" value="30" min="10" max="300">
+    <span class="param-label">批次 Batch ID</span>
+    <input type="text" id="param-batch" placeholder="e.g. 20260606-001">
+  </div>
+  <div class="param-row">
+    <span class="param-label">日期 Date</span>
+    <input type="date" id="param-date">
   </div>
 </div>
 
+<!-- Log -->
 <div class="card">
   <div class="section-title">最近 log</div>
   <div class="log-lines" id="log-lines">—</div>
 </div>
 
 <script>
+let beanType = 'green';
+
+// Set today's date as default
+document.getElementById('param-date').value = new Date().toISOString().split('T')[0];
+// Auto-generate batch ID
+document.getElementById('param-batch').value = new Date().toISOString().slice(0,10).replace(/-/g,'') + '-001';
+
+function setBeanType(type) {
+  beanType = type;
+  document.getElementById('btn-green').className = 'toggle-btn' + (type==='green' ? ' active-green' : '');
+  document.getElementById('btn-roast').className = 'toggle-btn' + (type==='roast' ? ' active-roast' : '');
+  document.getElementById('row-roast').style.display = type === 'roast' ? 'flex' : 'none';
+}
+// Init: hide roast row for green beans
+document.getElementById('row-roast').style.display = 'none';
+
 function colorLine(line) {
   if (line.includes('[detect]'))  return 'detect';
   if (line.includes('[OK]') || line.includes('done')) return 'ok';
   if (line.includes('WARN') || line.includes('ERROR')) return 'warn';
   return '';
 }
-
 function escHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
@@ -179,19 +188,16 @@ async function refresh() {
     const r = await fetch('/api/status');
     const d = await r.json();
     const running = d.running;
-
     document.getElementById('dot').className = 'dot' + (running ? ' running' : '');
     document.getElementById('status-label').textContent = running ? '● 採集中' : '○ 已停止';
     document.getElementById('btn-start').style.display = running ? 'none' : 'block';
     document.getElementById('btn-stop').style.display  = running ? 'block' : 'none';
     document.getElementById('total-beans').textContent = d.total_beans ?? '—';
-
     const detects = (d.recent_log || []).filter(l => l.includes('[detect]'));
     if (detects.length) {
       const m = detects[detects.length-1].match(/frame=(\d+)/);
       if (m) document.getElementById('frame-count').textContent = '#' + m[1];
     }
-
     const logEl = document.getElementById('log-lines');
     logEl.innerHTML = (d.recent_log || []).map(l =>
       '<div class="log-line ' + colorLine(l) + '">' + escHtml(l) + '</div>'
@@ -203,10 +209,15 @@ async function refresh() {
 }
 
 async function startCapture() {
+  const roastLevel = beanType === 'green' ? 'green' : document.getElementById('param-roast').value;
   const body = {
-    origin:   document.getElementById('param-origin').value   || 'unknown',
-    roast:    document.getElementById('param-roast').value    || 'green',
-    interval: parseInt(document.getElementById('param-interval').value) || 30,
+    origin:      document.getElementById('param-origin').value  || 'unknown',
+    process:     document.getElementById('param-process').value || 'unknown',
+    roast_level: roastLevel,
+    batch_id:    document.getElementById('param-batch').value   || 'batch-001',
+    capture_date: document.getElementById('param-date').value   || new Date().toISOString().split('T')[0],
+    bean_type:   beanType,
+    interval:    30,
   };
   await fetch('/api/capture/start', {
     method: 'POST',
