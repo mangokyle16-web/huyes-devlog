@@ -12,11 +12,24 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
 
-ROOT     = Path(__file__).parent.parent          # /home/kyle/KyleClaude
-PIPELINE = ROOT / "spectral_capture/capture_pipeline.py"
-DB_PATH  = ROOT / "spectral_capture/data/beans.db"
-LOG_PATH = Path("/tmp/pipeline.log")
-UI_PATH  = Path(__file__).parent / "ui/index.html"
+ROOT       = Path(__file__).parent.parent          # /home/kyle/KyleClaude
+PIPELINE   = ROOT / "spectral_capture/capture_pipeline.py"
+DB_PATH    = ROOT / "spectral_capture/data/beans.db"
+LOG_PATH   = Path("/tmp/pipeline.log")
+UI_PATH    = Path(__file__).parent / "ui/index.html"
+
+SDK        = ROOT / "sdk_extract/linux-sdk-arm64/qssdk-20250817"
+OPENCV_LIB = SDK / "libarm64/opencv/lib"
+UVC_FIX    = ROOT / "multispectral_demo/uvc_fix.so"
+
+def _capture_env() -> dict:
+    """Build environment with QS SDK paths for capture_pipeline subprocess."""
+    import os
+    env = os.environ.copy()
+    env["LD_PRELOAD"] = str(UVC_FIX)
+    existing_ldlib = env.get("LD_LIBRARY_PATH", "")
+    env["LD_LIBRARY_PATH"] = f"{SDK}:{OPENCV_LIB}:{existing_ldlib}"
+    return env
 
 app = FastAPI()
 
@@ -79,6 +92,7 @@ def start_capture(req: StartRequest):
         stdout=LOG_PATH.open("w"),
         stderr=subprocess.STDOUT,
         cwd=str(ROOT),
+        env=_capture_env(),
     )
     return {"status": "started", "pid": _proc.pid}
 
