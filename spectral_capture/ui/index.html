@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Huyes 採集指揮台</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0f1117;
+    color: #e8eaf6;
+    font-family: -apple-system, system-ui, sans-serif;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+  h1 { font-size: 18px; font-weight: 600; color: #a5d6a7; margin-bottom: 4px; }
+  .subtitle { font-size: 12px; color: #78909c; margin-bottom: 20px; }
+
+  .card {
+    background: #1a1d27;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .status-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #546e7a;
+  }
+  .dot.running { background: #66bb6a; box-shadow: 0 0 6px #66bb6a; }
+  .status-label { font-size: 15px; font-weight: 500; }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .stat {
+    background: #0f1117;
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .stat-val {
+    font-size: 24px;
+    font-weight: 700;
+    color: #a5d6a7;
+    line-height: 1.1;
+  }
+  .stat-key { font-size: 11px; color: #78909c; margin-top: 2px; }
+
+  .btn {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .btn:active { opacity: 0.7; }
+  .btn-start { background: #388e3c; color: #fff; margin-bottom: 12px; }
+  .btn-stop  { background: #b71c1c; color: #fff; margin-bottom: 12px; }
+
+  .param-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #1e2130;
+  }
+  .param-row:last-child { border-bottom: none; }
+  .param-label { font-size: 13px; color: #b0bec5; }
+  select, input[type=number], input[type=text] {
+    background: #0f1117;
+    color: #e8eaf6;
+    border: 1px solid #37474f;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 13px;
+    width: 120px;
+    text-align: right;
+  }
+
+  .log-lines {
+    font-family: monospace;
+    font-size: 11px;
+    color: #78909c;
+    line-height: 1.6;
+    max-height: 180px;
+    overflow-y: auto;
+  }
+  .log-line { padding: 1px 0; }
+  .log-line.ok     { color: #81c784; }
+  .log-line.warn   { color: #ffb74d; }
+  .log-line.detect { color: #4dd0e1; }
+
+  .section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #546e7a;
+    margin-bottom: 8px;
+  }
+</style>
+</head>
+<body>
+
+<h1>🌿 Huyes 採集指揮台</h1>
+<p class="subtitle">Pi5 多光譜豆子採集控制</p>
+
+<div class="card">
+  <div class="status-row">
+    <div class="dot" id="dot"></div>
+    <span class="status-label" id="status-label">載入中...</span>
+  </div>
+  <div class="stat-grid">
+    <div class="stat">
+      <div class="stat-val" id="total-beans">—</div>
+      <div class="stat-key">累計豆子</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="frame-count">—</div>
+      <div class="stat-key">目前幀</div>
+    </div>
+  </div>
+</div>
+
+<button class="btn btn-start" id="btn-start" onclick="startCapture()">▶ 開始採集</button>
+<button class="btn btn-stop"  id="btn-stop"  onclick="stopCapture()" style="display:none">⏸ 暫停採集</button>
+
+<div class="card">
+  <div class="section-title">採集設定</div>
+  <div class="param-row">
+    <span class="param-label">產地</span>
+    <input type="text" id="param-origin" value="Taiwan">
+  </div>
+  <div class="param-row">
+    <span class="param-label">烘焙程度</span>
+    <select id="param-roast">
+      <option value="green">生豆 green</option>
+      <option value="light">淺焙 light</option>
+      <option value="medium">中焙 medium</option>
+      <option value="dark">深焙 dark</option>
+    </select>
+  </div>
+  <div class="param-row">
+    <span class="param-label">採集間隔（秒）</span>
+    <input type="number" id="param-interval" value="30" min="10" max="300">
+  </div>
+</div>
+
+<div class="card">
+  <div class="section-title">最近 log</div>
+  <div class="log-lines" id="log-lines">—</div>
+</div>
+
+<script>
+function colorLine(line) {
+  if (line.includes('[detect]'))  return 'detect';
+  if (line.includes('[OK]') || line.includes('done')) return 'ok';
+  if (line.includes('WARN') || line.includes('ERROR')) return 'warn';
+  return '';
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+async function refresh() {
+  try {
+    const r = await fetch('/api/status');
+    const d = await r.json();
+    const running = d.running;
+
+    document.getElementById('dot').className = 'dot' + (running ? ' running' : '');
+    document.getElementById('status-label').textContent = running ? '● 採集中' : '○ 已停止';
+    document.getElementById('btn-start').style.display = running ? 'none' : 'block';
+    document.getElementById('btn-stop').style.display  = running ? 'block' : 'none';
+    document.getElementById('total-beans').textContent = d.total_beans ?? '—';
+
+    const detects = (d.recent_log || []).filter(l => l.includes('[detect]'));
+    if (detects.length) {
+      const m = detects[detects.length-1].match(/frame=(\d+)/);
+      if (m) document.getElementById('frame-count').textContent = '#' + m[1];
+    }
+
+    const logEl = document.getElementById('log-lines');
+    logEl.innerHTML = (d.recent_log || []).map(l =>
+      '<div class="log-line ' + colorLine(l) + '">' + escHtml(l) + '</div>'
+    ).join('');
+    logEl.scrollTop = logEl.scrollHeight;
+  } catch(e) {
+    document.getElementById('status-label').textContent = '連線失敗';
+  }
+}
+
+async function startCapture() {
+  const body = {
+    origin:   document.getElementById('param-origin').value   || 'unknown',
+    roast:    document.getElementById('param-roast').value    || 'green',
+    interval: parseInt(document.getElementById('param-interval').value) || 30,
+  };
+  await fetch('/api/capture/start', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(body),
+  });
+  await refresh();
+}
+
+async function stopCapture() {
+  await fetch('/api/capture/stop', { method: 'POST' });
+  await refresh();
+}
+
+refresh();
+setInterval(refresh, 3000);
+</script>
+</body>
+</html>
