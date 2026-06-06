@@ -121,8 +121,8 @@ def start_capture(req: StartRequest):
     # 1. 先啟動 preview_daemon（相機亮燈、開始 live preview）
     _preview_proc = subprocess.Popen(
         [str(PREVIEW_BIN), str(QSBS), str(PREVIEW_FPS)],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        stdout=open("/tmp/preview_daemon.log", "w"),
+        stderr=subprocess.STDOUT,
         cwd=str(ROOT),
         env=env,
         start_new_session=True,
