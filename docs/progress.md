@@ -2,6 +2,32 @@
 
 ---
 
+## 2026-06-06
+
+**完成：**
+- 夜間自主提案：提案 05（光譜溯源護照）、提案 06（手機遠端採集指揮台）生成並 push
+- **手機遠端採集指揮台完整實作**（提案 06）：
+  - `spectral_capture/control_server.py`：FastAPI start/stop/status API（TDD，15/15 tests pass）
+  - `spectral_capture/ui/index.html`：深色主題手機 Web UI，vanilla JS，3 秒自動更新
+  - Pi5 systemd service `huyes-control` 設定開機自啟
+- **Tailscale 遠端存取設定完成**：
+  - Mac Mini 安裝 Tailscale，與 iPhone + Pi5 同一網路
+  - VNC 螢幕共享設定，iPhone 透過 RealVNC 成功連線 Mac Mini 桌面
+- 個資安全：移除 git 記錄中的 Tailscale IP
+
+**Pi5 採集指揮台使用方式：**
+- 手機瀏覽器開 `http://raspberrypi.local:8765`（同 WiFi）
+- 外出透過 Tailscale IP 連線
+
+**累計採集：** 812 筆豆子光譜向量
+
+**下一步：**
+- 繼續採集更多樣本（目標每品種 1000+ 筆）
+- Siamese MLP Phase 2（特徵提取 + pair generation）
+- 評估 qsToQab 優化（降低 20s 瓶頸）
+
+---
+
 ## 2026-06-05（晚）
 
 **完成：**
