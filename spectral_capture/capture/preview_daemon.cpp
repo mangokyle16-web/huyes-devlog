@@ -127,9 +127,14 @@ int main(int argc, char* argv[]) {
         t_last = now;
         last_processed = fid;
 
-        // Save raw .qs for capture pipeline
+        // Save raw .qs for capture pipeline + write frame ID so pipeline knows it's new
         writeFile("/dev/shm/qs_latest.qs",
                   frame_copy.data(), frame_copy.size());
+        {
+            char id_buf[32];
+            snprintf(id_buf, sizeof(id_buf), "%llu\n", (unsigned long long)fid);
+            writeFile("/dev/shm/qs_frame_id.txt", id_buf, strlen(id_buf));
+        }
 
         // Convert to RGB for preview
         uint8_t* rgbData = nullptr;

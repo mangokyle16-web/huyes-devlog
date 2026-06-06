@@ -23,6 +23,10 @@ SDK         = ROOT / 'sdk_extract/linux-sdk-arm64/qssdk-20250817'
 OPENCV_LIB  = SDK / 'libarm64/opencv/lib'
 UVC_FIX     = ROOT / 'multispectral_demo/uvc_fix.so'
 
+# preview_daemon 寫到 /dev/shm/
+SHM_QS      = Path('/dev/shm/qs_latest.qs')
+SHM_FRAME_ID = Path('/dev/shm/qs_frame_id.txt')
+
 CAPTURE_INTERVAL_S = 25
 
 
@@ -157,21 +161,57 @@ def main():
           f'batch={args.batch_id} date={args.date} interval={args.interval}s')
     print('[pipeline] Ctrl+C to stop')
 
+    # 偵測 preview_daemon 是否在跑（有 /dev/shm/qs_frame_id.txt）
+    use_shm = SHM_QS.exists() or SHM_FRAME_ID.exists()
+    if use_shm:
+        print('[pipeline] preview_daemon detected — reading from /dev/shm/ (no camera conflict)')
+    else:
+        print('[pipeline] no preview_daemon — using capture_one')
+
+    last_frame_id = -1
+
     while not stop:
         t_cycle = time.time()
         ts = t_cycle
-        qs_path = QUEUE_DIR / f'frame_{frame_n:06d}.qs'
 
-        print(f'[capture] frame {frame_n}...', flush=True)
-        cap = subprocess.run(
-            [str(CAPTURE_ONE), str(QSBS), str(qs_path)],
-            env=capture_env, capture_output=True, timeout=30)
-        if cap.returncode != 0 or not qs_path.exists():
-            print(f'[capture] FAILED: {cap.stderr.decode()[:100]}', flush=True)
-            time.sleep(2)
-            continue
-        sz = qs_path.stat().st_size
-        print(f'[capture] saved {qs_path.name} ({sz:,}b)', flush=True)
+        if use_shm:
+            # 等待 preview_daemon 寫入新幀（polling，每 0.5 秒檢查一次）
+            print(f'[capture] frame {frame_n}: waiting for preview_daemon...', flush=True)
+            waited = 0
+            while not stop:
+                try:
+                    fid = int(SHM_FRAME_ID.read_text().strip())
+                except Exception:
+                    fid = last_frame_id
+                if fid != last_frame_id and SHM_QS.exists():
+                    last_frame_id = fid
+                    break
+                time.sleep(0.5)
+                waited += 0.5
+                if waited > 60:
+                    print('[capture] TIMEOUT waiting for frame', flush=True)
+                    break
+            if stop:
+                break
+            # 複製 shm 檔案（避免 preview_daemon 覆寫中讀取）
+            qs_path = QUEUE_DIR / f'frame_{frame_n:06d}.qs'
+            import shutil
+            shutil.copy2(str(SHM_QS), str(qs_path))
+            sz = qs_path.stat().st_size
+            print(f'[capture] frame {frame_n} from shm (fid={last_frame_id}, {sz:,}b)', flush=True)
+        else:
+            # 沒有 preview_daemon，用 capture_one（舊模式）
+            qs_path = QUEUE_DIR / f'frame_{frame_n:06d}.qs'
+            print(f'[capture] frame {frame_n}...', flush=True)
+            cap = subprocess.run(
+                [str(CAPTURE_ONE), str(QSBS), str(qs_path)],
+                env=capture_env, capture_output=True, timeout=30)
+            if cap.returncode != 0 or not qs_path.exists():
+                print(f'[capture] FAILED: {cap.stderr.decode()[:100]}', flush=True)
+                time.sleep(2)
+                continue
+            sz = qs_path.stat().st_size
+            print(f'[capture] saved {qs_path.name} ({sz:,}b)', flush=True)
 
         print('[process] qsToQab + 5 indices (may take ~20s)...', flush=True)
         t_proc = time.time()
