@@ -1,59 +1,59 @@
 #!/usr/bin/env python3
 """
-Pi5 7" 螢幕 Live Preview Display
+Pi5 7" 螢幕 Live Preview Display（pygame 版）
 - 獨立程式，不依賴 capture_pipeline 或桌面 app
 - 讀取 /dev/shm/preview.ppm（preview_daemon 寫入）
-- 全螢幕 480×800 直立顯示
-- 上方：相機 RGB 預覽
-- 下方：frame 編號、開始時間、累計豆子數、fps
+- 全螢幕 480×800 直立顯示（Wayland/KMS）
 
 Run: python3 spectral_capture/preview_display.py
-     （需要有顯示器，在 Pi5 桌面環境執行）
 """
+import os
 import json
 import sqlite3
 import time
 from datetime import datetime
 from pathlib import Path
 
-import cv2
+# ── Wayland / display 環境設定 ───────────────────────────
+os.environ.setdefault('WAYLAND_DISPLAY', 'wayland-0')
+os.environ.setdefault('XDG_RUNTIME_DIR', '/run/user/1000')
+# 讓 SDL2 優先嘗試 Wayland，退回 KMS framebuffer
+if 'SDL_VIDEODRIVER' not in os.environ:
+    os.environ['SDL_VIDEODRIVER'] = 'wayland'
+
+import pygame
 import numpy as np
 
-PREVIEW_PPM    = Path('/dev/shm/preview.ppm')
-STATUS_JSON    = Path('/dev/shm/preview_status.json')
-DB_PATH        = Path('/home/kyle/KyleClaude/spectral_capture/data/beans.db')
+PREVIEW_PPM  = Path('/dev/shm/preview.ppm')
+STATUS_JSON  = Path('/dev/shm/preview_status.json')
+DB_PATH      = Path('/home/kyle/KyleClaude/spectral_capture/data/beans.db')
 
-# 7" DSI 螢幕：480×800 直立
-SCREEN_W = 480
-SCREEN_H = 800
+SCREEN_W  = 480
+SCREEN_H  = 800
+PREVIEW_H = int(SCREEN_H * 0.60)   # 480×480 上方預覽
+INFO_H    = SCREEN_H - PREVIEW_H   # 480×320 下方資訊
 
-# 預覽區佔上方 60%
-PREVIEW_H = int(SCREEN_H * 0.60)
-INFO_H    = SCREEN_H - PREVIEW_H
-
-# 顏色
-BG_COLOR      = (17, 17, 15)      # #0f1117
-GREEN_COLOR   = (106, 187, 102)   # #66bb6a
-CYAN_COLOR    = (225, 208, 77)    # #4dd0e1
-TEXT_COLOR    = (230, 234, 246)   # #e8eaf6
-MUTED_COLOR   = (121, 144, 156)   # #78909c
-DARK_CARD     = (39, 29, 26)      # #1a1d27
+# Colours (RGB)
+BG         = (15, 17, 11)
+GREEN      = (102, 187, 106)
+CYAN       = (77, 208, 225)
+TEXT       = (230, 234, 246)
+MUTED      = (121, 144, 156)
+CARD_BG    = (27, 29, 39)
 
 
-def read_ppm(path: Path):
-    """Read PPM file → numpy BGR array."""
+def read_ppm():
     try:
-        data = path.read_bytes()
-        # Parse PPM header: P6\n<W> <H>\n<maxval>\n
-        lines = []
+        data = PREVIEW_PPM.read_bytes()
         i = 0
+        lines = []
         while len(lines) < 3:
             j = data.index(b'\n', i)
             lines.append(data[i:j].decode())
             i = j + 1
         W, H = map(int, lines[1].split())
         pixels = np.frombuffer(data[i:], dtype=np.uint8).reshape(H, W, 3)
-        return cv2.cvtColor(pixels, cv2.COLOR_RGB2BGR)
+        return pygame.surfarray.make_surface(pixels.swapaxes(0, 1))
     except Exception:
         return None
 
@@ -77,102 +77,103 @@ def db_total_beans():
         return 0
 
 
-def draw_info_panel(canvas, status, total_beans, start_time):
-    """Draw info panel in the bottom INFO_H area."""
-    y0 = PREVIEW_H
-    # Background
-    canvas[y0:, :] = BG_COLOR
-
-    frame_id = status.get('frame_id', 0)
-    fps      = status.get('fps', 0.0)
-    cur_time = status.get('time', '--:--:--')
-
-    elapsed_s = int(time.time() - start_time)
-    elapsed   = f"{elapsed_s//3600:02d}:{(elapsed_s%3600)//60:02d}:{elapsed_s%60:02d}"
-
-    font   = cv2.FONT_HERSHEY_SIMPLEX
-    pad    = 20
-    y      = y0 + 28
-
-    def txt(text, x, y, color=TEXT_COLOR, scale=0.55, thick=1):
-        cv2.putText(canvas, text, (x, y), font, scale, color, thick, cv2.LINE_AA)
-
-    # ── Row 1: Frame + FPS ─────────────────────────────────
-    txt(f"Frame  #{frame_id}", pad, y, GREEN_COLOR, 0.65, 2)
-    txt(f"FPS {fps:.1f}", SCREEN_W - 110, y, MUTED_COLOR, 0.55)
-    y += 34
-
-    # ── Row 2: 開始時間 ─────────────────────────────────────
-    start_str = datetime.fromtimestamp(start_time).strftime('%H:%M:%S')
-    txt(f"Start  {start_str}", pad, y, MUTED_COLOR, 0.55)
-    txt(f"+{elapsed}", SCREEN_W - 110, y, MUTED_COLOR, 0.50)
-    y += 30
-
-    # ── Divider ────────────────────────────────────────────
-    cv2.line(canvas, (pad, y), (SCREEN_W - pad, y), (40, 40, 50), 1)
-    y += 18
-
-    # ── Row 3: 累計豆子（大字）──────────────────────────────
-    txt("累計豆子", pad, y, MUTED_COLOR, 0.48)
-    y += 34
-    cv2.putText(canvas, str(total_beans), (pad, y),
-                font, 1.4, GREEN_COLOR, 2, cv2.LINE_AA)
-    txt("顆", pad + 90, y, MUTED_COLOR, 0.55)
-
-    # ── Status dot ────────────────────────────────────────
-    dot_color = GREEN_COLOR if PREVIEW_PPM.exists() else (100, 100, 100)
-    cv2.circle(canvas, (SCREEN_W - pad - 8, y0 + 16), 7, dot_color, -1)
-    status_txt = "採集中" if PREVIEW_PPM.exists() else "待機"
-    txt(status_txt, SCREEN_W - pad - 70, y0 + 22, dot_color, 0.48)
-
-
 def main():
-    window = 'Huyes Preview'
-    cv2.namedWindow(window, cv2.WND_PROP_FULLSCREEN)
-    cv2.setWindowProperty(window, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+    pygame.init()
+    screen = pygame.display.set_mode((SCREEN_W, SCREEN_H), pygame.FULLSCREEN)
+    pygame.display.set_caption('Huyes Preview')
+    pygame.mouse.set_visible(False)
 
-    canvas     = np.zeros((SCREEN_H, SCREEN_W, 3), dtype=np.uint8)
-    start_time = time.time()
-    last_db_check = 0
-    total_beans   = 0
+    font_large  = pygame.font.SysFont('monospace', 36, bold=True)
+    font_medium = pygame.font.SysFont('monospace', 24)
+    font_small  = pygame.font.SysFont('monospace', 20)
 
-    # Placeholder preview
-    no_signal = np.zeros((PREVIEW_H, SCREEN_W, 3), dtype=np.uint8)
-    cv2.putText(no_signal, "Waiting for camera...",
-                (60, PREVIEW_H // 2), cv2.FONT_HERSHEY_SIMPLEX,
-                0.7, (80, 80, 80), 1, cv2.LINE_AA)
+    clock       = pygame.time.Clock()
+    start_time  = time.time()
+    total_beans = 0
+    last_db_t   = 0
 
-    while True:
-        # 1. Load preview image
-        preview = read_ppm(PREVIEW_PPM)
-        if preview is None:
-            canvas[:PREVIEW_H, :] = no_signal
-        else:
-            # Scale to fit SCREEN_W × PREVIEW_H (maintain aspect ratio, letterbox)
-            h, w = preview.shape[:2]
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key in (pygame.K_q, pygame.K_ESCAPE):
+                    running = False
+
+        screen.fill(BG)
+
+        # ── Preview image ────────────────────────────────
+        surf = read_ppm()
+        if surf:
+            # Scale to fit SCREEN_W × PREVIEW_H
+            w, h = surf.get_size()
             scale = min(SCREEN_W / w, PREVIEW_H / h)
             nw, nh = int(w * scale), int(h * scale)
-            resized = cv2.resize(preview, (nw, nh))
-            canvas[:PREVIEW_H, :] = 0
+            scaled = pygame.transform.smoothscale(surf, (nw, nh))
             x0 = (SCREEN_W - nw) // 2
-            canvas[:nh, x0:x0+nw] = resized
+            y0 = (PREVIEW_H - nh) // 2
+            screen.blit(scaled, (x0, y0))
+        else:
+            msg = font_small.render('Waiting for camera...', True, MUTED)
+            screen.blit(msg, (80, PREVIEW_H // 2 - 10))
 
-        # 2. Status
+        # ── Divider ──────────────────────────────────────
+        pygame.draw.line(screen, (40, 40, 55),
+                         (0, PREVIEW_H), (SCREEN_W, PREVIEW_H), 2)
+
+        # ── Info panel ───────────────────────────────────
         status = read_status()
+        frame_id = status.get('frame_id', 0)
+        fps      = status.get('fps', 0.0)
 
-        # 3. DB beans (update every 5s)
-        if time.time() - last_db_check > 5:
+        # DB update every 5s
+        now = time.time()
+        if now - last_db_t > 5:
             total_beans = db_total_beans()
-            last_db_check = time.time()
+            last_db_t = now
 
-        # 4. Draw info panel
-        draw_info_panel(canvas, status, total_beans, start_time)
+        elapsed_s = int(now - start_time)
+        elapsed   = f"{elapsed_s//3600:02d}:{(elapsed_s%3600)//60:02d}:{elapsed_s%60:02d}"
+        start_str = datetime.fromtimestamp(start_time).strftime('%H:%M:%S')
 
-        cv2.imshow(window, canvas)
-        if cv2.waitKey(300) & 0xFF == ord('q'):
-            break
+        pad = 20
+        y = PREVIEW_H + 20
 
-    cv2.destroyAllWindows()
+        # Frame + FPS
+        txt = font_medium.render(f"Frame  #{frame_id}", True, GREEN)
+        screen.blit(txt, (pad, y))
+        txt2 = font_small.render(f"FPS {fps:.1f}", True, MUTED)
+        screen.blit(txt2, (SCREEN_W - 90, y + 4))
+        y += 36
+
+        # Start time + elapsed
+        txt = font_small.render(f"Start  {start_str}  +{elapsed}", True, MUTED)
+        screen.blit(txt, (pad, y))
+        y += 32
+
+        # Divider
+        pygame.draw.line(screen, (40, 40, 55), (pad, y), (SCREEN_W - pad, y), 1)
+        y += 18
+
+        # Bean count (big)
+        label = font_small.render("累計豆子", True, MUTED)
+        screen.blit(label, (pad, y))
+        y += 28
+        count_txt = font_large.render(str(total_beans), True, GREEN)
+        screen.blit(count_txt, (pad, y))
+        unit = font_medium.render("顆", True, MUTED)
+        screen.blit(unit, (pad + count_txt.get_width() + 8, y + 8))
+
+        # Status dot
+        dot_color = GREEN if PREVIEW_PPM.exists() else MUTED
+        pygame.draw.circle(screen, dot_color,
+                           (SCREEN_W - pad - 8, PREVIEW_H + 16), 7)
+
+        pygame.display.flip()
+        clock.tick(10)   # 10fps UI refresh
+
+    pygame.quit()
 
 
 if __name__ == '__main__':
