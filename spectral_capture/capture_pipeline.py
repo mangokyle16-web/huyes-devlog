@@ -29,35 +29,40 @@ CAPTURE_INTERVAL_S = 25
 def init_db(db_path):
     db_path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(db_path), check_same_thread=False)
-    conn.executescript('''
+
+    # 1. Create table (minimal schema, always safe)
+    conn.execute('''
         CREATE TABLE IF NOT EXISTS bean_spectra (
-            id           INTEGER PRIMARY KEY AUTOINCREMENT,
-            captured_at  REAL    NOT NULL,
-            capture_date TEXT    DEFAULT '',
-            qs_file      TEXT    NOT NULL,
-            bean_cx      INTEGER NOT NULL,
-            bean_cy      INTEGER NOT NULL,
-            area_px      INTEGER NOT NULL,
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            captured_at REAL    NOT NULL,
+            qs_file     TEXT    NOT NULL,
+            bean_cx     INTEGER NOT NULL,
+            bean_cy     INTEGER NOT NULL,
+            area_px     INTEGER NOT NULL,
             b0 REAL, b1 REAL, b2 REAL, b3 REAL, b4 REAL,
-            origin       TEXT DEFAULT '',
-            process      TEXT DEFAULT 'unknown',
-            roast_level  TEXT DEFAULT 'green',
-            bean_type    TEXT DEFAULT 'green',
-            batch_id     TEXT DEFAULT '',
-            label        TEXT DEFAULT 'unknown'
-        );
-        CREATE INDEX IF NOT EXISTS idx_captured_at   ON bean_spectra(captured_at);
-        CREATE INDEX IF NOT EXISTS idx_batch_id      ON bean_spectra(batch_id);
-        CREATE INDEX IF NOT EXISTS idx_capture_date  ON bean_spectra(capture_date);
+            origin      TEXT DEFAULT '',
+            roast_level TEXT DEFAULT 'green',
+            label       TEXT DEFAULT 'unknown'
+        )
     ''')
-    # Migrate existing DB: add new columns if missing
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_captured_at ON bean_spectra(captured_at)")
+
+    # 2. Migrate: add new columns if missing
     existing = {row[1] for row in conn.execute("PRAGMA table_info(bean_spectra)")}
-    for col, defval in [
-        ('capture_date', "''"), ('process', "'unknown'"),
-        ('bean_type', "'green'"), ('batch_id', "''"),
-    ]:
+    migrations = [
+        ('capture_date', 'TEXT', "''"),
+        ('process',      'TEXT', "'unknown'"),
+        ('bean_type',    'TEXT', "'green'"),
+        ('batch_id',     'TEXT', "''"),
+    ]
+    for col, typ, defval in migrations:
         if col not in existing:
-            conn.execute(f"ALTER TABLE bean_spectra ADD COLUMN {col} TEXT DEFAULT {defval}")
+            conn.execute(f"ALTER TABLE bean_spectra ADD COLUMN {col} {typ} DEFAULT {defval}")
+
+    # 3. Create indexes on new columns (safe after migration)
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_batch_id     ON bean_spectra(batch_id)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_capture_date ON bean_spectra(capture_date)")
+
     conn.commit()
     return conn
 

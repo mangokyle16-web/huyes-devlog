@@ -103,6 +103,7 @@ def start_capture(req: StartRequest):
         stderr=subprocess.STDOUT,
         cwd=str(ROOT),
         env=_capture_env(),
+        start_new_session=True,   # 獨立 process group，killpg 才能全殺
     )
     return {"status": "started", "pid": _proc.pid}
 
@@ -112,11 +113,20 @@ def stop_capture():
     global _proc
     if not _is_running():
         return {"status": "not_running"}
-    _proc.terminate()
+    import signal as _sig
+    import os
     try:
-        _proc.wait(timeout=5)
+        # Kill the whole process group so capture_one / qs_file_processor die too
+        os.killpg(os.getpgid(_proc.pid), _sig.SIGTERM)
+    except Exception:
+        _proc.terminate()
+    try:
+        _proc.wait(timeout=8)
     except subprocess.TimeoutExpired:
-        _proc.kill()
+        try:
+            os.killpg(os.getpgid(_proc.pid), _sig.SIGKILL)
+        except Exception:
+            _proc.kill()
     _proc = None
     return {"status": "stopped"}
 
