@@ -57,7 +57,11 @@ def _recent_log(n: int = 8) -> list:
         return []
     try:
         lines = LOG_PATH.read_text().splitlines()
-        return lines[-n:] if len(lines) >= n else lines
+        # Filter out uvc_fix noise (not errors, just SDK startup messages)
+        filtered = [l for l in lines
+                    if not l.startswith('[uvc_fix]')
+                    and not l.startswith('!name:')]
+        return filtered[-n:] if len(filtered) >= n else filtered
     except Exception:
         return []
 
@@ -115,18 +119,19 @@ def stop_capture():
         return {"status": "not_running"}
     import signal as _sig
     import os
+    # SIGKILL entire process group immediately (includes qs_file_processor children)
     try:
-        # Kill the whole process group so capture_one / qs_file_processor die too
-        os.killpg(os.getpgid(_proc.pid), _sig.SIGTERM)
+        os.killpg(os.getpgid(_proc.pid), _sig.SIGKILL)
     except Exception:
-        _proc.terminate()
-    try:
-        _proc.wait(timeout=8)
-    except subprocess.TimeoutExpired:
         try:
-            os.killpg(os.getpgid(_proc.pid), _sig.SIGKILL)
-        except Exception:
             _proc.kill()
+        except Exception:
+            pass
+    # Collect zombie without blocking (don't wait for graceful shutdown)
+    try:
+        _proc.wait(timeout=2)
+    except Exception:
+        pass
     _proc = None
     return {"status": "stopped"}
 
