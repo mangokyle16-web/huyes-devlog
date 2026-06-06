@@ -103,7 +103,7 @@
 **Pi5 連線：**
 - SSH 金鑰授權完成（raspberrypi.local）
 - Pi5 health endpoint 確認（port 8080）
-- Tailscale IP：100.65.98.76
+- Tailscale 已連線
 
 ---
 
