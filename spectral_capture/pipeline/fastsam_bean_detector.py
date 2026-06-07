@@ -17,12 +17,12 @@ from pathlib import Path
 FASTSAM_HEF    = Path('/home/kyle/KyleClaude/fastsam_s_v3.hef')
 FASTSAM_SRC    = Path('/home/kyle/KyleClaude')
 
-CONF_THRESH    = 0.30   # 降低信心門檻，抓更多候選
+CONF_THRESH    = 0.50   # 信心門檻（越高越嚴格）
 IOU_THRESH     = 0.15
-MIN_AREA       = 300    # px²，原始影像座標
-MAX_AREA       = 12000  # px²
-MAX_ASPECT     = 3.0    # max(w,h)/min(w,h)
-BRIGHT_THRESH  = 180    # 平均亮度超過此值 → IR LED 亮點，排除
+MIN_AREA       = 600    # px²，原始影像座標（太小=雜訊）
+MAX_AREA       = 15000  # px²（太大=背景或 LED 光暈）
+MAX_ASPECT     = 2.5    # max(w,h)/min(w,h)（豆子是橢圓，不應太長）
+BRIGHT_THRESH  = 160    # 平均亮度超過此值 → IR LED 亮點，排除（調低）
 
 
 class FastSAMBeanDetector:

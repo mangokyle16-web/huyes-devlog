@@ -186,6 +186,21 @@ def main():
 
             # FastSAM on Hailo-8 偵測豆子（~30ms when ready）
             bean_boxes = detect_beans_live(rgb_arr)
+
+            # 每 30 幀存一張 debug 圖到 /tmp/debug_detect.jpg
+            if _fastsam_ready and rgb_arr is not None:
+                import cv2 as _cv2
+                if not hasattr(detect_beans_live, '_dbg_cnt'):
+                    detect_beans_live._dbg_cnt = 0
+                detect_beans_live._dbg_cnt += 1
+                if detect_beans_live._dbg_cnt % 30 == 1:
+                    _dbg = _cv2.cvtColor(rgb_arr, _cv2.COLOR_RGB2GRAY)
+                    _dbg = _cv2.cvtColor(_dbg, _cv2.COLOR_GRAY2BGR)
+                    for (_bx,_by,_bw,_bh) in bean_boxes:
+                        _cv2.rectangle(_dbg,(_bx,_by),(_bx+_bw,_by+_bh),(0,255,0),2)
+                    _cv2.putText(_dbg,f"beans={len(bean_boxes)}",(10,30),
+                                 _cv2.FONT_HERSHEY_SIMPLEX,0.8,(0,255,0),2)
+                    _cv2.imwrite("/tmp/debug_detect.jpg", _dbg)
             for (bx, by, bw, bh) in bean_boxes:
                 # 把原始座標 scale 到螢幕座標
                 sx = px0 + int(bx * scale)
