@@ -15,6 +15,7 @@ os.environ.setdefault('XDG_RUNTIME_DIR', '/run/user/1000')
 if 'SDL_VIDEODRIVER' not in os.environ:
     os.environ['SDL_VIDEODRIVER'] = 'wayland'
 
+import threading
 import pygame
 import numpy as np
 
@@ -23,6 +24,25 @@ STATUS_JSON  = Path('/dev/shm/preview_status.json')
 META_JSON    = Path('/dev/shm/capture_meta.json')
 DB_PATH      = Path('/home/kyle/KyleClaude/spectral_capture/data/beans.db')
 CJK_FONT     = '/usr/share/fonts/truetype/wqy/wqy-microhei.ttc'  # Latin + CJK
+
+# ── FastSAM 背景初始化 ──────────────────────────────────────
+_fastsam = None
+_fastsam_ready = False
+
+def _init_fastsam():
+    global _fastsam, _fastsam_ready
+    try:
+        sys.path.insert(0, '/home/kyle/KyleClaude')
+        from spectral_capture.pipeline.fastsam_bean_detector import FastSAMBeanDetector
+        _fastsam = FastSAMBeanDetector()
+        _fastsam_ready = True
+        print("[display] FastSAM on Hailo-8 就緒")
+    except Exception as e:
+        print(f"[display] FastSAM 初始化失敗: {e}")
+        _fastsam_ready = False
+
+# 背景 thread 初始化，不阻塞 display 啟動
+threading.Thread(target=_init_fastsam, daemon=True).start()
 
 SCREEN_W  = 800
 SCREEN_H  = 480
@@ -69,23 +89,19 @@ def read_ppm():
         return None, None
 
 
-def detect_beans_rgb(rgb: np.ndarray) -> list:
-    """Fast bean detection on RGB grayscale — runs at preview speed (~2fps)."""
-    import cv2
-    gray = cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY)
-    _, mask = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-    k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, k)
-    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE,
-                             cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9)))
-    cnts, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    beans = []
-    for cnt in cnts:
-        area = cv2.contourArea(cnt)
-        if 500 < area < 8000:
-            x, y, w, h = cv2.boundingRect(cnt)
-            beans.append((x, y, w, h))
-    return beans
+def detect_beans_live(rgb: np.ndarray) -> list:
+    """
+    FastSAM on Hailo-8 即時豆子偵測。
+    就緒前回傳空列表（不阻塞畫面）。
+    回傳 list of (x, y, w, h)。
+    """
+    if not _fastsam_ready or _fastsam is None:
+        return []
+    try:
+        detections = _fastsam.detect(rgb)
+        return [d['bbox'] for d in detections]
+    except Exception:
+        return []
 
 
 def read_json(path):
@@ -168,8 +184,8 @@ def main():
             py0 = (SCREEN_H  - nh) // 2
             screen.blit(scaled, (px0, py0))
 
-            # 偵測豆子並畫框（CPU 灰階 Otsu，~5ms）
-            bean_boxes = detect_beans_rgb(rgb_arr)
+            # FastSAM on Hailo-8 偵測豆子（~30ms when ready）
+            bean_boxes = detect_beans_live(rgb_arr)
             for (bx, by, bw, bh) in bean_boxes:
                 # 把原始座標 scale 到螢幕座標
                 sx = px0 + int(bx * scale)
@@ -181,12 +197,17 @@ def main():
             msg = fM.render("Waiting for camera...", True, MUTED)
             screen.blit(msg, ((PREVIEW_W - msg.get_width()) // 2, SCREEN_H // 2 - 10))
 
-        # 預覽左上：標題 badge
-        badge_surf = pygame.Surface((160, 28), pygame.SRCALPHA)
+        # 預覽左上：標題 + NPU 狀態 badge
+        badge_surf = pygame.Surface((200, 28), pygame.SRCALPHA)
         badge_surf.fill((0, 0, 0, 140))
         screen.blit(badge_surf, (8, 8))
         title = fM.render("🌿 Huyes 採集平台", True, GREEN_LT)
         screen.blit(title, (12, 10))
+        npu_str = "NPU✓" if _fastsam_ready else "NPU..."
+        npu_col = GREEN if _fastsam_ready else MUTED
+        npu_surf = fXS.render(npu_str, True, npu_col)
+        screen.blit(npu_surf, (12 + title.get_width() + 6,
+                                10 + (title.get_height() - npu_surf.get_height()) // 2))
 
         # 左右分隔線
         pygame.draw.line(screen, DIVIDER, (PREVIEW_W, 0), (PREVIEW_W, SCREEN_H), 1)

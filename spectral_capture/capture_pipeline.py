@@ -89,27 +89,66 @@ def insert_beans(conn, qs_file, ts, beans, args, frame_n):
     conn.commit()
 
 
-def detect_beans(cube):
+def detect_beans(cube, rgb_preview=None):
+    """
+    豆子偵測：優先用 FastSAM on Hailo-8（視覺精確），
+    fallback 用 NDVI Otsu（光譜特徵）。
+    cube: (H,W,5) float32 光譜 cube
+    rgb_preview: (H,W,3) uint8 RGB，來自 /dev/shm/preview.ppm
+    """
     import cv2
-    nir = cube[:, :, 0]
-    nir_max = float(nir.max()) or 1.0
-    nir_u8 = (nir / nir_max * 255).clip(0, 255).astype(np.uint8)
-    _, mask = cv2.threshold(nir_u8, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-    k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, k)
-    k2 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9))
-    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, k2)
-    cnts, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    beans_bbox = []  # list of (x, y, w, h)
+
+    # ── 方法 1：FastSAM on Hailo-8 ─────────────────────────
+    if rgb_preview is not None:
+        try:
+            sys.path.insert(0, str(ROOT))
+            from spectral_capture.pipeline.fastsam_bean_detector import FastSAMBeanDetector
+            if not hasattr(detect_beans, '_fastsam'):
+                detect_beans._fastsam = FastSAMBeanDetector()
+            detections = detect_beans._fastsam.detect(rgb_preview)
+            beans_bbox = [d['bbox'] for d in detections]
+            print(f'[detect] FastSAM: {len(beans_bbox)} 豆子', flush=True)
+        except Exception as e:
+            print(f'[detect] FastSAM 失敗，fallback Otsu: {e}', flush=True)
+            beans_bbox = []
+
+    # ── 方法 2：NDVI Otsu fallback ──────────────────────────
+    if not beans_bbox:
+        nir = cube[:, :, 0]
+        nir_max = float(nir.max()) or 1.0
+        nir_u8 = (nir / nir_max * 255).clip(0, 255).astype(np.uint8)
+        _, mask = cv2.threshold(nir_u8, 0, 255,
+                                cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+        k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+        mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, k)
+        mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE,
+                                cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9)))
+        cnts, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        for cnt in cnts:
+            area = cv2.contourArea(cnt)
+            if 500 < area < 8000:
+                beans_bbox.append(cv2.boundingRect(cnt))
+
+    # ── 提取光譜向量 ────────────────────────────────────────
+    H, W = cube.shape[:2]
     beans = []
-    for cnt in cnts:
-        area = cv2.contourArea(cnt)
-        if not (500 < area < 8000):
+    for (x, y, bw, bh) in beans_bbox:
+        x, y = max(0, x), max(0, y)
+        bw = min(bw, W - x)
+        bh = min(bh, H - y)
+        if bw <= 0 or bh <= 0:
             continue
-        x, y, w, h = cv2.boundingRect(cnt)
-        roi = cube[y:y+h, x:x+w]
+        roi = cube[y:y+bh, x:x+bw]
         spec = roi.mean(axis=(0, 1)).astype(np.float32)
-        beans.append({'cx': x+w//2, 'cy': y+h//2, 'area': int(area),
-                      'bbox': (x, y, w, h), 'spec': spec})
+        beans.append({
+            'cx':   x + bw // 2,
+            'cy':   y + bh // 2,
+            'area': bw * bh,
+            'bbox': (x, y, bw, bh),
+            'spec': spec,
+        })
     return sorted(beans, key=lambda b: b['cx'])
 
 
@@ -278,7 +317,19 @@ def main():
         print(f'[process] done in {proc_t:.1f}s', flush=True)
 
         if cube is not None:
-            beans = detect_beans(cube)
+            # 讀 preview RGB 供 FastSAM 使用
+            rgb_preview = None
+            try:
+                ppm_data = SHM_PREVIEW.read_bytes()
+                i2 = 0; lines2 = []
+                while len(lines2) < 3:
+                    j2 = ppm_data.index(b'\n', i2)
+                    lines2.append(ppm_data[i2:j2].decode()); i2 = j2+1
+                W2, H2 = map(int, lines2[1].split())
+                rgb_preview = np.frombuffer(ppm_data[i2:], dtype=np.uint8).reshape(H2, W2, 3)
+            except Exception:
+                pass
+            beans = detect_beans(cube, rgb_preview)
 
             # 1. 儲存原始 .qs 到批次目錄（無論有無豆子）
             import shutil as _shutil
