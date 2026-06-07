@@ -6,7 +6,7 @@ Pi5 7" 螢幕 Live Preview Display — 800×480 橫向
 
 Run: python3 spectral_capture/preview_display.py
 """
-import os, json, sqlite3, time
+import os, sys, json, sqlite3, time
 from datetime import datetime
 from pathlib import Path
 
