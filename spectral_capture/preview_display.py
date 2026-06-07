@@ -164,11 +164,18 @@ def main():
     clock = pygame.time.Clock()
     total_beans = 0
     last_db_t   = 0
+    pygame.mouse.set_visible(True)
+
+    # Exit button: 右下角 60×36px 紅色按鈕
+    EXIT_W, EXIT_H = 60, 36
+    exit_rect = pygame.Rect(SCREEN_W - EXIT_W - 4, SCREEN_H - EXIT_H - 4, EXIT_W, EXIT_H)
 
     while True:
         for ev in pygame.event.get():
             if ev.type == pygame.QUIT: return
             if ev.type == pygame.KEYDOWN and ev.key in (pygame.K_q, pygame.K_ESCAPE): return
+            if ev.type == pygame.MOUSEBUTTONDOWN:
+                if exit_rect.collidepoint(ev.pos): return
 
         screen.fill(BG)
 
@@ -347,6 +354,14 @@ def main():
                 surf = fXS.render(txt, True, log_color(line))
                 screen.blit(surf, (xL, y))
                 y += line_h
+
+        # ── Exit 按鈕（右下角，觸控可點擊）────────────────────
+        pygame.draw.rect(screen, (180, 30, 30), exit_rect, border_radius=6)
+        exit_lbl = fXS.render("✕ Exit", True, (255, 255, 255))
+        screen.blit(exit_lbl, (
+            exit_rect.x + (EXIT_W - exit_lbl.get_width()) // 2,
+            exit_rect.y + (EXIT_H - exit_lbl.get_height()) // 2,
+        ))
 
         pygame.display.flip()
         clock.tick(10)
