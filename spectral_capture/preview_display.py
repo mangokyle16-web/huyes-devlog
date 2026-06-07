@@ -53,6 +53,7 @@ ROAST_MAP = {
 
 
 def read_ppm():
+    """Returns (pygame.Surface, np.ndarray HxWx3) or (None, None)."""
     try:
         data = PREVIEW_PPM.read_bytes()
         i = 0; lines = []
@@ -60,9 +61,28 @@ def read_ppm():
             j = data.index(b'\n', i); lines.append(data[i:j].decode()); i = j+1
         W, H = map(int, lines[1].split())
         px = np.frombuffer(data[i:], dtype=np.uint8).reshape(H, W, 3)
-        return pygame.surfarray.make_surface(px.swapaxes(0, 1))
+        return pygame.surfarray.make_surface(px.swapaxes(0, 1)), px
     except Exception:
-        return None
+        return None, None
+
+
+def detect_beans_rgb(rgb: np.ndarray) -> list:
+    """Fast bean detection on RGB grayscale — runs at preview speed (~2fps)."""
+    import cv2
+    gray = cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY)
+    _, mask = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, k)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE,
+                             cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9)))
+    cnts, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    beans = []
+    for cnt in cnts:
+        area = cv2.contourArea(cnt)
+        if 500 < area < 8000:
+            x, y, w, h = cv2.boundingRect(cnt)
+            beans.append((x, y, w, h))
+    return beans
 
 
 def read_json(path):
@@ -133,14 +153,27 @@ def main():
 
         screen.fill(BG)
 
-        # ── 左側：相機預覽 ──────────────────────────────────────
-        surf = read_ppm()
-        if surf:
+        # ── 左側：相機預覽 + 即時偵測框 ────────────────────────
+        surf, rgb_arr = read_ppm()
+        bean_boxes = []
+        if surf and rgb_arr is not None:
             w, h = surf.get_size()
             scale = min(PREVIEW_W / w, SCREEN_H / h)
             nw, nh = int(w * scale), int(h * scale)
             scaled = pygame.transform.smoothscale(surf, (nw, nh))
-            screen.blit(scaled, ((PREVIEW_W - nw) // 2, (SCREEN_H - nh) // 2))
+            px0 = (PREVIEW_W - nw) // 2
+            py0 = (SCREEN_H  - nh) // 2
+            screen.blit(scaled, (px0, py0))
+
+            # 偵測豆子並畫框（CPU 灰階 Otsu，~5ms）
+            bean_boxes = detect_beans_rgb(rgb_arr)
+            for (bx, by, bw, bh) in bean_boxes:
+                # 把原始座標 scale 到螢幕座標
+                sx = px0 + int(bx * scale)
+                sy = py0 + int(by * scale)
+                sw = int(bw * scale)
+                sh = int(bh * scale)
+                pygame.draw.rect(screen, GREEN, (sx, sy, sw, sh), 2)
         else:
             msg = fM.render("Waiting for camera...", True, MUTED)
             screen.blit(msg, ((PREVIEW_W - msg.get_width()) // 2, SCREEN_H // 2 - 10))
@@ -197,9 +230,10 @@ def main():
         # ── Card 2: Stats (2欄) ─────────────────────────────────
         rounded_rect(screen, CARD_BG, (x0 + 6, y, INFO_W - 12, 62), 8)
         cw = (INFO_W - 12 - pad*2 - 6) // 2   # column width
+        live_count = str(len(bean_boxes)) if bean_boxes is not None else "_"
         for i, (val, lbl, col) in enumerate([
-            (str(total_beans), "累計豆子", GREEN_LT),
-            (f"#{frame_id}",   "目前幀",   GREEN_LT),
+            (str(total_beans), "累計豆子",   GREEN_LT),
+            (live_count,       "即時偵測",   GREEN if bean_boxes else MUTED),
         ]):
             cx = xL + i * (cw + 6)
             rounded_rect(screen, STAT_BG, (cx, y + 6, cw, 50), 6)
