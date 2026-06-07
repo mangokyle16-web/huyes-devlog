@@ -70,6 +70,26 @@ def read_json(path):
     except Exception: return {}
 
 
+LOG_PATH = Path('/tmp/pipeline.log')
+
+def read_recent_log(n=4):
+    try:
+        lines = LOG_PATH.read_text().splitlines()
+        filtered = [l for l in lines
+                    if not l.startswith('[uvc_fix]')
+                    and not l.startswith('!name:')
+                    and l.strip()]
+        return filtered[-n:]
+    except Exception:
+        return []
+
+def log_color(line):
+    if '[detect]'  in line: return (77, 208, 225)   # cyan
+    if '[process]' in line and 'done' in line: return (102, 187, 106)  # green
+    if 'WARN'  in line or 'ERROR' in line: return (255, 183, 77)  # amber
+    if '[capture]' in line: return (165, 214, 167)  # light green
+    return (120, 144, 156)  # muted
+
 def db_total_beans():
     try:
         if not DB_PATH.exists(): return 0
@@ -230,7 +250,30 @@ def main():
         val_s = fXS.render(capdate[:16], True, TEXT)
         screen.blit(lbl_s, (xL + 6, y + 4))
         screen.blit(val_s, (xR - val_s.get_width() - 4, y + 4))
-        y += lbl_s.get_height() + 12
+        y += lbl_s.get_height() + 10
+
+        # ── Log 區塊 ─────────────────────────────────────────────
+        log_lines = read_recent_log(4)
+        remaining = SCREEN_H - y - 4
+        if log_lines and remaining > 20:
+            # section title
+            sec = fXS.render("LOG", True, (50, 60, 80))
+            screen.blit(sec, (xL, y))
+            pygame.draw.line(screen, DIVIDER, (xL + sec.get_width() + 4, y + 5),
+                             (xR, y + 5), 1)
+            y += sec.get_height() + 4
+
+            line_h = fXS.size("A")[1] + 2
+            for line in log_lines:
+                if y + line_h > SCREEN_H - 2:
+                    break
+                # Truncate long lines to fit INFO_W
+                txt = line
+                while fXS.size(txt)[0] > INFO_W - pad * 2 - 4 and len(txt) > 4:
+                    txt = txt[:-1]
+                surf = fXS.render(txt, True, log_color(line))
+                screen.blit(surf, (xL, y))
+                y += line_h
 
         pygame.display.flip()
         clock.tick(10)
