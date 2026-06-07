@@ -18,13 +18,14 @@ QSBS        = ROOT / 'spectral_capture/capture/msi.qsbs'
 CAPTURE_ONE = ROOT / 'multispectral_demo/build/capture_one'
 PROCESSOR   = ROOT / 'spectral_capture/capture/qs_file_processor'
 DB_PATH     = ROOT / 'spectral_capture/data/beans.db'
+CAPTURES_DIR = ROOT / 'spectral_capture/data/captures'   # 每批次子目錄
 QUEUE_DIR   = Path('/tmp/qs_queue')
 SDK         = ROOT / 'sdk_extract/linux-sdk-arm64/qssdk-20250817'
 OPENCV_LIB  = SDK / 'libarm64/opencv/lib'
 UVC_FIX     = ROOT / 'multispectral_demo/uvc_fix.so'
 
 # preview_daemon 寫到 /dev/shm/
-SHM_QS      = Path('/dev/shm/qs_latest.qs')
+SHM_QS       = Path('/dev/shm/qs_latest.qs')
 SHM_FRAME_ID = Path('/dev/shm/qs_frame_id.txt')
 
 CAPTURE_INTERVAL_S = 25
@@ -54,10 +55,12 @@ def init_db(db_path):
     # 2. Migrate: add new columns if missing
     existing = {row[1] for row in conn.execute("PRAGMA table_info(bean_spectra)")}
     migrations = [
-        ('capture_date', 'TEXT', "''"),
-        ('process',      'TEXT', "'unknown'"),
-        ('bean_type',    'TEXT', "'green'"),
-        ('batch_id',     'TEXT', "''"),
+        ('capture_date', 'TEXT',    "''"),
+        ('process',      'TEXT',    "'unknown'"),
+        ('bean_type',    'TEXT',    "'green'"),
+        ('batch_id',     'TEXT',    "''"),
+        ('frame_n',      'INTEGER', '0'),
+        ('has_beans',    'INTEGER', '1'),   # 1=有豆, 0=空幀
     ]
     for col, typ, defval in migrations:
         if col not in existing:
@@ -71,17 +74,18 @@ def init_db(db_path):
     return conn
 
 
-def insert_beans(conn, qs_file, ts, beans, args):
+def insert_beans(conn, qs_file, ts, beans, args, frame_n):
     rows = [(ts, args.date, qs_file, b['cx'], b['cy'], b['area'],
              float(b['spec'][0]), float(b['spec'][1]), float(b['spec'][2]),
              float(b['spec'][3]), float(b['spec'][4]),
-             args.origin, args.process, args.roast, args.bean_type, args.batch_id)
+             args.origin, args.process, args.roast, args.bean_type, args.batch_id,
+             frame_n, 1)
             for b in beans]
     conn.executemany(
         'INSERT INTO bean_spectra '
         '(captured_at, capture_date, qs_file, bean_cx, bean_cy, area_px, '
-        ' b0,b1,b2,b3,b4, origin,process,roast_level,bean_type,batch_id) '
-        'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', rows)
+        ' b0,b1,b2,b3,b4, origin,process,roast_level,bean_type,batch_id, frame_n,has_beans) '
+        'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', rows)
     conn.commit()
 
 
@@ -106,6 +110,33 @@ def detect_beans(cube):
         spec = roi.mean(axis=(0, 1)).astype(np.float32)
         beans.append({'cx': x+w//2, 'cy': y+h//2, 'area': int(area), 'spec': spec})
     return sorted(beans, key=lambda b: b['cx'])
+
+
+def save_detection_image(cube, beans, capture_dir, frame_n, ts):
+    """
+    儲存灰階偵測圖片（NDVI 波段 + 豆子邊框）到 capture_dir。
+    """
+    import cv2 as _cv2
+    import datetime as _dt
+    nir = cube[:, :, 0]  # NDVI band
+    nir_max = float(nir.max()) or 1.0
+    gray = (nir / nir_max * 255).clip(0, 255).astype(np.uint8)
+    # 轉成 BGR（3-channel，方便畫彩色框和文字）
+    vis = _cv2.cvtColor(gray, _cv2.COLOR_GRAY2BGR)
+    for b in beans:
+        x, y, w, h = b['bbox']
+        _cv2.rectangle(vis, (x, y), (x+w, y+h), (255, 255, 255), 2)
+        _cv2.putText(vis, f"{b['area']}px", (x, y-4),
+                     _cv2.FONT_HERSHEY_SIMPLEX, 0.35, (200, 200, 200), 1)
+    # 右下角：幀資訊
+    ts_str = _dt.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
+    info = f"frame={frame_n}  beans={len(beans)}  {ts_str}"
+    H, W = vis.shape[:2]
+    _cv2.putText(vis, info, (6, H-8),
+                 _cv2.FONT_HERSHEY_SIMPLEX, 0.45, (180, 180, 180), 1)
+    out_path = capture_dir / f'frame_{frame_n:06d}_detect.jpg'
+    _cv2.imwrite(str(out_path), vis, [_cv2.IMWRITE_JPEG_QUALITY, 85])
+    return out_path
 
 
 def process_qs_file(qs_path, capture_env):
@@ -140,6 +171,9 @@ def main():
     args = p.parse_args()
 
     QUEUE_DIR.mkdir(parents=True, exist_ok=True)
+    # 每批次獨立目錄
+    capture_dir = CAPTURES_DIR / args.batch_id
+    capture_dir.mkdir(parents=True, exist_ok=True)
     conn = init_db(DB_PATH)
 
     stop = False
@@ -221,9 +255,32 @@ def main():
 
         if cube is not None:
             beans = detect_beans(cube)
-            insert_beans(conn, str(qs_path), ts, beans, args)
+
+            # 1. 儲存原始 .qs 到批次目錄（無論有無豆子）
+            import shutil as _shutil
+            saved_qs = capture_dir / f'frame_{frame_n:06d}.qs'
+            _shutil.copy2(str(qs_path), str(saved_qs))
+
+            # 2. 儲存灰階偵測圖片
+            detect_img = save_detection_image(cube, beans, capture_dir, frame_n, ts)
+
+            # 3. 寫入 DB（qs_file 指向永久路徑）
+            if beans:
+                insert_beans(conn, str(saved_qs), ts, beans, args, frame_n)
+            else:
+                # 空幀也記一筆（has_beans=0）供分析
+                conn.execute(
+                    'INSERT INTO bean_spectra '
+                    '(captured_at, capture_date, qs_file, bean_cx, bean_cy, area_px, '
+                    ' b0,b1,b2,b3,b4, origin,process,roast_level,bean_type,batch_id, frame_n,has_beans) '
+                    'VALUES (?,?,?,0,0,0, 0,0,0,0,0, ?,?,?,?,?,?,0)',
+                    (ts, args.date, str(saved_qs),
+                     args.origin, args.process, args.roast, args.bean_type, args.batch_id, frame_n))
+                conn.commit()
+
             total_beans += len(beans)
-            print(f'[detect]  frame={frame_n} beans={len(beans)} total={total_beans}', flush=True)
+            print(f'[detect]  frame={frame_n} beans={len(beans)} total={total_beans} '
+                  f'qs={saved_qs.name} img={detect_img.name}', flush=True)
 
         qs_path.unlink(missing_ok=True)
         frame_n += 1
