@@ -113,16 +113,39 @@ def detect_beans(cube):
     return sorted(beans, key=lambda b: b['cx'])
 
 
+SHM_PREVIEW = Path('/dev/shm/preview.ppm')
+
+
 def save_detection_image(cube, beans, capture_dir, frame_n, ts):
     """
-    儲存灰階偵測圖片（NDVI 波段 + 豆子邊框）到 capture_dir。
+    儲存灰階偵測圖片（RGB preview 轉灰階 + 豆子邊框）到 capture_dir。
+    優先使用 /dev/shm/preview.ppm 作為底圖（實際相機影像）。
     """
     import cv2 as _cv2
     import datetime as _dt
-    nir = cube[:, :, 0]  # NDVI band
-    nir_max = float(nir.max()) or 1.0
-    gray = (nir / nir_max * 255).clip(0, 255).astype(np.uint8)
-    # 轉成 BGR（3-channel，方便畫彩色框和文字）
+
+    gray = None
+    # 嘗試讀 preview.ppm（RGB → 灰階）
+    try:
+        data = SHM_PREVIEW.read_bytes()
+        i = 0; lines = []
+        while len(lines) < 3:
+            j = data.index(b'\n', i); lines.append(data[i:j].decode()); i = j+1
+        W, H = map(int, lines[1].split())
+        rgb = np.frombuffer(data[i:], dtype=np.uint8).reshape(H, W, 3)
+        gray = _cv2.cvtColor(rgb, _cv2.COLOR_RGB2GRAY)
+        # 也存一份 preview 快照
+        preview_path = capture_dir / f'frame_{frame_n:06d}_preview.jpg'
+        _cv2.imwrite(str(preview_path), gray, [_cv2.IMWRITE_JPEG_QUALITY, 85])
+    except Exception:
+        pass
+
+    # fallback：用 NDVI 波段
+    if gray is None:
+        nir = cube[:, :, 0]
+        nir_max = float(nir.max()) or 1.0
+        gray = (nir / nir_max * 255).clip(0, 255).astype(np.uint8)
+
     vis = _cv2.cvtColor(gray, _cv2.COLOR_GRAY2BGR)
     for b in beans:
         x, y, w, h = b['bbox']
