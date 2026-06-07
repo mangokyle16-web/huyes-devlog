@@ -143,7 +143,7 @@ def draw_right_panel(screen, fonts, status, meta, total_beans, start_time, last_
     # ── Metadata ──────────────────────────────────────────
     process_map = {
         'washed': '水洗', 'natural': '日曬', 'honey': '蜜處理',
-        'wet_hulled': '濕剝', 'anaerobic': '厭氧', 'other': '其他', 'unknown': '—'
+        'wet_hulled': '濕剝', 'anaerobic': '厭氧', 'other': '其他', 'unknown': '_'
     }
     roast_map = {
         'green': '生豆', 'light': '淺焙', 'medium_light': '中淺',
@@ -158,11 +158,11 @@ def draw_right_panel(screen, fonts, status, meta, total_beans, start_time, last_
         screen.blit(val, (x0 + INFO_W - pad - val.get_width(), y))
         y += lbl.get_height() + 3
 
-    origin   = meta.get('origin', '—')
-    process  = process_map.get(meta.get('process', ''), meta.get('process', '—'))
-    roast    = roast_map.get(meta.get('roast_level', ''), meta.get('roast_level', '—'))
-    batch    = meta.get('batch_id', '—')
-    cap_date = meta.get('capture_date', '—')
+    origin   = meta.get('origin', '_')
+    process  = process_map.get(meta.get('process', ''), meta.get('process', '_'))
+    roast    = roast_map.get(meta.get('roast_level', ''), meta.get('roast_level', '_'))
+    batch    = meta.get('batch_id', '_')
+    cap_date = meta.get('capture_date', '_')
 
     meta_row("產地", origin, AMBER)
     meta_row("處理", process)
