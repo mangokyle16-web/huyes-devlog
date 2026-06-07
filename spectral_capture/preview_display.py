@@ -22,7 +22,7 @@ PREVIEW_PPM  = Path('/dev/shm/preview.ppm')
 STATUS_JSON  = Path('/dev/shm/preview_status.json')
 META_JSON    = Path('/dev/shm/capture_meta.json')
 DB_PATH      = Path('/home/kyle/KyleClaude/spectral_capture/data/beans.db')
-CJK_FONT     = '/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf'
+CJK_FONT     = '/usr/share/fonts/truetype/wqy/wqy-microhei.ttc'  # Latin + CJK
 
 SCREEN_W  = 800
 SCREEN_H  = 480
