@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
 """
-Pi5 7" 螢幕 Live Preview Display — 橫向佈局（800×480）
-左側：相機 RGB 預覽
-右側：採集資訊（metadata + frame + 時間 + 持續時間 + 累計豆子）
+Pi5 7" 螢幕 Live Preview Display — 800×480 橫向
+左側（520px）：相機預覽 + 左上 Huyes 標題
+右側（280px）：手機 UI 風格的採集資訊面板
 
 Run: python3 spectral_capture/preview_display.py
 """
-import os
-import json
-import sqlite3
-import time
+import os, json, sqlite3, time
 from datetime import datetime
 from pathlib import Path
 
@@ -25,158 +22,65 @@ PREVIEW_PPM  = Path('/dev/shm/preview.ppm')
 STATUS_JSON  = Path('/dev/shm/preview_status.json')
 META_JSON    = Path('/dev/shm/capture_meta.json')
 DB_PATH      = Path('/home/kyle/KyleClaude/spectral_capture/data/beans.db')
+CJK_FONT     = '/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf'
 
-# DSI-1 螢幕：800×480 橫向（目前 transform=normal）
 SCREEN_W  = 800
 SCREEN_H  = 480
-INFO_W    = 280        # 右側資訊欄寬度
-PREVIEW_W = SCREEN_W - INFO_W   # 520px 左側預覽
+INFO_W    = 280
+PREVIEW_W = SCREEN_W - INFO_W   # 520
 
-# 顏色
-BG        = (15, 17, 11)
-PANEL_BG  = (22, 24, 34)
-GREEN     = (102, 187, 106)
-CYAN      = (77, 208, 225)
-AMBER     = (255, 183, 77)
-TEXT      = (230, 234, 246)
-MUTED     = (100, 120, 130)
-DIVIDER   = (35, 40, 55)
+# Phone UI colors
+BG        = ( 15,  17,  11)   # #0f1117
+CARD_BG   = ( 26,  29,  39)   # #1a1d27
+STAT_BG   = ( 15,  17,  11)   # #0f1117
+GREEN_LT  = (165, 214, 167)   # #a5d6a7
+GREEN     = (102, 187, 106)   # #66bb6a
+CYAN      = ( 77, 208, 225)   # #4dd0e1
+TEXT      = (230, 234, 246)   # #e8eaf6
+MUTED     = (120, 144, 156)   # #78909c
+DARK_DOT  = ( 84, 110, 122)   # #546e7a
+AMBER     = (255, 183,  77)   # #ffb74d
+DIVIDER   = ( 30,  33,  48)   # #1e2130
+
+PROCESS_MAP = {
+    'washed': '水洗', 'natural': '日曬', 'honey': '蜜處理',
+    'wet_hulled': '濕剝', 'anaerobic': '厭氧', 'other': '其他', 'unknown': '_'
+}
+ROAST_MAP = {
+    'green': '生豆', 'light': '淺焙', 'medium_light': '中淺',
+    'medium': '中焙', 'medium_dark': '中深', 'dark': '深焙'
+}
 
 
 def read_ppm():
     try:
         data = PREVIEW_PPM.read_bytes()
-        i = 0
-        lines = []
+        i = 0; lines = []
         while len(lines) < 3:
-            j = data.index(b'\n', i)
-            lines.append(data[i:j].decode())
-            i = j + 1
+            j = data.index(b'\n', i); lines.append(data[i:j].decode()); i = j+1
         W, H = map(int, lines[1].split())
-        pixels = np.frombuffer(data[i:], dtype=np.uint8).reshape(H, W, 3)
-        return pygame.surfarray.make_surface(pixels.swapaxes(0, 1))
+        px = np.frombuffer(data[i:], dtype=np.uint8).reshape(H, W, 3)
+        return pygame.surfarray.make_surface(px.swapaxes(0, 1))
     except Exception:
         return None
 
 
 def read_json(path):
-    try:
-        return json.loads(path.read_text())
-    except Exception:
-        return {}
+    try: return json.loads(path.read_text())
+    except Exception: return {}
 
 
 def db_total_beans():
     try:
-        if not DB_PATH.exists():
-            return 0
+        if not DB_PATH.exists(): return 0
         conn = sqlite3.connect(str(DB_PATH))
         n = conn.execute('SELECT COUNT(*) FROM bean_spectra').fetchone()[0]
-        conn.close()
-        return n
-    except Exception:
-        return 0
+        conn.close(); return n
+    except Exception: return 0
 
 
-def draw_right_panel(screen, fonts, status, meta, total_beans, start_time, last_db_beans):
-    """Draw the right info panel."""
-    x0 = PREVIEW_W
-    # Panel background
-    pygame.draw.rect(screen, PANEL_BG, (x0, 0, INFO_W, SCREEN_H))
-    pygame.draw.line(screen, DIVIDER, (x0, 0), (x0, SCREEN_H), 2)
-
-    fL, fM, fS, fXS = fonts   # large, medium, small, xsmall
-    pad = 14
-    x = x0 + pad
-    y = 14
-
-    def txt(text, font, color=TEXT, align_right=False):
-        nonlocal y
-        surf = font.render(text, True, color)
-        if align_right:
-            screen.blit(surf, (x0 + INFO_W - pad - surf.get_width(), y))
-        else:
-            screen.blit(surf, (x, y))
-        return surf.get_height()
-
-    def divider():
-        nonlocal y
-        y += 6
-        pygame.draw.line(screen, DIVIDER, (x, y), (x0 + INFO_W - pad, y), 1)
-        y += 8
-
-    # ── 狀態 + 時間 ───────────────────────────────────────
-    running = META_JSON.exists()
-    dot_color = GREEN if running else MUTED
-    pygame.draw.circle(screen, dot_color, (x + 6, y + 8), 5)
-    status_txt = fS.render("採集中" if running else "待機", True, dot_color)
-    screen.blit(status_txt, (x + 16, y))
-    now_str = datetime.now().strftime('%H:%M:%S')
-    now_surf = fS.render(now_str, True, CYAN)
-    screen.blit(now_surf, (x0 + INFO_W - pad - now_surf.get_width(), y))
-    y += max(status_txt.get_height(), now_surf.get_height()) + 4
-
-    # 持續時間
-    if running and start_time > 0:
-        elapsed_s = int(time.time() - start_time)
-        h = elapsed_s // 3600
-        m = (elapsed_s % 3600) // 60
-        s = elapsed_s % 60
-        elapsed_str = f"+{h:02d}:{m:02d}:{s:02d}"
-        y += txt(elapsed_str, fS, MUTED)
-    y += 2
-
-    divider()
-
-    # ── Frame + FPS ───────────────────────────────────────
-    frame_id = status.get('frame_id', 0)
-    fps      = status.get('fps', 0.0)
-
-    frame_surf = fL.render(f"#{frame_id}", True, GREEN)
-    screen.blit(frame_surf, (x, y))
-    fps_surf = fXS.render(f"fps {fps:.1f}", True, MUTED)
-    screen.blit(fps_surf, (x0 + INFO_W - pad - fps_surf.get_width(), y + frame_surf.get_height() - fps_surf.get_height()))
-    y += frame_surf.get_height() + 4
-
-    divider()
-
-    # ── Metadata ──────────────────────────────────────────
-    process_map = {
-        'washed': '水洗', 'natural': '日曬', 'honey': '蜜處理',
-        'wet_hulled': '濕剝', 'anaerobic': '厭氧', 'other': '其他', 'unknown': '_'
-    }
-    roast_map = {
-        'green': '生豆', 'light': '淺焙', 'medium_light': '中淺',
-        'medium': '中焙', 'medium_dark': '中深', 'dark': '深焙'
-    }
-
-    def meta_row(label, value, val_color=TEXT):
-        nonlocal y
-        lbl = fXS.render(label, True, MUTED)
-        val = fXS.render(value[:18], True, val_color)  # truncate long values
-        screen.blit(lbl, (x, y))
-        screen.blit(val, (x0 + INFO_W - pad - val.get_width(), y))
-        y += lbl.get_height() + 3
-
-    origin   = meta.get('origin', '_')
-    process  = process_map.get(meta.get('process', ''), meta.get('process', '_'))
-    roast    = roast_map.get(meta.get('roast_level', ''), meta.get('roast_level', '_'))
-    batch    = meta.get('batch_id', '_')
-    cap_date = meta.get('capture_date', '_')
-
-    meta_row("產地", origin, AMBER)
-    meta_row("處理", process)
-    meta_row("烘焙", roast)
-    meta_row("批次", batch)
-    meta_row("日期", cap_date)
-
-    divider()
-
-    # ── 累計豆子 ──────────────────────────────────────────
-    beans_surf = fL.render(str(total_beans), True, GREEN)
-    screen.blit(beans_surf, (x, y))
-    unit = fS.render("顆", True, MUTED)
-    screen.blit(unit, (x + beans_surf.get_width() + 4, y + beans_surf.get_height() - unit.get_height()))
+def rounded_rect(surf, color, rect, radius):
+    pygame.draw.rect(surf, color, rect, border_radius=radius)
 
 
 def main():
@@ -185,65 +89,148 @@ def main():
     pygame.display.set_caption('Huyes Preview')
     pygame.mouse.set_visible(False)
 
-    # CJK font for Chinese characters
-    CJK_FONT = '/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf'
     try:
-        fL  = pygame.font.Font(CJK_FONT, 38)
-        fM  = pygame.font.Font(CJK_FONT, 26)
-        fS  = pygame.font.Font(CJK_FONT, 20)
-        fXS = pygame.font.Font(CJK_FONT, 17)
+        fXL = pygame.font.Font(CJK_FONT, 34)  # big stat numbers
+        fL  = pygame.font.Font(CJK_FONT, 22)
+        fM  = pygame.font.Font(CJK_FONT, 17)
+        fS  = pygame.font.Font(CJK_FONT, 14)
+        fXS = pygame.font.Font(CJK_FONT, 12)
     except Exception:
-        # Fallback to system monospace if font not found
-        fL  = pygame.font.SysFont('monospace', 38, bold=True)
-        fM  = pygame.font.SysFont('monospace', 26, bold=True)
-        fS  = pygame.font.SysFont('monospace', 20)
-        fXS = pygame.font.SysFont('monospace', 17)
-    fonts = (fL, fM, fS, fXS)
+        fXL = pygame.font.SysFont('monospace', 34, bold=True)
+        fL  = pygame.font.SysFont('monospace', 22, bold=True)
+        fM  = pygame.font.SysFont('monospace', 17)
+        fS  = pygame.font.SysFont('monospace', 14)
+        fXS = pygame.font.SysFont('monospace', 12)
 
-    clock      = pygame.time.Clock()
+    clock = pygame.time.Clock()
     total_beans = 0
-    last_db_t  = 0
-    last_db_beans = 0
+    last_db_t   = 0
 
-    no_signal = pygame.Surface((PREVIEW_W, SCREEN_H))
-    no_signal.fill(BG)
-    msg = fS.render("Waiting for camera...", True, MUTED)
-    no_signal.blit(msg, ((PREVIEW_W - msg.get_width()) // 2, SCREEN_H // 2 - 10))
-
-    running = True
-    while running:
+    while True:
         for ev in pygame.event.get():
-            if ev.type == pygame.QUIT:
-                running = False
-            elif ev.type == pygame.KEYDOWN and ev.key in (pygame.K_q, pygame.K_ESCAPE):
-                running = False
+            if ev.type == pygame.QUIT: return
+            if ev.type == pygame.KEYDOWN and ev.key in (pygame.K_q, pygame.K_ESCAPE): return
 
         screen.fill(BG)
 
-        # ── 左側：相機預覽 ────────────────────────────────
+        # ── 左側：相機預覽 ──────────────────────────────────────
         surf = read_ppm()
         if surf:
             w, h = surf.get_size()
             scale = min(PREVIEW_W / w, SCREEN_H / h)
             nw, nh = int(w * scale), int(h * scale)
             scaled = pygame.transform.smoothscale(surf, (nw, nh))
-            x0 = (PREVIEW_W - nw) // 2
-            y0 = (SCREEN_H - nh) // 2
-            screen.blit(scaled, (x0, y0))
+            screen.blit(scaled, ((PREVIEW_W - nw) // 2, (SCREEN_H - nh) // 2))
         else:
-            screen.blit(no_signal, (0, 0))
+            msg = fM.render("Waiting for camera...", True, MUTED)
+            screen.blit(msg, ((PREVIEW_W - msg.get_width()) // 2, SCREEN_H // 2 - 10))
 
-        # ── 右側：資訊面板 ────────────────────────────────
-        status = read_json(STATUS_JSON)
-        meta   = read_json(META_JSON)
-        start_time = meta.get('start_epoch', 0)
+        # 預覽左上：標題 badge
+        badge_surf = pygame.Surface((160, 28), pygame.SRCALPHA)
+        badge_surf.fill((0, 0, 0, 140))
+        screen.blit(badge_surf, (8, 8))
+        title = fM.render("🌿 Huyes 採集平台", True, GREEN_LT)
+        screen.blit(title, (12, 10))
 
-        now = time.time()
-        if now - last_db_t > 4:
+        # 左右分隔線
+        pygame.draw.line(screen, DIVIDER, (PREVIEW_W, 0), (PREVIEW_W, SCREEN_H), 1)
+
+        # ── 右側：資訊面板 ──────────────────────────────────────
+        x0   = PREVIEW_W
+        pad  = 10
+        xL   = x0 + pad           # left edge of content
+        xR   = SCREEN_W - pad     # right edge
+        y    = 8
+
+        status    = read_json(STATUS_JSON)
+        meta      = read_json(META_JSON)
+        running   = META_JSON.exists()
+        start_t   = meta.get('start_epoch', 0)
+        frame_id  = status.get('frame_id', 0)
+        fps_val   = status.get('fps', 0.0)
+
+        if time.time() - last_db_t > 4:
             total_beans = db_total_beans()
-            last_db_t = now
+            last_db_t   = time.time()
 
-        draw_right_panel(screen, fonts, status, meta, total_beans, start_time, last_db_beans)
+        # ── Card 1: 狀態 + 時間 ────────────────────────────────
+        rounded_rect(screen, CARD_BG, (x0 + 6, y, INFO_W - 12, 46), 8)
+        # Status dot
+        dot_col = GREEN if running else DARK_DOT
+        pygame.draw.circle(screen, dot_col, (xL + 7, y + 14), 5)
+        status_lbl = fS.render("採集中" if running else "待機", True, dot_col)
+        screen.blit(status_lbl, (xL + 16, y + 6))
+        # Current time
+        now_str = datetime.now().strftime('%H:%M:%S')
+        t_surf = fS.render(now_str, True, CYAN)
+        screen.blit(t_surf, (xR - t_surf.get_width(), y + 6))
+        # Elapsed
+        if running and start_t > 0:
+            es = int(time.time() - start_t)
+            elapsed = f"+{es//3600:02d}:{(es%3600)//60:02d}:{es%60:02d}"
+        else:
+            elapsed = "+00:00:00"
+        el_surf = fXS.render(elapsed, True, MUTED)
+        screen.blit(el_surf, (xL + 16, y + 26))
+        y += 52
+
+        # ── Card 2: Stats (2欄) ─────────────────────────────────
+        rounded_rect(screen, CARD_BG, (x0 + 6, y, INFO_W - 12, 62), 8)
+        cw = (INFO_W - 12 - pad*2 - 6) // 2   # column width
+        for i, (val, lbl, col) in enumerate([
+            (str(total_beans), "累計豆子", GREEN_LT),
+            (f"#{frame_id}",   "目前幀",   GREEN_LT),
+        ]):
+            cx = xL + i * (cw + 6)
+            rounded_rect(screen, STAT_BG, (cx, y + 6, cw, 50), 6)
+            v_surf = fXL.render(val, True, col)
+            # Scale down if too wide
+            if v_surf.get_width() > cw - 8:
+                v_surf = pygame.transform.smoothscale(v_surf, (cw - 8, v_surf.get_height() * (cw - 8) // v_surf.get_width()))
+            screen.blit(v_surf, (cx + 6, y + 10))
+            l_surf = fXS.render(lbl, True, MUTED)
+            screen.blit(l_surf, (cx + 6, y + 44))
+        y += 68
+
+        # ── Card 3: FPS 小列 ────────────────────────────────────
+        fps_lbl = fXS.render(f"fps  {fps_val:.1f}", True, MUTED)
+        screen.blit(fps_lbl, (xL, y))
+        y += fps_lbl.get_height() + 6
+
+        # ── 分隔線 ───────────────────────────────────────────────
+        pygame.draw.line(screen, DIVIDER, (xL, y), (xR, y), 1)
+        y += 8
+
+        # ── Card 4: Metadata ─────────────────────────────────────
+        rounded_rect(screen, CARD_BG, (x0 + 6, y, INFO_W - 12, 118), 8)
+        origin  = meta.get('origin', '_')
+        process = PROCESS_MAP.get(meta.get('process', ''), '_')
+        roast   = ROAST_MAP.get(meta.get('roast_level', ''), '_')
+        batch   = meta.get('batch_id', '_')
+        capdate = meta.get('capture_date', '_')
+
+        def meta_row(label, value, val_color=TEXT):
+            nonlocal y
+            lbl_s = fXS.render(label, True, MUTED)
+            val_s = fXS.render(value[:16], True, val_color)
+            screen.blit(lbl_s, (xL + 6, y + 4))
+            screen.blit(val_s, (xR - val_s.get_width() - 4, y + 4))
+            # thin divider
+            dh = lbl_s.get_height() + 8
+            pygame.draw.line(screen, DIVIDER,
+                (xL + 6, y + dh), (xR - 4, y + dh), 1)
+            y += dh
+
+        meta_row("產地", origin,  AMBER)
+        meta_row("處理", process, TEXT)
+        meta_row("烘焙", roast,   TEXT)
+        meta_row("批次", batch,   TEXT)
+        # Last row: no divider
+        lbl_s = fXS.render("日期", True, MUTED)
+        val_s = fXS.render(capdate[:16], True, TEXT)
+        screen.blit(lbl_s, (xL + 6, y + 4))
+        screen.blit(val_s, (xR - val_s.get_width() - 4, y + 4))
+        y += lbl_s.get_height() + 12
 
         pygame.display.flip()
         clock.tick(10)
