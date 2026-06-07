@@ -219,3 +219,19 @@
 - 帶回 Mac Mini → 執行 Plan A Task 3~8（Pocketbase + Caddy + Cloudflare）
 - 確認 domain 名稱給我填入設定檔
 - NAS 採購後執行 Task 1~2
+
+---
+
+## 2026-06-08
+
+**完成：**
+- 安裝 SAM2（Mac Mini，MPS 加速）+ 對 91 張圖片跑 Automatic Mask Generator
+- 建立互動標注 App（Gradio）：SAM2 自動分割 + 點擊新增 + 手動 bbox + NMS + fill_ratio + max_texture 等 9 個過濾參數
+- 人工標注完成：72 張圖，55 幀有豆，**525 個豆子 bbox** 完成標注
+- 確認 Hailo-8 工具鏈在 Pi5（hailo_sdk_client），YOLOv8n detection 可直接 ONNX→HAR→HEF
+- 建立 YOLOv8n 訓練資料集：train=57張/472豆，val=15張/53豆
+- 啟動 YOLOv8n 背景訓練（Mac Mini MPS）
+
+**下一步：**
+- 訓練完成 → 匯出 ONNX → Pi5 compile to HEF → 部署取代 FastSAM Otsu 偵測
+- 拍攝更多樣本（不同光線/豆量）強化泛化能力
