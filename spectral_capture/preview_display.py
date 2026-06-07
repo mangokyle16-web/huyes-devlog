@@ -185,10 +185,19 @@ def main():
     pygame.display.set_caption('Huyes Preview')
     pygame.mouse.set_visible(False)
 
-    fL  = pygame.font.SysFont('monospace', 38, bold=True)   # large: frame number, bean count
-    fM  = pygame.font.SysFont('monospace', 26, bold=True)
-    fS  = pygame.font.SysFont('monospace', 20)
-    fXS = pygame.font.SysFont('monospace', 17)
+    # CJK font for Chinese characters
+    CJK_FONT = '/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf'
+    try:
+        fL  = pygame.font.Font(CJK_FONT, 38)
+        fM  = pygame.font.Font(CJK_FONT, 26)
+        fS  = pygame.font.Font(CJK_FONT, 20)
+        fXS = pygame.font.Font(CJK_FONT, 17)
+    except Exception:
+        # Fallback to system monospace if font not found
+        fL  = pygame.font.SysFont('monospace', 38, bold=True)
+        fM  = pygame.font.SysFont('monospace', 26, bold=True)
+        fS  = pygame.font.SysFont('monospace', 20)
+        fXS = pygame.font.SysFont('monospace', 17)
     fonts = (fL, fM, fS, fXS)
 
     clock      = pygame.time.Clock()
