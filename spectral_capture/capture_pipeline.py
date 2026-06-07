@@ -108,7 +108,8 @@ def detect_beans(cube):
         x, y, w, h = cv2.boundingRect(cnt)
         roi = cube[y:y+h, x:x+w]
         spec = roi.mean(axis=(0, 1)).astype(np.float32)
-        beans.append({'cx': x+w//2, 'cy': y+h//2, 'area': int(area), 'spec': spec})
+        beans.append({'cx': x+w//2, 'cy': y+h//2, 'area': int(area),
+                      'bbox': (x, y, w, h), 'spec': spec})
     return sorted(beans, key=lambda b: b['cx'])
 
 
