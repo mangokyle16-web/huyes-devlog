@@ -26,11 +26,11 @@ STATUS_JSON  = Path('/dev/shm/preview_status.json')
 META_JSON    = Path('/dev/shm/capture_meta.json')
 DB_PATH      = Path('/home/kyle/KyleClaude/spectral_capture/data/beans.db')
 
-# 橫向螢幕
+# DSI-1 螢幕：800×480 橫向（目前 transform=normal）
 SCREEN_W  = 800
 SCREEN_H  = 480
 INFO_W    = 280        # 右側資訊欄寬度
-PREVIEW_W = SCREEN_W - INFO_W   # 520px 預覽寬度
+PREVIEW_W = SCREEN_W - INFO_W   # 520px 左側預覽
 
 # 顏色
 BG        = (15, 17, 11)
