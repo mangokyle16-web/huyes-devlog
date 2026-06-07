@@ -46,7 +46,12 @@ _preview_proc:  Optional[subprocess.Popen] = None
 
 
 def _is_running() -> bool:
-    return _pipeline_proc is not None and _pipeline_proc.poll() is None
+    if _pipeline_proc is not None and _pipeline_proc.poll() is None:
+        return True
+    # Also check if preview_daemon is alive (camera might be on without pipeline)
+    if _preview_proc is not None and _preview_proc.poll() is None:
+        return True
+    return False
 
 
 def _kill_proc(proc: Optional[subprocess.Popen]):
@@ -63,6 +68,16 @@ def _kill_proc(proc: Optional[subprocess.Popen]):
         proc.wait(timeout=2)
     except Exception:
         pass
+
+
+def _pkill_by_name():
+    """Fallback: kill any lingering processes by name regardless of PID tracking."""
+    for name in ('preview_daemon', 'capture_pipeline', 'qs_file_processor', 'capture_one'):
+        try:
+            subprocess.run(['pkill', '-9', '-f', name],
+                           capture_output=True, timeout=2)
+        except Exception:
+            pass
 
 
 def _db_stats() -> dict:
@@ -170,15 +185,14 @@ def start_capture(req: StartRequest):
 @app.post("/api/capture/stop")
 def stop_capture():
     global _pipeline_proc, _preview_proc
-    if not _is_running() and _preview_proc is None:
-        return {"status": "not_running"}
 
-    # 同時殺掉 pipeline + preview_daemon（相機熄燈）
+    # 無論 PID 是否有效，一律 pkill 兜底（處理殭屍/失去追蹤的情況）
     _kill_proc(_pipeline_proc)
     _kill_proc(_preview_proc)
+    _pkill_by_name()   # 確保清乾淨
+
     _pipeline_proc = None
     _preview_proc  = None
-    # 清除 shm metadata
     try:
         Path("/dev/shm/capture_meta.json").unlink(missing_ok=True)
     except Exception:

@@ -53,15 +53,18 @@ ROAST_MAP = {
 
 
 def read_ppm():
-    """Returns (pygame.Surface, np.ndarray HxWx3) or (None, None)."""
+    """Returns (pygame.Surface grayscale, np.ndarray HxWx3 RGB) or (None, None)."""
     try:
         data = PREVIEW_PPM.read_bytes()
         i = 0; lines = []
         while len(lines) < 3:
             j = data.index(b'\n', i); lines.append(data[i:j].decode()); i = j+1
         W, H = map(int, lines[1].split())
-        px = np.frombuffer(data[i:], dtype=np.uint8).reshape(H, W, 3)
-        return pygame.surfarray.make_surface(px.swapaxes(0, 1)), px
+        rgb = np.frombuffer(data[i:], dtype=np.uint8).reshape(H, W, 3)
+        # Convert to grayscale for display
+        gray = (0.299 * rgb[:,:,0] + 0.587 * rgb[:,:,1] + 0.114 * rgb[:,:,2]).astype(np.uint8)
+        gray_rgb = np.stack([gray, gray, gray], axis=2)  # pygame needs 3-channel
+        return pygame.surfarray.make_surface(gray_rgb.swapaxes(0, 1)), rgb
     except Exception:
         return None, None
 
