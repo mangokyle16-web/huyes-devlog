@@ -113,6 +113,7 @@ class StartRequest(BaseModel):
     capture_date: str = ""
     bean_type:    str = "green"
     interval:     int = 30
+    mode:         str = "image"   # "image" = 只存圖, "spectral" = 光譜採集
 
 
 @app.get("/api/status")
@@ -160,9 +161,19 @@ def start_capture(req: StartRequest):
     import time
     time.sleep(2)
 
-    # 3. 啟動採集 pipeline（讀 shm，不碰相機）
-    _pipeline_proc = subprocess.Popen(
-        [
+    # 3. 啟動採集程式（根據 mode 選擇）
+    CAPTURE_IMAGES = ROOT / "spectral_capture/capture_images.py"
+    if req.mode == "image":
+        # 快速影像模式：只存 preview JPEG + .qs，不做光譜處理
+        cmd = [
+            sys.executable, "-u", str(CAPTURE_IMAGES),
+            "--batch-id", req.batch_id,
+            "--save-qs",
+            "--qs-every", "5",   # 每 5 幀存一次 .qs，節省空間
+        ]
+    else:
+        # 光譜採集模式：完整處理
+        cmd = [
             sys.executable, "-u", str(PIPELINE),
             "--origin",    req.origin,
             "--process",   req.process,
@@ -171,7 +182,10 @@ def start_capture(req: StartRequest):
             "--date",      date,
             "--bean-type", req.bean_type,
             "--interval",  str(req.interval),
-        ],
+        ]
+
+    _pipeline_proc = subprocess.Popen(
+        cmd,
         stdout=LOG_PATH.open("w"),
         stderr=subprocess.STDOUT,
         cwd=str(ROOT),
@@ -179,7 +193,7 @@ def start_capture(req: StartRequest):
         start_new_session=True,
     )
 
-    return {"status": "started", "pid": _pipeline_proc.pid}
+    return {"status": "started", "mode": req.mode, "pid": _pipeline_proc.pid}
 
 
 @app.post("/api/capture/stop")

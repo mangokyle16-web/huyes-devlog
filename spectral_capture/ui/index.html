@@ -108,6 +108,12 @@
 <div class="card">
   <div class="section-title">豆子資訊</div>
 
+  <!-- 採集模式 -->
+  <div class="toggle-row" style="margin-bottom:8px">
+    <div class="toggle-btn active-green" id="btn-mode-img"   onclick="setMode('image')"   style="font-size:13px">📷 存圖模式</div>
+    <div class="toggle-btn"              id="btn-mode-spec"  onclick="setMode('spectral')" style="font-size:13px">🌿 光譜模式</div>
+  </div>
+
   <!-- Bean type toggle -->
   <div class="toggle-row">
     <div class="toggle-btn active-green" id="btn-green" onclick="setBeanType('green')">🌱 生豆</div>
@@ -158,6 +164,13 @@
 
 <script>
 let beanType = 'green';
+let captureMode = 'image';
+
+function setMode(mode) {
+  captureMode = mode;
+  document.getElementById('btn-mode-img').className  = 'toggle-btn' + (mode==='image'    ? ' active-green' : '');
+  document.getElementById('btn-mode-spec').className = 'toggle-btn' + (mode==='spectral' ? ' active-green' : '');
+}
 
 // Set today's date as default
 document.getElementById('param-date').value = new Date().toISOString().split('T')[0];
@@ -218,6 +231,7 @@ async function startCapture() {
     capture_date: document.getElementById('param-date').value   || new Date().toISOString().split('T')[0],
     bean_type:   beanType,
     interval:    30,
+    mode:        captureMode,
   };
   await fetch('/api/capture/start', {
     method: 'POST',
