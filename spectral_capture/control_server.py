@@ -118,6 +118,19 @@ def start_capture(req: StartRequest):
     date = req.capture_date or datetime.date.today().isoformat()
     env  = _sdk_env()
 
+    # 寫 metadata 到 shm 供 7" 螢幕顯示
+    import json, time
+    meta = {
+        "origin":      req.origin,
+        "process":     req.process,
+        "roast_level": req.roast_level,
+        "batch_id":    req.batch_id,
+        "capture_date": date,
+        "bean_type":   req.bean_type,
+        "start_epoch": time.time(),
+    }
+    Path("/dev/shm/capture_meta.json").write_text(json.dumps(meta))
+
     # 1. 先啟動 preview_daemon（相機亮燈、開始 live preview）
     _preview_proc = subprocess.Popen(
         [str(PREVIEW_BIN), str(QSBS), str(PREVIEW_FPS)],
@@ -165,6 +178,11 @@ def stop_capture():
     _kill_proc(_preview_proc)
     _pipeline_proc = None
     _preview_proc  = None
+    # 清除 shm metadata
+    try:
+        Path("/dev/shm/capture_meta.json").unlink(missing_ok=True)
+    except Exception:
+        pass
     return {"status": "stopped"}
 
 
