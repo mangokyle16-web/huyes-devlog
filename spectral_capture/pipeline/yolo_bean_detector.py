@@ -16,11 +16,16 @@ import queue
 import numpy as np
 import cv2
 
-HEF_PATH   = "/home/kyle/KyleClaude/bean_yolov8n_v2.hef"
-INPUT_SIZE = 640
-REG_MAX    = 16   # YOLOv8 DFL bins (64 channels / 4 = 16)
-CONF_THRESH = 0.35
+HEF_PATH    = "/home/kyle/KyleClaude/bean_yolov8n_v2.hef"
+INPUT_SIZE  = 640
+REG_MAX     = 16      # YOLOv8 DFL bins (64 channels / 4 = 16)
+CONF_THRESH = 0.50
 IOU_THRESH  = 0.45
+
+# 後處理過濾（對應 SAM2 labeling 的邏輯）
+MIN_BEAN_AREA = 600   # px²，過小 = 小格子誤判
+MAX_BEAN_AREA = 80000 # px²，過大 = 背景區塊
+MAX_ASPECT    = 3.0   # max(w,h)/min(w,h)，過長 = 非豆子形狀
 
 
 def _make_anchors(strides=(8, 16, 32), grid_cell_offset=0.5):
@@ -192,12 +197,19 @@ class YOLOBeanDetector:
             bw, bh = x2 - x1, y2 - y1
             if bw <= 0 or bh <= 0:
                 continue
+            area = bw * bh
+            # 面積過濾：排除小格子誤判 & 大背景區塊
+            if not (MIN_BEAN_AREA < area < MAX_BEAN_AREA):
+                continue
+            # 長寬比過濾：豆子是橢圓，不應過長
+            if max(bw, bh) / max(min(bw, bh), 1) > MAX_ASPECT:
+                continue
             results.append({
                 'bbox':  (x1, y1, bw, bh),
                 'cx':    x1 + bw // 2,
                 'cy':    y1 + bh // 2,
                 'score': float(scores_k[i]),
-                'area':  bw * bh,
+                'area':  area,
             })
         return sorted(results, key=lambda b: b['cx'])
 
