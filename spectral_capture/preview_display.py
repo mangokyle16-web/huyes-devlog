@@ -22,27 +22,27 @@ import numpy as np
 PREVIEW_PPM  = Path('/dev/shm/preview.ppm')
 STATUS_JSON  = Path('/dev/shm/preview_status.json')
 META_JSON    = Path('/dev/shm/capture_meta.json')
+DETECT_JSON  = Path('/dev/shm/bean_detect.json')   # 供 capture_pipeline 讀取
 DB_PATH      = Path('/home/kyle/KyleClaude/spectral_capture/data/beans.db')
 CJK_FONT     = '/usr/share/fonts/truetype/wqy/wqy-microhei.ttc'  # Latin + CJK
 
-# ── FastSAM 背景初始化 ──────────────────────────────────────
-_fastsam = None
-_fastsam_ready = False
+# ── YOLOv8n Hailo-8 背景初始化 ─────────────────────────────
+_detector       = None
+_detector_ready = False
 
-def _init_fastsam():
-    global _fastsam, _fastsam_ready
+def _init_detector():
+    global _detector, _detector_ready
     try:
         sys.path.insert(0, '/home/kyle/KyleClaude')
-        from spectral_capture.pipeline.fastsam_bean_detector import FastSAMBeanDetector
-        _fastsam = FastSAMBeanDetector()
-        _fastsam_ready = True
-        print("[display] FastSAM on Hailo-8 就緒")
+        from spectral_capture.pipeline.yolo_bean_detector import YOLOBeanDetector
+        _detector = YOLOBeanDetector()
+        _detector_ready = True
+        print("[display] YOLOv8n on Hailo-8 就緒")
     except Exception as e:
-        print(f"[display] FastSAM 初始化失敗: {e}")
-        _fastsam_ready = False
+        print(f"[display] YOLOv8n 初始化失敗: {e}")
+        _detector_ready = False
 
-# 背景 thread 初始化，不阻塞 display 啟動
-threading.Thread(target=_init_fastsam, daemon=True).start()
+threading.Thread(target=_init_detector, daemon=True).start()
 
 SCREEN_W  = 800
 SCREEN_H  = 480
@@ -91,16 +91,24 @@ def read_ppm():
 
 def detect_beans_live(rgb: np.ndarray) -> list:
     """
-    FastSAM on Hailo-8 即時豆子偵測。
+    YOLOv8n on Hailo-8 即時豆子偵測（~13ms/幀）。
     就緒前回傳空列表（不阻塞畫面）。
-    回傳 list of (x, y, w, h)。
+    回傳 list of (x, y, w, h)，同時寫結果到 /dev/shm/bean_detect.json。
     """
-    if not _fastsam_ready or _fastsam is None:
+    if not _detector_ready or _detector is None:
         return []
     try:
-        detections = _fastsam.detect(rgb)
-        return [d['bbox'] for d in detections]
-    except Exception:
+        detections = _detector.detect(rgb, conf=0.50)
+        boxes = [d['bbox'] for d in detections]
+        # 寫到 shm 供 capture_pipeline 使用
+        DETECT_JSON.write_text(json.dumps({
+            'count': len(detections),
+            'boxes': boxes,
+            'scores': [d['score'] for d in detections],
+        }))
+        return boxes
+    except Exception as e:
+        print(f"[display] detect error: {e}")
         return []
 
 
@@ -195,7 +203,7 @@ def main():
             bean_boxes = detect_beans_live(rgb_arr)
 
             # 每 30 幀存一張 debug 圖到 /tmp/debug_detect.jpg
-            if _fastsam_ready and rgb_arr is not None:
+            if _detector_ready and rgb_arr is not None:
                 import cv2 as _cv2
                 if not hasattr(detect_beans_live, '_dbg_cnt'):
                     detect_beans_live._dbg_cnt = 0
@@ -225,8 +233,8 @@ def main():
         screen.blit(badge_surf, (8, 8))
         title = fM.render("🌿 Huyes 採集平台", True, GREEN_LT)
         screen.blit(title, (12, 10))
-        npu_str = "NPU✓" if _fastsam_ready else "NPU..."
-        npu_col = GREEN if _fastsam_ready else MUTED
+        npu_str = "YOLO✓" if _detector_ready else "YOLO..."
+        npu_col = GREEN if _detector_ready else MUTED
         npu_surf = fXS.render(npu_str, True, npu_col)
         screen.blit(npu_surf, (12 + title.get_width() + 6,
                                 10 + (title.get_height() - npu_surf.get_height()) // 2))
