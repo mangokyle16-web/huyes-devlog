@@ -2,6 +2,37 @@
 
 ---
 
+## 2026-06-08（晚）
+
+**完成：**
+- 拍攝批次 20260608-001：291 張影像（空帶背景 + 各種豆量）
+- SAM2 標注 App 優化：批次選擇、移除 led_excl_radius、儲存後自動跳下一張並執行
+- 完成 290 張人工標注：有豆 134 張、背景 156 張、1096 個豆子
+- 整合昨天（72張）+ 今天（290張）= **362 張，1621 個豆子**
+- 建立訓練資料集 v2：train=289張/1321豆，val=95張/408豆
+- YOLOv8n v2 背景訓練啟動（背景負樣本大幅增加，預期 IR LED 誤判改善）
+
+**下一步：**
+- 訓練完成 → 評估 IR LED 誤判是否改善 → 重新編譯 HEF → 部署 Pi5
+
+---
+
+## 2026-06-08
+
+**完成：**
+- 安裝 SAM2（Mac Mini，MPS 加速）+ 對 91 張圖片跑 Automatic Mask Generator
+- 建立互動標注 App（Gradio）：SAM2 自動分割 + 點擊新增 + 手動 bbox + NMS + fill_ratio + max_texture 等多個過濾參數
+- 人工標注完成第一批：72 張圖，525 個豆子 bbox
+- 確認 Hailo-8 工具鏈在 Pi5（hailo_sdk_client），YOLOv8n detection 可直接 ONNX→HAR→HEF
+- YOLOv8n 訓練完成：mAP50=96.8%，Precision=96.6%，Recall=92.5%
+- Hailo DFC 編譯成功：bean_yolov8n.hef（4.3MB），Pi5 推論 **13.5ms/幀（~74fps）**
+- YOLOv8n 整合進 Pi5 preview_display，即時偵測框顯示
+
+**問題：**
+- IR LED 亮點被誤判為豆子（需更多背景負樣本訓練）
+
+---
+
 ## 2026-06-06
 
 **完成：**
