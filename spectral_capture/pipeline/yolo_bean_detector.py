@@ -23,9 +23,10 @@ CONF_THRESH = 0.50
 IOU_THRESH  = 0.45
 
 # 後處理過濾（對應 SAM2 labeling 的邏輯）
-MIN_BEAN_AREA = 600   # px²，過小 = 小格子誤判
-MAX_BEAN_AREA = 80000 # px²，過大 = 背景區塊
-MAX_ASPECT    = 3.0   # max(w,h)/min(w,h)，過長 = 非豆子形狀
+MIN_BEAN_AREA  = 600   # px²，過小 = 小格子誤判
+MAX_BEAN_AREA  = 80000 # px²，過大 = 背景區塊
+MAX_ASPECT     = 3.0   # max(w,h)/min(w,h)，過長 = 非豆子形狀
+MAX_BRIGHTNESS = 160   # bbox 平均亮度上限，超過 = IR LED 高反光區域
 
 
 def _make_anchors(strides=(8, 16, 32), grid_cell_offset=0.5):
@@ -129,6 +130,9 @@ class YOLOBeanDetector:
         """
         H, W = img_rgb.shape[:2]
 
+        # 預先計算灰階圖供亮度過濾用
+        img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2GRAY)
+
         # resize + to NHWC uint8
         inp = cv2.resize(img_rgb, (INPUT_SIZE, INPUT_SIZE))[np.newaxis].astype(np.uint8)
 
@@ -203,6 +207,10 @@ class YOLOBeanDetector:
                 continue
             # 長寬比過濾：豆子是橢圓，不應過長
             if max(bw, bh) / max(min(bw, bh), 1) > MAX_ASPECT:
+                continue
+            # 亮度過濾：排除 IR LED 高反光區域
+            roi = img_gray[y1:y2, x1:x2]
+            if roi.size > 0 and roi.mean() > MAX_BRIGHTNESS:
                 continue
             results.append({
                 'bbox':  (x1, y1, bw, bh),
