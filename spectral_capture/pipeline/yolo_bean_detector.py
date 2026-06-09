@@ -247,7 +247,30 @@ class YOLOBeanDetector:
                 'score': float(scores_k[i]),
                 'area':  area,
             })
-        return sorted(results, key=lambda b: b['cx'])
+        if not results:
+            return []
+
+        # ── 中心點距離合併 ──────────────────────────────────────
+        # INT8 量化讓同一顆豆產生多個低重疊框，中心距離近 → 合成一個
+        avg_dim      = np.mean([max(b['bbox'][2], b['bbox'][3]) for b in results])
+        cdist_thresh = avg_dim * 0.75   # 75% 豆徑內視為同一顆
+
+        by_score = sorted(results, key=lambda b: -b['score'])
+        used     = [False] * len(by_score)
+        final    = []
+        for i, a in enumerate(by_score):
+            if used[i]:
+                continue
+            for j, b in enumerate(by_score):
+                if i == j or used[j]:
+                    continue
+                dist = ((a['cx']-b['cx'])**2 + (a['cy']-b['cy'])**2) ** 0.5
+                if dist < cdist_thresh:
+                    used[j] = True      # 低分框被高分框吸收
+            final.append(a)
+            used[i] = True
+
+        return sorted(final, key=lambda b: b['cx'])
 
     def close(self):
         self._req_q.put(None)
