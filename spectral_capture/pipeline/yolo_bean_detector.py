@@ -26,7 +26,7 @@ IOU_THRESH  = 0.45
 MIN_BEAN_AREA  = 600   # px²，過小 = 小格子誤判
 MAX_BEAN_AREA  = 80000 # px²，過大 = 背景區塊
 MAX_ASPECT     = 3.0   # max(w,h)/min(w,h)，過長 = 非豆子形狀
-MAX_BRIGHTNESS = 160   # bbox 平均亮度上限，超過 = IR LED 高反光區域
+MAX_BRIGHTNESS = 200   # bbox 最大亮度上限，超過 = IR LED 高反光（用 max 而非 mean）
 
 
 def _make_anchors(strides=(8, 16, 32), grid_cell_offset=0.5):
@@ -208,9 +208,9 @@ class YOLOBeanDetector:
             # 長寬比過濾：豆子是橢圓，不應過長
             if max(bw, bh) / max(min(bw, bh), 1) > MAX_ASPECT:
                 continue
-            # 亮度過濾：排除 IR LED 高反光區域
+            # 亮度過濾：排除 IR LED 高反光（max 比 mean 更精準）
             roi = img_gray[y1:y2, x1:x2]
-            if roi.size > 0 and roi.mean() > MAX_BRIGHTNESS:
+            if roi.size > 0 and int(roi.max()) > MAX_BRIGHTNESS:
                 continue
             results.append({
                 'bbox':  (x1, y1, bw, bh),
