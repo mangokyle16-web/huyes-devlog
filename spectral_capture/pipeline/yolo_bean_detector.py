@@ -68,14 +68,42 @@ def _decode_bbox(bbox_head):
     return np.concatenate([xy_min, xy_max], axis=1)   # (N,4) x1y1x2y2
 
 
-def _nms(boxes, scores, iou_thresh):
-    """OpenCV NMS → indices to keep."""
+def _soft_nms(boxes, scores, sigma=0.5, score_thresh=0.25):
+    """
+    Soft-NMS with Gaussian decay (Bodla et al. 2017).
+    重疊越多 → 分數衰減越多，而非直接刪除。
+    比 hard NMS 對 INT8 量化的多框問題更穩健。
+    sigma: 高斯衰減強度（越小越嚴格）
+    """
     if len(boxes) == 0:
         return []
-    xywh = [[float(b[0]), float(b[1]),
-              float(b[2] - b[0]), float(b[3] - b[1])] for b in boxes]
-    idx = cv2.dnn.NMSBoxes(xywh, scores.tolist(), 0.0, iou_thresh)
-    return idx.flatten().tolist() if len(idx) else []
+
+    boxes_arr  = np.array(boxes, dtype=np.float32)   # (N, 4) xyxy
+    scores_arr = np.array(scores, dtype=np.float32).copy()
+    N = len(scores_arr)
+    indices = list(range(N))
+    keep = []
+
+    while indices:
+        # 取當前最高分
+        best = max(indices, key=lambda i: scores_arr[i])
+        keep.append(best)
+        indices.remove(best)
+
+        bx1, by1, bx2, by2 = boxes_arr[best]
+        for i in indices[:]:
+            ix1, iy1, ix2, iy2 = boxes_arr[i]
+            inter_w = max(0, min(bx2, ix2) - max(bx1, ix1))
+            inter_h = max(0, min(by2, iy2) - max(by1, iy1))
+            inter   = inter_w * inter_h
+            union   = ((bx2-bx1)*(by2-by1) + (ix2-ix1)*(iy2-iy1) - inter)
+            iou     = inter / union if union > 0 else 0.0
+            # Gaussian decay
+            scores_arr[i] *= np.exp(-(iou ** 2) / sigma)
+            if scores_arr[i] < score_thresh:
+                indices.remove(i)
+
+    return keep
 
 
 class YOLOBeanDetector:
@@ -186,8 +214,8 @@ class YOLOBeanDetector:
         xy_max = (anchors_k + dist[:, 2:]) * strides_k[:, None]
         boxes_640 = np.concatenate([xy_min, xy_max], axis=1)
 
-        # ── NMS ────────────────────────────────────────────────────
-        keep_idx = _nms(boxes_640, scores_k, iou)
+        # ── Soft-NMS ────────────────────────────────────────────────
+        keep_idx = _soft_nms(boxes_640, scores_k)
         if not keep_idx:
             return []
 
