@@ -253,7 +253,7 @@ class YOLOBeanDetector:
         # ── 中心點距離合併 ──────────────────────────────────────
         # INT8 量化讓同一顆豆產生多個低重疊框，中心距離近 → 合成一個
         avg_dim      = np.mean([max(b['bbox'][2], b['bbox'][3]) for b in results])
-        cdist_thresh = avg_dim * 0.75   # 75% 豆徑內視為同一顆
+        cdist_thresh = avg_dim * 1.0    # 100% 豆徑內視為同一顆
 
         by_score = sorted(results, key=lambda b: -b['score'])
         used     = [False] * len(by_score)
