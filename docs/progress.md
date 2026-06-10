@@ -266,3 +266,56 @@
 **下一步：**
 - 訓練完成 → 匯出 ONNX → Pi5 compile to HEF → 部署取代 FastSAM Otsu 偵測
 - 拍攝更多樣本（不同光線/豆量）強化泛化能力
+
+---
+
+## 2026-06-09
+
+**完成：**
+- 採集批次 20260609-001（多光譜 QS 原始檔 + 預覽 JPG）
+- YOLOv8n v3 訓練完成：3468 張（含 12× 旋轉增強）mAP50=99.3%，HEF 編譯部署 Pi5
+- 診斷 INT8 bbox 錯位根本原因：DFL cv2 head 64ch 在 Hailo-8 INT8 量化後 softmax 分布失真
+- 實施 Soft-NMS（Gaussian decay σ=0.5）取代 hard NMS：24 框 → 9 框
+- 重新 calibration（513 張圖）+ DFC 3.33.1 升級：bean_yolov8n_v3_331.hef
+- 嘗試 center-distance merge 合併重疊框（效果有限，位置仍不正確）
+- 實施 QAT v1（fake INT8 quant 30 epochs，動態 scale）：bean_qat.hef，明顯改善但不夠準
+
+**關鍵發現：**
+- Mac FP32 同一張圖 9 顆正確，Pi5 INT8 多框且位置偏移 → 量化造成 DFL decode 錯誤
+- IR LED 高反光誤判：改用 roi.max()>200 過濾（比 mean 更精準）
+
+**下一步：**
+- QAT v2（固定 scale）+ REG_MAX=4 根治方案
+
+---
+
+## 2026-06-10
+
+**完成：**
+- **QAT v2**（固定 scale EMA calibration + 50 epochs）：訓練完成，部署 Pi5 bean_qat_v2.hef
+  - 測試結果：18 框（比 v1 更差），確認 QAT 方向有根本瓶頸
+- **REG_MAX=4 研究與實作**
+  - 根本原因確認：REG_MAX=16 → 每 bin 16 levels INT8 精度；改為 4 → 每 bin 64 levels
+  - Ultralytics 技術障礙：DetectionTrainer.setup_model() 固定從 YAML 重建，in-memory 修改被覆蓋
+  - 三次嘗試 → 第三次引入 OpenAI Codex 協助分析，Codex 實作 `RegMax4DetectionTrainer`（override `get_model()`）
+  - 訓練中：28/50 epochs，mAP50=99.4%，mAP50-95=97.0%（持續提升）
+- **Codex 整合**
+  - 安裝 OpenAI Codex CLI（npm + standalone）、啟動 remote-control daemon
+  - 透過 AppleScript 把任務輸入 Codex 桌面 App
+  - 發現讀取 `~/.codex/sessions/YYYY/MM/DD/*.jsonl` 可文字監控 Codex 執行過程（免截圖）
+- **LocateAnything（NVIDIA）可行性分析**（Codex + web search）
+  - 結論：VLM grounding 模型，無 Hailo-8 export path，不可行
+  - 重要發現：Hailo 官方數據 YOLOv8n float→hardware mAP 差距僅 0.6%，問題在 export/calibration
+  - 備選架構推薦：YOLOX-tiny（742 FPS）、CenterNet
+- **三點比較腳本**：`~/Desktop/compare_three_outputs.py`
+  - 同一張圖分別跑 Mac FP32 / Hailo DFC 模擬 / Pi5 實機，輸出三格比較圖
+- **Git 提案更新**：docs/proposals/07（INT8修復）+ 08（多分類升級）
+
+**進行中（睡眠期間自動執行）：**
+- REG_MAX=4 訓練（~50/50 epochs）
+- 完成後自動：extract heads → Docker HEF 編譯（全 513 張 calib）→ scp Pi5 → 三點比較
+
+**下一步（明天）：**
+- 確認 REG_MAX=4 三點比較結果
+- 若精度達標：接提案 08（多分類）或 06（手機指揮台）
+- 若仍偏移：改用 YOLOX-tiny 或 CenterNet
