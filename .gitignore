@@ -14,3 +14,4 @@ hailo-compile/*.har
 hailo-compile/*.onnx
 hailo-compile/*.log
 *.db
+.gstack/

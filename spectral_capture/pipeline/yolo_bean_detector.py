@@ -16,7 +16,7 @@ import queue
 import numpy as np
 import cv2
 
-HEF_PATH    = "/home/kyle/KyleClaude/bean_qat.hef"
+HEF_PATH    = "/home/kyle/KyleClaude/bean_qat_v2.hef"
 INPUT_SIZE  = 640
 REG_MAX     = 16      # YOLOv8 DFL bins (64 channels / 4 = 16)
 CONF_THRESH = 0.50
