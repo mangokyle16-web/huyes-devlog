@@ -350,3 +350,35 @@
 - Exp file：`exps/default/yolox_tiny_beans.py`
 - Dataset：`~/Desktop/coco_beans/`（COCO format）
 - Checkpoint：`YOLOX_outputs/yolox_tiny_beans/`
+
+---
+
+## 2026-06-12
+
+**YOLOX-tiny 訓練完成 + Hailo-8 INT8 測試成功！**
+
+**訓練結果（epoch 15/50 checkpoint）：**
+- AP@50: 98.9%，AP@50:95: 91.5%（已達可用標準）
+
+**HEF 編譯問題與解法（累計 6 次嘗試）：**
+1. opset 18 不相容 → 改 opset 11
+2. Resize op 有 `keep_aspect_ratio_policy`/`antialias` opset18 屬性 → 手動移除
+3. Resize roi 輸入為空字串 → 加空 tensor initializer
+4. Conv 節點缺少 `kernel_shape` → 從 weight shape 推算補齊
+5. 最終成功：4.37MB HEF → 9.6MB（YOLOX-tiny 比 YOLOv8n 大一點）
+
+**Pi5 實機測試結果（YOLOX-tiny INT8 vs Mac FP32）：**
+- 9 顆豆子全部正確偵測
+- 中心點誤差最大 4px，多數 ≤2px
+- 完全解決了 YOLOv8n INT8 的 bbox 錯位問題
+
+**根本原因確認：**
+YOLOv8n 的 DFL (Distribution Focal Loss) head 需要 softmax over 16 bins，INT8 量化讓分布嚴重失真。
+YOLOX 使用直接回歸（4個值），不依賴 DFL，INT8 量化後精度幾乎無損。
+
+**比較圖：** `docs/int8_comparison/6_yolox_tiny_pi5.jpg`
+
+**下一步：**
+- 訓練還在繼續（epoch ~15/50），完成後更新 best_ckpt 重新 export + 部署
+- 撰寫 YOLOX-tiny 的 Pi5 detector 類（取代 yolo_bean_detector.py）
+- 接提案 08（瑕疵豆多分類）或 06（手機指揮台）
