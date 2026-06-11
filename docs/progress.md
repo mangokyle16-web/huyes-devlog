@@ -319,3 +319,34 @@
 - 確認 REG_MAX=4 三點比較結果
 - 若精度達標：接提案 08（多分類）或 06（手機指揮台）
 - 若仍偏移：改用 YOLOX-tiny 或 CenterNet
+
+---
+
+## 2026-06-11
+
+**完成：**
+- INT8 根因診斷（快速 bounded test）
+  - 比較 FP32 ONNX vs Hailo INT8 在同一 anchor 的 cv2 raw logits
+  - 結論：9 顆豆子位置 cls score 全部 < 0.4，DFL bin 系統性偏移，Hailo logit range 是 FP32 的 3×
+  - 確認：raw logits 已破壞，不是後處理問題 → 放棄 YOLOv8n INT8
+- INT8 精度比較圖（5 種方法）上傳 GitHub `docs/int8_comparison/`
+- Codex 分析 YOLOX-tiny 可行性（與 YOLOv8n 方向比較）
+  - 結論：切換 YOLOX-tiny，避開 DFL，Hailo model zoo 原生支援
+
+**YOLOX-tiny 訓練環境建立：**
+- Clone hailo-ai/YOLOX，安裝 loguru/pycocotools/tensorboard
+- YOLO → COCO format 轉換（3468 train / 95 val）
+- 6 個 MPS patch（trainer/prefetcher/yolo_head/boxes/evaluators）
+- 修正 random_size=(13,13) 避免 MPS graph 重編
+- Codex 審查 config → act=lrelu, enable_mixup=False, mosaic_scale=(0.5,1.5), no_aug_epochs=10
+
+**進行中（訓練中）：**
+- YOLOX-tiny fine-tune from Megvii pretrained weights（epoch 12/50）
+- ETA：約 5 小時（預計 2026-06-12 早上完成）
+- 完成後：ONNX export → DFC HEF 編譯 → Pi5 部署 → 比較 YOLOX vs YOLOv8n
+
+**YOLOX 訓練路徑：**
+- 腳本：`~/Desktop/hailo-yolox/`
+- Exp file：`exps/default/yolox_tiny_beans.py`
+- Dataset：`~/Desktop/coco_beans/`（COCO format）
+- Checkpoint：`YOLOX_outputs/yolox_tiny_beans/`
