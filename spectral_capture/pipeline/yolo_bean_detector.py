@@ -16,9 +16,9 @@ import queue
 import numpy as np
 import cv2
 
-HEF_PATH    = "/home/kyle/KyleClaude/bean_qat_v2.hef"
+HEF_PATH    = "/home/kyle/KyleClaude/bean_regmax4_v3.hef"
 INPUT_SIZE  = 640
-REG_MAX     = 16      # YOLOv8 DFL bins (64 channels / 4 = 16)
+REG_MAX     = 4       # REG_MAX=4: cv2 16ch (4×4 DFL bins), INT8 精度 4× 提升
 CONF_THRESH = 0.50
 IOU_THRESH  = 0.45
 
@@ -179,10 +179,10 @@ class YOLOBeanDetector:
             stride = INPUT_SIZE // fh        # 640/80=8, 640/40=16, 640/20=32
             C = arr.shape[-1]
             flat = arr.reshape(-1, C)        # (H*W, C)
-            if C == 64:
+            if C == REG_MAX * 4:          # bbox DFL head (16ch for REG_MAX=4, 64ch for REG_MAX=16)
                 bbox_by_stride[stride] = flat
             else:
-                cls_by_stride[stride] = flat   # (H*W, 1)
+                cls_by_stride[stride] = flat   # class logits (H*W, 1)
 
         # ── concatenate 3 scales ───────────────────────────────────
         strides = [8, 16, 32]
