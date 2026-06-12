@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Huyes 採集
+Comment=咖啡豆多光譜採集
+Exec=bash /home/kyle/KyleClaude/spectral_capture/launch_ui.sh
+Icon=camera-photo
+Terminal=false
+Categories=Utility;

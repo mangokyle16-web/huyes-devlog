@@ -24,6 +24,7 @@ STATUS_JSON  = Path('/dev/shm/preview_status.json')
 META_JSON    = Path('/dev/shm/capture_meta.json')
 DETECT_JSON  = Path('/dev/shm/bean_detect.json')   # 供 capture_pipeline 讀取
 DB_PATH      = Path('/home/kyle/KyleClaude/spectral_capture/data/beans.db')
+BATCH_DIR    = Path('/home/kyle/KyleClaude/spectral_capture/data/batches')
 CJK_FONT     = '/usr/share/fonts/truetype/wqy/wqy-microhei.ttc'  # Latin + CJK
 
 # ── YOLOv8n Hailo-8 背景初始化 ─────────────────────────────
@@ -146,6 +147,18 @@ def db_total_beans():
     except Exception: return 0
 
 
+def save_batch_json(batch_id, total_beans, frames, batch_dir=BATCH_DIR):
+    batch_dir.mkdir(parents=True, exist_ok=True)
+    out_path = batch_dir / f"batch_{batch_id}.json"
+    payload = {
+        "batch_id": batch_id,
+        "total_beans": total_beans,
+        "frames": frames,
+    }
+    out_path.write_text(json.dumps(payload, ensure_ascii=False, separators=(',', ':')))
+    return out_path
+
+
 def rounded_rect(surf, color, rect, radius):
     pygame.draw.rect(surf, color, rect, border_radius=radius)
 
@@ -172,11 +185,19 @@ def main():
     clock = pygame.time.Clock()
     total_beans = 0
     last_db_t   = 0
+    session_beans = 0
+    batch_frames = []
+    seen_frame_ids = set()
+    paused = False
+    flash_msg = ""
+    flash_until = 0
     pygame.mouse.set_visible(True)
 
     # Exit button: 右下角 60×36px 紅色按鈕
     EXIT_W, EXIT_H = 60, 36
     exit_rect = pygame.Rect(SCREEN_W - EXIT_W - 4, SCREEN_H - EXIT_H - 4, EXIT_W, EXIT_H)
+    PAUSE_W, PAUSE_H = 92, 36
+    pause_rect = pygame.Rect(exit_rect.x - PAUSE_W - 6, exit_rect.y, PAUSE_W, PAUSE_H)
 
     while True:
         for ev in pygame.event.get():
@@ -184,6 +205,18 @@ def main():
             if ev.type == pygame.KEYDOWN and ev.key in (pygame.K_q, pygame.K_ESCAPE): return
             if ev.type == pygame.MOUSEBUTTONDOWN:
                 if exit_rect.collidepoint(ev.pos): return
+                if pause_rect.collidepoint(ev.pos):
+                    if paused:
+                        session_beans = 0
+                        batch_frames = []
+                        seen_frame_ids = set()
+                        paused = False
+                    else:
+                        ts = datetime.now().strftime('%Y%m%d_%H%M%S')
+                        save_batch_json(ts, session_beans, batch_frames)
+                        flash_msg = "已儲存批次"
+                        flash_until = time.time() + 1.5
+                        paused = True
 
         screen.fill(BG)
 
@@ -255,6 +288,18 @@ def main():
         start_t   = meta.get('start_epoch', 0)
         frame_id  = status.get('frame_id', 0)
         fps_val   = status.get('fps', 0.0)
+        detect    = read_json(DETECT_JSON)
+        detect_count = int(detect.get('count', 0) or 0)
+        detect_boxes = detect.get('boxes', [])
+
+        if not paused and frame_id not in seen_frame_ids:
+            seen_frame_ids.add(frame_id)
+            session_beans += detect_count
+            batch_frames.append({
+                "frame_id": int(frame_id),
+                "count": detect_count,
+                "boxes": detect_boxes,
+            })
 
         if time.time() - last_db_t > 4:
             total_beans = db_total_beans()
@@ -279,6 +324,8 @@ def main():
             elapsed = "+00:00:00"
         el_surf = fXS.render(elapsed, True, MUTED)
         screen.blit(el_surf, (xL + 16, y + 26))
+        cum_surf = fM.render(f"累積 {session_beans}", True, GREEN_LT)
+        screen.blit(cum_surf, (SCREEN_W - cum_surf.get_width() - 10, y + 26))
         y += 52
 
         # ── Card 2: Stats (2欄) ─────────────────────────────────
@@ -362,6 +409,22 @@ def main():
                 surf = fXS.render(txt, True, log_color(line))
                 screen.blit(surf, (xL, y))
                 y += line_h
+
+        if flash_msg and time.time() < flash_until:
+            flash = fM.render(flash_msg, True, GREEN_LT)
+            screen.blit(flash, (
+                pause_rect.x - flash.get_width() - 8,
+                pause_rect.y + (PAUSE_H - flash.get_height()) // 2,
+            ))
+
+        # ── Pause/Resume 按鈕（Exit 左側）────────────────────
+        pause_col = AMBER if paused else GREEN
+        pygame.draw.rect(screen, pause_col, pause_rect, border_radius=6)
+        pause_lbl = fXS.render("繼續採集" if paused else "暫停採集", True, BG)
+        screen.blit(pause_lbl, (
+            pause_rect.x + (PAUSE_W - pause_lbl.get_width()) // 2,
+            pause_rect.y + (PAUSE_H - pause_lbl.get_height()) // 2,
+        ))
 
         # ── Exit 按鈕（右下角，觸控可點擊）────────────────────
         pygame.draw.rect(screen, (180, 30, 30), exit_rect, border_radius=6)
