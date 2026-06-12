@@ -19,6 +19,12 @@ import threading
 import pygame
 import numpy as np
 
+# 確保以 `python3 spectral_capture/preview_display.py` 直接執行時也能 import 套件
+if '/home/kyle/KyleClaude' not in sys.path:
+    sys.path.insert(0, '/home/kyle/KyleClaude')
+
+from spectral_capture.pipeline.bean_tracker import BeanTracker
+
 PREVIEW_PPM  = Path('/dev/shm/preview.ppm')
 STATUS_JSON  = Path('/dev/shm/preview_status.json')
 META_JSON    = Path('/dev/shm/capture_meta.json')
@@ -153,6 +159,7 @@ def save_batch_json(batch_id, total_beans, frames, batch_dir=BATCH_DIR):
     payload = {
         "batch_id": batch_id,
         "total_beans": total_beans,
+        "total_crossed": total_beans,
         "frames": frames,
     }
     out_path.write_text(json.dumps(payload, ensure_ascii=False, separators=(',', ':')))
@@ -186,6 +193,8 @@ def main():
     total_beans = 0
     last_db_t   = 0
     session_beans = 0
+    tracker = BeanTracker()
+    live_tracks = 0
     batch_frames = []
     seen_frame_ids = set()
     paused = False
@@ -208,6 +217,8 @@ def main():
                 if pause_rect.collidepoint(ev.pos):
                     if paused:
                         session_beans = 0
+                        tracker = BeanTracker()
+                        live_tracks = 0
                         batch_frames = []
                         seen_frame_ids = set()
                         paused = False
@@ -223,7 +234,10 @@ def main():
         # ── 左側：相機預覽 + 即時偵測框 ────────────────────────
         surf, rgb_arr = read_ppm()
         bean_boxes = []
+        frame_size = None
         if surf and rgb_arr is not None:
+            frame_size = (rgb_arr.shape[1], rgb_arr.shape[0])
+            tracker.set_frame_size(*frame_size)
             w, h = surf.get_size()
             scale = min(PREVIEW_W / w, SCREEN_H / h)
             nw, nh = int(w * scale), int(h * scale)
@@ -294,7 +308,9 @@ def main():
 
         if not paused and frame_id not in seen_frame_ids:
             seen_frame_ids.add(frame_id)
-            session_beans += detect_count
+            track_result = tracker.update(detect_boxes, frame_id, frame_size=frame_size)
+            session_beans = track_result["total_crossed"]
+            live_tracks = track_result["live_tracks"]
             batch_frames.append({
                 "frame_id": int(frame_id),
                 "count": detect_count,
@@ -331,10 +347,10 @@ def main():
         # ── Card 2: Stats (2欄) ─────────────────────────────────
         rounded_rect(screen, CARD_BG, (x0 + 6, y, INFO_W - 12, 62), 8)
         cw = (INFO_W - 12 - pad*2 - 6) // 2   # column width
-        live_count = str(len(bean_boxes)) if bean_boxes is not None else "_"
+        live_count = str(live_tracks)
         for i, (val, lbl, col) in enumerate([
             (str(total_beans), "累計豆子",   GREEN_LT),
-            (live_count,       "即時偵測",   GREEN if bean_boxes else MUTED),
+            (live_count,       "畫面追蹤",   GREEN if live_tracks else MUTED),
         ]):
             cx = xL + i * (cw + 6)
             rounded_rect(screen, STAT_BG, (cx, y + 6, cw, 50), 6)

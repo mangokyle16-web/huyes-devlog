@@ -26,6 +26,7 @@ def test_save_batch_json_writes_expected_payload(tmp_path, monkeypatch):
     assert out_path == tmp_path / "batch_20260612_153045.json"
     assert out_path.read_text() == (
         '{"batch_id":"20260612_153045","total_beans":3,'
+        '"total_crossed":3,'
         '"frames":[{"frame_id":7,"count":2,"boxes":[[1,2,3,4],[5,6,7,8]]},'
         '{"frame_id":8,"count":1,"boxes":[[9,10,11,12]]}]}'
     )
