@@ -3,7 +3,7 @@
 # Adjust SDK paths to match actual installation
 
 CXX      = g++
-CXXFLAGS = -std=c++17 -O2 -Wall
+CXXFLAGS = -std=c++17 -O3 -march=armv8.2-a+simd -fopenmp -Wall
 
 # ── Pi5 QS SDK paths ─────────────────────────────────────────
 ROOT        ?= /home/kyle/KyleClaude
@@ -11,7 +11,7 @@ QS_SDK_DIR  ?= $(ROOT)/sdk_extract/linux-sdk-arm64/qssdk-20250817
 OPENCV_LIB  ?= $(QS_SDK_DIR)/libarm64/opencv/lib
 
 CXXFLAGS += -I$(QS_SDK_DIR)
-LDFLAGS   = -L$(QS_SDK_DIR) -L$(OPENCV_LIB) \
+LDFLAGS   = -fopenmp -L$(QS_SDK_DIR) -L$(OPENCV_LIB) \
             -lqs_camera -lqs_agriculture -lqs_fileio -lqs_imgproc \
             -lopencv_world \
             -Wl,-rpath,$(QS_SDK_DIR) -Wl,-rpath,$(OPENCV_LIB)

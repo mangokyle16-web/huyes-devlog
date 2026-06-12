@@ -33,7 +33,7 @@ sleep 2
 
 $BASE/spectral_capture/capture/preview_daemon \
     $BASE/spectral_capture/capture/msi.qsbs \
-    5 &
+    13 &
 daemon_pid=$!
 
 sleep 3

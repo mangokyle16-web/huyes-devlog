@@ -3,7 +3,7 @@
  *
  * 功能：
  *   - 開啟相機 async 模式，持續接收 callback
- *   - 每幀：qsToRgb → 儲存 /dev/shm/preview.jpg（預覽圖）
+ *   - 每幀：fast raw grayscale → 儲存 /dev/shm/preview.ppm（預覽圖）
  *   - 每幀：儲存原始 .qs 到 /dev/shm/qs_latest.qs（供採集 pipeline 使用）
  *   - 寫入 /dev/shm/preview_status.txt：frame_id, fps, timestamp
  *
@@ -13,8 +13,9 @@
  *
  * Build: make preview_daemon
  * Run:   LD_PRELOAD=.../uvc_fix.so ./preview_daemon [qsbs_path] [preview_fps]
- *        default preview_fps = 2
+ *        default preview_fps = 13
  */
+#include "fast_gray.h"
 #include "qs_camera.h"
 #include "qs_fileio.h"
 #include "qs_imgproc.h"
@@ -54,10 +55,41 @@ static void writeFile(const char* path, const void* data, size_t size) {
     if (f) { fwrite(data, 1, size, f); fclose(f); }
 }
 
+static void writeUpscaledGrayPpm(const char* path, const uint8_t* gray,
+                                 int grayW, int grayH) {
+    constexpr int kPreviewW = 1600;
+    constexpr int kPreviewH = 1200;
+
+    static std::vector<uint8_t> rgbBuf;
+    rgbBuf.resize(static_cast<size_t>(kPreviewW) * kPreviewH * 3);
+
+    for (int y = 0; y < kPreviewH; ++y) {
+        const int srcY = y * grayH / kPreviewH;
+        const uint8_t* srcRow = gray + static_cast<size_t>(srcY) * grayW;
+        uint8_t* dst = rgbBuf.data() + static_cast<size_t>(y) * kPreviewW * 3;
+        for (int x = 0; x < kPreviewW; ++x) {
+            const int srcX = x * grayW / kPreviewW;
+            const uint8_t g = srcRow[srcX];
+            dst[x * 3 + 0] = g;
+            dst[x * 3 + 1] = g;
+            dst[x * 3 + 2] = g;
+        }
+    }
+
+    char header[64];
+    int hlen = snprintf(header, sizeof(header), "P6\n%d %d\n255\n", kPreviewW, kPreviewH);
+    FILE* f = fopen(path, "wb");
+    if (f) {
+        fwrite(header, 1, hlen, f);
+        fwrite(rgbBuf.data(), 1, rgbBuf.size(), f);
+        fclose(f);
+    }
+}
+
 int main(int argc, char* argv[]) {
     const char* qsbs_path   = (argc >= 2) ? argv[1] : "msi.qsbs";
-    const int   preview_fps = (argc >= 3) ? atoi(argv[2]) : 2;
-    const int   preview_ms  = 1000 / (preview_fps > 0 ? preview_fps : 2);
+    const int   preview_fps = (argc >= 3) ? atoi(argv[2]) : 13;
+    const int   preview_ms  = 1000 / (preview_fps > 0 ? preview_fps : 13);
 
     signal(SIGINT,  onSigint);
     signal(SIGTERM, onSigint);
@@ -70,7 +102,7 @@ int main(int argc, char* argv[]) {
     }
     fprintf(stderr, "[preview_daemon] calibration: %zu bytes\n", qsbsSize);
 
-    // Init imgproc context for qsToRgb
+    // Keep the SDK imgproc context initialized for the existing camera stack.
     QsImgprocContext* imgCtx = nullptr;
     if (initQsImgproc(&imgCtx, qsbsData, qsbsSize) != QS_ERR_SUCCESS) {
         fprintf(stderr, "[preview_daemon] ERROR: initQsImgproc failed\n");
@@ -136,22 +168,14 @@ int main(int argc, char* argv[]) {
             writeFile("/dev/shm/qs_frame_id.txt", id_buf, strlen(id_buf));
         }
 
-        // Convert to RGB for preview
-        uint8_t* rgbData = nullptr;
+        // Convert raw QS to fast grayscale, then upscale to preserve the
+        // 1600x1200 preview/detector coordinate system.
+        uint8_t* grayData = nullptr;
         int W = 0, H = 0;
-        if (qsToRgb(imgCtx, frame_copy.data(), frame_copy.size(),
-                    &rgbData, &W, &H) == QS_ERR_SUCCESS && rgbData) {
-            // Write raw PPM to /dev/shm/preview.ppm
-            // (Python display reads this directly — no JPEG encoding needed)
-            char header[64];
-            int hlen = snprintf(header, sizeof(header), "P6\n%d %d\n255\n", W, H);
-            FILE* f = fopen("/dev/shm/preview.ppm", "wb");
-            if (f) {
-                fwrite(header, 1, hlen, f);
-                fwrite(rgbData, 1, W * H * 3, f);
-                fclose(f);
-            }
-            freeQsData(rgbData);
+        if (fastGrayFromRaw(frame_copy.data(), frame_copy.size(), &grayData, &W, &H) &&
+            grayData) {
+            writeUpscaledGrayPpm("/dev/shm/preview.ppm", grayData, W, H);
+            free(grayData);
         }
 
         // Write status for display overlay
