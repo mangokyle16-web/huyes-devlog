@@ -356,7 +356,7 @@ def main():
                 if y + line_h > SCREEN_H - 2:
                     break
                 # Truncate long lines to fit INFO_W
-                txt = line
+                txt = line.replace('\x00', '').replace('\r', '')
                 while fXS.size(txt)[0] > INFO_W - pad * 2 - 4 and len(txt) > 4:
                     txt = txt[:-1]
                 surf = fXS.render(txt, True, log_color(line))
