@@ -12,8 +12,8 @@
  *   而非呼叫 capture_one（避免兩個程式搶相機）
  *
  * Build: make preview_daemon
- * Run:   LD_PRELOAD=.../uvc_fix.so ./preview_daemon [qsbs_path] [preview_fps] [exposure_us]
- *        default preview_fps = 13, default exposure_us = 6000 (0 keeps camera default)
+ * Run:   LD_PRELOAD=.../uvc_fix.so ./preview_daemon [qsbs_path] [preview_fps]
+ *        default preview_fps = 13
  */
 #include "fast_gray.h"
 #include "qs_camera.h"
@@ -89,7 +89,6 @@ static void writeUpscaledGrayPpm(const char* path, const uint8_t* gray,
 int main(int argc, char* argv[]) {
     const char* qsbs_path   = (argc >= 2) ? argv[1] : "msi.qsbs";
     const int   preview_fps = (argc >= 3) ? atoi(argv[2]) : 13;
-    const int   target_exposure_us = (argc >= 4) ? atoi(argv[3]) : 6000;
     const int   preview_ms  = 1000 / (preview_fps > 0 ? preview_fps : 13);
 
     signal(SIGINT,  onSigint);
@@ -123,27 +122,6 @@ int main(int argc, char* argv[]) {
     if (openQsCamera(cameras[0], true) != QS_ERR_SUCCESS) {
         fprintf(stderr, "[preview_daemon] ERROR: openQsCamera failed\n");
         return 1;
-    }
-    if (target_exposure_us > 0) {
-        int exp_min = 0;
-        int exp_max = 0;
-        int exp = target_exposure_us;
-        int actual_exp = 0;
-        controlQsCamera(cameras[0], QS_CAMERA_GET_EXPOSURE_MIN, &exp_min);
-        controlQsCamera(cameras[0], QS_CAMERA_GET_EXPOSURE_MAX, &exp_max);
-        QsErrorcodes exp_err = controlQsCamera(cameras[0], QS_CAMERA_SET_EXPOSURE, &exp);
-        if (exp_err == QS_ERR_SUCCESS) {
-            controlQsCamera(cameras[0], QS_CAMERA_GET_EXPOSURE, &actual_exp);
-            fprintf(stderr,
-                    "[preview_daemon] exposure set target=%d us actual=%d us range=[%d,%d]\n",
-                    target_exposure_us, actual_exp, exp_min, exp_max);
-        } else {
-            fprintf(stderr,
-                    "[preview_daemon] WARNING: QS_CAMERA_SET_EXPOSURE %d us failed err=%d range=[%d,%d]\n",
-                    target_exposure_us, exp_err, exp_min, exp_max);
-        }
-    } else {
-        fprintf(stderr, "[preview_daemon] exposure unchanged (camera default)\n");
     }
     fprintf(stderr, "[preview_daemon] ready, preview @ %d fps\n", preview_fps);
 
