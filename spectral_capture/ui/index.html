@@ -18,6 +18,12 @@
   .subtitle { font-size: 12px; color: #78909c; margin-bottom: 16px; }
 
   .card { background: #1a1d27; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+  .tab-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .tab-btn {
+    border: 1px solid #37474f; border-radius: 10px; background: #0f1117;
+    color: #78909c; padding: 10px; font-size: 14px; font-weight: 700;
+  }
+  .tab-btn.active { border-color: #66bb6a; background: #1a2e1a; color: #a5d6a7; }
 
   .status-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
   .dot { width: 10px; height: 10px; border-radius: 50%; background: #546e7a; }
@@ -66,6 +72,22 @@
   }
   input[type=date] { color-scheme: dark; }
   .hidden { display: none; }
+  .count-hero { text-align: center; }
+  .count-number { color: #a5d6a7; font-size: 64px; font-weight: 800; line-height: 1; }
+  .count-subline { color: #78909c; font-size: 12px; margin-top: 8px; }
+  #throughput-chart {
+    display: block; width: 100%; height: 120px; background: #0f1117;
+    border-radius: 8px;
+  }
+  .batch-list { display: grid; gap: 8px; }
+  .batch-item {
+    background: #0f1117; border-radius: 8px; padding: 10px 12px;
+    display: grid; gap: 4px;
+  }
+  .batch-top { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: #e8eaf6; }
+  .batch-id { overflow-wrap: anywhere; }
+  .batch-count { color: #a5d6a7; font-weight: 700; white-space: nowrap; }
+  .batch-meta { color: #78909c; font-size: 11px; }
 
   .log-lines {
     font-family: monospace; font-size: 11px; color: #78909c;
@@ -82,6 +104,12 @@
 <h1>🌿 Huyes 採集指揮台</h1>
 <p class="subtitle">Pi5 多光譜豆子採集控制</p>
 
+<div class="tab-row">
+  <button class="tab-btn active" id="tab-control" onclick="setTab('control')">控制</button>
+  <button class="tab-btn" id="tab-count" onclick="setTab('count')">計數</button>
+</div>
+
+<div id="panel-control">
 <!-- Status -->
 <div class="card">
   <div class="status-row">
@@ -161,10 +189,63 @@
   <div class="section-title">最近 log</div>
   <div class="log-lines" id="log-lines">—</div>
 </div>
+</div>
+
+<div id="panel-count" class="hidden">
+  <div class="card count-hero">
+    <div class="section-title">即時計數</div>
+    <div class="count-number" id="count-total">—</div>
+    <div class="count-subline" id="count-subline">等待計數狀態...</div>
+  </div>
+
+  <div class="card">
+    <div class="stat-grid">
+      <div class="stat">
+        <div class="stat-val" id="count-live-tracks">—</div>
+        <div class="stat-key">畫面追蹤</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="count-fps">—</div>
+        <div class="stat-key">FPS</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="count-throughput">—</div>
+        <div class="stat-key">豆 / 分鐘</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="count-speed">—</div>
+        <div class="stat-key">px / 秒</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Throughput 最近 60 秒</div>
+    <canvas id="throughput-chart" width="448" height="120"></canvas>
+  </div>
+
+  <div class="card">
+    <div class="section-title">最近批次</div>
+    <div class="batch-list" id="batch-list">—</div>
+  </div>
+</div>
 
 <script>
 let beanType = 'green';
 let captureMode = 'image';
+let currentTab = 'control';
+const throughputSamples = [];
+
+function setTab(tab) {
+  currentTab = tab;
+  document.getElementById('tab-control').className = 'tab-btn' + (tab === 'control' ? ' active' : '');
+  document.getElementById('tab-count').className = 'tab-btn' + (tab === 'count' ? ' active' : '');
+  document.getElementById('panel-control').className = tab === 'control' ? '' : 'hidden';
+  document.getElementById('panel-count').className = tab === 'count' ? '' : 'hidden';
+  if (tab === 'count') {
+    drawThroughputChart();
+  }
+}
 
 function setMode(mode) {
   captureMode = mode;
@@ -193,7 +274,109 @@ function colorLine(line) {
   return '';
 }
 function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function fmtNumber(v, digits=0) {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return '—';
+  return n.toLocaleString('zh-TW', { maximumFractionDigits: digits, minimumFractionDigits: digits });
+}
+
+function fmtAge(age) {
+  const n = Number(age);
+  if (!Number.isFinite(n)) return '';
+  return ' · ' + n.toFixed(1) + 's 前';
+}
+
+function drawThroughputChart() {
+  const canvas = document.getElementById('throughput-chart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width;
+  const h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#0f1117';
+  ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = '#1e2130';
+  ctx.lineWidth = 1;
+  for (let i = 1; i < 4; i++) {
+    const y = Math.round((h / 4) * i) + 0.5;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+  }
+  if (throughputSamples.length < 2) return;
+  const maxVal = Math.max(10, ...throughputSamples.map(s => s.value));
+  const pad = 8;
+  ctx.strokeStyle = '#66bb6a';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  throughputSamples.forEach((sample, i) => {
+    const x = throughputSamples.length === 1
+      ? pad
+      : pad + (i / (throughputSamples.length - 1)) * (w - pad * 2);
+    const y = h - pad - (sample.value / maxVal) * (h - pad * 2);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+}
+
+function updateCountDisplay(response) {
+  const data = response.data || {};
+  const available = response.available !== false && response.ok !== false;
+  const stale = !!response.stale;
+  document.getElementById('count-total').textContent = fmtNumber(data.total_crossed);
+  document.getElementById('count-live-tracks').textContent = fmtNumber(data.live_tracks);
+  document.getElementById('count-fps').textContent = fmtNumber(data.fps, 1);
+  document.getElementById('count-throughput').textContent = fmtNumber(data.throughput_per_min, 1);
+  document.getElementById('count-speed').textContent = fmtNumber(data.belt_speed_px_s, 1);
+
+  const batch = data.batch_id ? ' · ' + data.batch_id : '';
+  const state = !available ? '等待計數狀態' : stale ? '計數狀態已逾時' : (data.running ? '即時更新中' : '未採集');
+  document.getElementById('count-subline').textContent = state + batch + fmtAge(response.age_s);
+
+  const throughput = Number(data.throughput_per_min || 0);
+  throughputSamples.push({ t: Date.now(), value: Number.isFinite(throughput) ? throughput : 0 });
+  while (throughputSamples.length > 60) throughputSamples.shift();
+  drawThroughputChart();
+}
+
+async function refreshCount() {
+  try {
+    const r = await fetch('/api/count');
+    const d = await r.json();
+    updateCountDisplay(d);
+  } catch(e) {
+    updateCountDisplay({ ok: false, available: false, stale: true, age_s: null, data: {} });
+  }
+}
+
+async function refreshBatches() {
+  const batchEl = document.getElementById('batch-list');
+  try {
+    const r = await fetch('/api/batches?limit=50');
+    const d = await r.json();
+    const batches = d.batches || [];
+    if (!batches.length) {
+      batchEl.textContent = '尚無批次';
+      return;
+    }
+    batchEl.innerHTML = batches.map(b => {
+      const count = b.total_crossed ?? b.total_beans ?? 0;
+      const frames = b.frame_count ?? b.frames ?? 0;
+      const saved = b.saved_at || (b.mtime ? new Date(b.mtime * 1000).toLocaleString('zh-TW') : '');
+      return '<div class="batch-item">' +
+        '<div class="batch-top"><span class="batch-id">' + escHtml(b.batch_id || b.file || 'batch') + '</span>' +
+        '<span class="batch-count">' + fmtNumber(count) + ' 豆</span></div>' +
+        '<div class="batch-meta">' + fmtNumber(frames) + ' frames · ' + escHtml(saved) + '</div>' +
+      '</div>';
+    }).join('');
+  } catch(e) {
+    batchEl.textContent = '批次讀取失敗';
+  }
 }
 
 async function refresh() {
@@ -244,10 +427,14 @@ async function startCapture() {
 async function stopCapture() {
   await fetch('/api/capture/stop', { method: 'POST' });
   await refresh();
+  await refreshBatches();
 }
 
 refresh();
+refreshCount();
+refreshBatches();
 setInterval(refresh, 3000);
+setInterval(refreshCount, 1000);
 </script>
 </body>
 </html>

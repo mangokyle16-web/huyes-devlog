@@ -12,6 +12,8 @@ import sys
 import os
 import signal as _sig
 import datetime
+import json
+import time
 from pathlib import Path
 from typing import Optional
 
@@ -26,6 +28,9 @@ QSBS          = ROOT / "spectral_capture/capture/msi.qsbs"
 DB_PATH       = ROOT / "spectral_capture/data/beans.db"
 LOG_PATH      = Path("/tmp/pipeline.log")
 UI_PATH       = Path(__file__).parent / "ui/index.html"
+COUNT_STATUS_PATH = Path("/dev/shm/count_status.json")
+BATCH_DIR     = Path("/home/kyle/KyleClaude/spectral_capture/data/batches")
+COUNT_STALE_AFTER_S = 3.0
 SDK           = ROOT / "sdk_extract/linux-sdk-arm64/qssdk-20250817"
 OPENCV_LIB    = SDK / "libarm64/opencv/lib"
 UVC_FIX       = ROOT / "multispectral_demo/uvc_fix.so"
@@ -105,6 +110,47 @@ def _recent_log(n: int = 8) -> list:
         return []
 
 
+def _read_json_file(path: Path) -> Optional[dict]:
+    try:
+        data = json.loads(path.read_text())
+        return data if isinstance(data, dict) else None
+    except Exception:
+        return None
+
+
+def _empty_count_data() -> dict:
+    return {
+        "schema_version": 1,
+        "running": _is_running(),
+        "paused": False,
+        "batch_id": "",
+        "total_crossed": 0,
+        "new_crossings": 0,
+        "live_tracks": 0,
+        "detected_count": 0,
+        "fps": 0.0,
+        "frame_id": 0,
+        "throughput_per_min": 0.0,
+        "throughput_window_s": 60,
+        "belt_speed_px_s": 0.0,
+        "updated_at": None,
+    }
+
+
+def _safe_int(value, default: int = 0) -> int:
+    try:
+        return int(value)
+    except Exception:
+        return default
+
+
+def _mtime(path: Path) -> float:
+    try:
+        return path.stat().st_mtime
+    except Exception:
+        return 0.0
+
+
 class StartRequest(BaseModel):
     origin:       str = "unknown"
     process:      str = "unknown"
@@ -125,6 +171,70 @@ def status():
     }
 
 
+@app.get("/api/count")
+def count_status():
+    data = _read_json_file(COUNT_STATUS_PATH)
+    if not data:
+        return {
+            "ok": False,
+            "available": False,
+            "stale": True,
+            "age_s": None,
+            "data": _empty_count_data(),
+        }
+
+    now = time.time()
+    updated_at = data.get("updated_at")
+    age_s = None
+    stale = True
+    if isinstance(updated_at, (int, float)):
+        age_s = max(0.0, now - float(updated_at))
+        stale = age_s > COUNT_STALE_AFTER_S
+
+    return {
+        "ok": True,
+        "available": True,
+        "stale": stale,
+        "age_s": round(age_s, 2) if age_s is not None else None,
+        "data": data,
+    }
+
+
+@app.get("/api/batches")
+def batches(limit: int = 50):
+    limit = max(1, min(int(limit or 50), 50))
+    if not BATCH_DIR.exists():
+        return {"batches": []}
+
+    rows = []
+    paths = sorted(
+        BATCH_DIR.glob("batch_*.json"),
+        key=_mtime,
+        reverse=True,
+    )
+    for path in paths[:limit]:
+        payload = _read_json_file(path) or {}
+        try:
+            stat = path.stat()
+        except Exception:
+            continue
+        frames = payload.get("frames") or []
+        if not isinstance(frames, list):
+            frames = []
+        total_beans = _safe_int(payload.get("total_beans"), 0)
+        total_crossed = _safe_int(payload.get("total_crossed"), total_beans)
+        rows.append({
+            "file": path.name,
+            "batch_id": payload.get("batch_id") or path.stem.replace("batch_", ""),
+            "total_crossed": total_crossed,
+            "total_beans": total_beans,
+            "frame_count": len(frames),
+            "mtime": stat.st_mtime,
+            "saved_at": datetime.datetime.fromtimestamp(stat.st_mtime).isoformat(timespec="seconds"),
+        })
+    return {"batches": rows}
+
+
 @app.post("/api/capture/start")
 def start_capture(req: StartRequest):
     global _pipeline_proc, _preview_proc
@@ -135,7 +245,6 @@ def start_capture(req: StartRequest):
     env  = _sdk_env()
 
     # 寫 metadata 到 shm 供 7" 螢幕顯示
-    import json, time
     meta = {
         "origin":      req.origin,
         "process":     req.process,
@@ -158,7 +267,6 @@ def start_capture(req: StartRequest):
     )
 
     # 2. 等相機初始化（約 1-2 秒後 shm 就緒）
-    import time
     time.sleep(2)
 
     # 3. 啟動採集程式（根據 mode 選擇）

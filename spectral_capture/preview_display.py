@@ -7,6 +7,7 @@ Pi5 7" 螢幕 Live Preview Display — 800×480 橫向
 Run: python3 spectral_capture/preview_display.py
 """
 import os, sys, json, sqlite3, time
+from collections import deque
 from datetime import datetime
 from pathlib import Path
 
@@ -29,10 +30,13 @@ PREVIEW_PPM  = Path('/dev/shm/preview.ppm')
 STATUS_JSON  = Path('/dev/shm/preview_status.json')
 META_JSON    = Path('/dev/shm/capture_meta.json')
 DETECT_JSON  = Path('/dev/shm/bean_detect.json')   # 供 capture_pipeline 讀取
+COUNT_STATUS_JSON = Path('/dev/shm/count_status.json')
 DB_PATH      = Path('/home/kyle/KyleClaude/spectral_capture/data/beans.db')
 BATCH_DIR    = Path('/home/kyle/KyleClaude/spectral_capture/data/batches')
 CJK_FONT     = '/usr/share/fonts/truetype/wqy/wqy-microhei.ttc'  # Latin + CJK
 PPM_FAIL_GRACE_S = 2.0
+COUNT_STATUS_WRITE_INTERVAL_S = 0.5
+THROUGHPUT_WINDOW_S = 60.0
 
 # ── YOLOv8n Hailo-8 背景初始化 ─────────────────────────────
 _detector       = None
@@ -132,6 +136,94 @@ def read_json(path):
     except Exception: return {}
 
 
+def write_json_atomic(path: Path, payload: dict) -> None:
+    tmp = path.with_suffix(path.suffix + '.tmp')
+    tmp.write_text(json.dumps(payload, ensure_ascii=False, separators=(',', ':')))
+    os.replace(tmp, path)
+
+
+class CountStatusPublisher:
+    def __init__(
+        self,
+        path: Path = COUNT_STATUS_JSON,
+        min_interval_s: float = COUNT_STATUS_WRITE_INTERVAL_S,
+        window_s: float = THROUGHPUT_WINDOW_S,
+    ):
+        self.path = path
+        self.min_interval_s = min_interval_s
+        self.window_s = window_s
+        self.history = deque()
+        self.last_write_t = 0.0
+
+    def reset(self) -> None:
+        self.history.clear()
+        self.last_write_t = 0.0
+
+    def record_count(self, now: float, total_crossed: int) -> None:
+        self.history.append((now, int(total_crossed)))
+        cutoff = now - self.window_s
+        while len(self.history) > 1 and self.history[0][0] < cutoff:
+            self.history.popleft()
+
+    def throughput_per_min(self) -> float:
+        if len(self.history) < 2:
+            return 0.0
+        t0, c0 = self.history[0]
+        t1, c1 = self.history[-1]
+        dt = max(0.001, t1 - t0)
+        return max(0.0, (c1 - c0) / dt * 60.0)
+
+    def belt_speed_px_s(self, tracker: BeanTracker, fps: float) -> float:
+        vh = getattr(tracker, 'vh', None)
+        if vh is None:
+            return 0.0
+        arr = np.asarray(vh, dtype=np.float32)
+        if arr.size == 0:
+            return 0.0
+        return float(np.median(arr) * max(0.0, fps))
+
+    def maybe_write(
+        self,
+        *,
+        running: bool,
+        paused: bool,
+        batch_id: str,
+        total_crossed: int,
+        new_crossings: int,
+        live_tracks: int,
+        detected_count: int,
+        fps: float,
+        frame_id: int,
+        tracker: BeanTracker,
+    ) -> None:
+        try:
+            now = time.time()
+            self.record_count(now, total_crossed)
+            if now - self.last_write_t < self.min_interval_s:
+                return
+
+            payload = {
+                "schema_version": 1,
+                "running": bool(running),
+                "paused": bool(paused),
+                "batch_id": str(batch_id or ""),
+                "total_crossed": int(total_crossed),
+                "new_crossings": int(new_crossings),
+                "live_tracks": int(live_tracks),
+                "detected_count": int(detected_count),
+                "fps": round(float(fps or 0.0), 3),
+                "frame_id": int(frame_id or 0),
+                "throughput_per_min": round(self.throughput_per_min(), 2),
+                "throughput_window_s": int(self.window_s),
+                "belt_speed_px_s": round(self.belt_speed_px_s(tracker, float(fps or 0.0)), 2),
+                "updated_at": now,
+            }
+            write_json_atomic(self.path, payload)
+            self.last_write_t = now
+        except Exception as exc:
+            print(f"[display] count status write failed: {exc}")
+
+
 LOG_PATH = Path('/tmp/pipeline.log')
 
 def read_recent_log(n=4):
@@ -203,6 +295,7 @@ def main():
     session_beans = 0
     tracker = BeanTracker()
     live_tracks = 0
+    count_status = CountStatusPublisher()
     batch_frames = []
     seen_frame_ids = set()
     paused = False
@@ -229,6 +322,7 @@ def main():
                         live_tracks = 0
                         batch_frames = []
                         seen_frame_ids = set()
+                        count_status.reset()
                         paused = False
                     else:
                         ts = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -328,9 +422,11 @@ def main():
         detect_count = int(detect.get('count', 0) or 0)
         detect_boxes = detect.get('boxes', [])
 
+        new_crossings = 0
         if not paused and frame_id not in seen_frame_ids:
             seen_frame_ids.add(frame_id)
             track_result = tracker.update(detect_boxes, frame_id, frame_size=frame_size)
+            new_crossings = track_result["new_crossings"]
             session_beans = track_result["total_crossed"]
             live_tracks = track_result["live_tracks"]
             batch_frames.append({
@@ -338,6 +434,19 @@ def main():
                 "count": detect_count,
                 "boxes": detect_boxes,
             })
+
+        count_status.maybe_write(
+            running=running,
+            paused=paused,
+            batch_id=meta.get("batch_id", ""),
+            total_crossed=session_beans,
+            new_crossings=new_crossings,
+            live_tracks=live_tracks,
+            detected_count=detect_count,
+            fps=fps_val,
+            frame_id=frame_id,
+            tracker=tracker,
+        )
 
         if time.time() - last_db_t > 4:
             total_beans = db_total_beans()
