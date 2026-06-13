@@ -31,6 +31,7 @@
 #include <thread>
 #include <csignal>
 #include <fstream>
+#include <string>
 
 static volatile bool g_running = true;
 static void onSigint(int) { g_running = false; }
@@ -50,9 +51,24 @@ static void onCameraFrame(const uint8_t* data, size_t size, void*) {
     g_cv.notify_one();
 }
 
-static void writeFile(const char* path, const void* data, size_t size) {
-    FILE* f = fopen(path, "wb");
-    if (f) { fwrite(data, 1, size, f); fclose(f); }
+static bool writeFileAtomic(const char* path, const void* data, size_t size) {
+    const std::string tmpPath = std::string(path) + ".tmp";
+    FILE* f = fopen(tmpPath.c_str(), "wb");
+    if (!f) return false;
+
+    const size_t written = fwrite(data, 1, size, f);
+    bool ok = (written == size);
+    if (fclose(f) != 0) ok = false;
+
+    if (!ok) {
+        std::remove(tmpPath.c_str());
+        return false;
+    }
+    if (std::rename(tmpPath.c_str(), path) != 0) {
+        std::remove(tmpPath.c_str());
+        return false;
+    }
+    return true;
 }
 
 static void writeUpscaledGrayPpm(const char* path, const uint8_t* gray,
@@ -78,12 +94,11 @@ static void writeUpscaledGrayPpm(const char* path, const uint8_t* gray,
 
     char header[64];
     int hlen = snprintf(header, sizeof(header), "P6\n%d %d\n255\n", kPreviewW, kPreviewH);
-    FILE* f = fopen(path, "wb");
-    if (f) {
-        fwrite(header, 1, hlen, f);
-        fwrite(rgbBuf.data(), 1, rgbBuf.size(), f);
-        fclose(f);
-    }
+    std::vector<uint8_t> ppmBuf;
+    ppmBuf.resize(static_cast<size_t>(hlen) + rgbBuf.size());
+    memcpy(ppmBuf.data(), header, static_cast<size_t>(hlen));
+    memcpy(ppmBuf.data() + hlen, rgbBuf.data(), rgbBuf.size());
+    writeFileAtomic(path, ppmBuf.data(), ppmBuf.size());
 }
 
 int main(int argc, char* argv[]) {
@@ -160,12 +175,12 @@ int main(int argc, char* argv[]) {
         last_processed = fid;
 
         // Save raw .qs for capture pipeline + write frame ID so pipeline knows it's new
-        writeFile("/dev/shm/qs_latest.qs",
-                  frame_copy.data(), frame_copy.size());
+        writeFileAtomic("/dev/shm/qs_latest.qs",
+                        frame_copy.data(), frame_copy.size());
         {
             char id_buf[32];
             snprintf(id_buf, sizeof(id_buf), "%llu\n", (unsigned long long)fid);
-            writeFile("/dev/shm/qs_frame_id.txt", id_buf, strlen(id_buf));
+            writeFileAtomic("/dev/shm/qs_frame_id.txt", id_buf, strlen(id_buf));
         }
 
         // Convert raw QS to fast grayscale, then upscale to preserve the
@@ -188,7 +203,7 @@ int main(int argc, char* argv[]) {
             snprintf(status, sizeof(status),
                      "{\"frame_id\":%llu,\"fps\":%.1f,\"time\":\"%s\"}",
                      (unsigned long long)fid, fps_display, tmbuf);
-            writeFile("/dev/shm/preview_status.json", status, strlen(status));
+            writeFileAtomic("/dev/shm/preview_status.json", status, strlen(status));
         }
 
         fprintf(stderr, "[preview_daemon] frame=%llu fps=%.1f\n",

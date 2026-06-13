@@ -32,6 +32,7 @@ DETECT_JSON  = Path('/dev/shm/bean_detect.json')   # 供 capture_pipeline 讀取
 DB_PATH      = Path('/home/kyle/KyleClaude/spectral_capture/data/beans.db')
 BATCH_DIR    = Path('/home/kyle/KyleClaude/spectral_capture/data/batches')
 CJK_FONT     = '/usr/share/fonts/truetype/wqy/wqy-microhei.ttc'  # Latin + CJK
+PPM_FAIL_GRACE_S = 2.0
 
 # ── YOLOv8n Hailo-8 背景初始化 ─────────────────────────────
 _detector       = None
@@ -91,8 +92,15 @@ def read_ppm():
         # Convert to grayscale for display
         gray = (0.299 * rgb[:,:,0] + 0.587 * rgb[:,:,1] + 0.114 * rgb[:,:,2]).astype(np.uint8)
         gray_rgb = np.stack([gray, gray, gray], axis=2)  # pygame needs 3-channel
-        return pygame.surfarray.make_surface(gray_rgb.swapaxes(0, 1)), rgb
+        surf = pygame.surfarray.make_surface(gray_rgb.swapaxes(0, 1))
+        read_ppm._last_good = (surf, rgb)
+        read_ppm._last_good_t = time.monotonic()
+        return surf, rgb
     except Exception:
+        last_good = getattr(read_ppm, '_last_good', (None, None))
+        last_good_t = getattr(read_ppm, '_last_good_t', 0.0)
+        if last_good[0] is not None and time.monotonic() - last_good_t <= PPM_FAIL_GRACE_S:
+            return last_good
         return None, None
 
 
@@ -285,6 +293,20 @@ def main():
         npu_surf = fXS.render(npu_str, True, npu_col)
         screen.blit(npu_surf, (12 + title.get_width() + 6,
                                 10 + (title.get_height() - npu_surf.get_height()) // 2))
+
+        # ── 偵測流記錄倒數（/dev/shm/log_countdown.txt，紅色置中）──
+        try:
+            _cd = Path('/dev/shm/log_countdown.txt').read_text().strip()
+        except Exception:
+            _cd = ""
+        if _cd:
+            cd_surf = fL.render(f"● {_cd}", True, (255, 70, 70))
+            cd_bg = pygame.Surface((cd_surf.get_width() + 16,
+                                    cd_surf.get_height() + 8), pygame.SRCALPHA)
+            cd_bg.fill((0, 0, 0, 170))
+            cx = (PREVIEW_W - cd_bg.get_width()) // 2
+            screen.blit(cd_bg, (cx, 44))
+            screen.blit(cd_surf, (cx + 8, 48))
 
         # 左右分隔線
         pygame.draw.line(screen, DIVIDER, (PREVIEW_W, 0), (PREVIEW_W, SCREEN_H), 1)
