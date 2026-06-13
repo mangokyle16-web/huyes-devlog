@@ -42,6 +42,9 @@ inline uint8_t stretchToU8(uint16_t value, int low, int high) {
 }
 }  // namespace fast_gray_detail
 
+// Detection-only fast path: this averages the local mosaic neighborhood into
+// one grayscale image for YOLO/tracking. VNIR density correction must use the
+// separate-band Python/SDK extractor instead of this averaged image.
 inline bool fastGrayFromRaw(const uint8_t* qsData, size_t qsSize,
                             uint8_t** out, int* w, int* h) {
     if (!out || !w || !h) return false;
