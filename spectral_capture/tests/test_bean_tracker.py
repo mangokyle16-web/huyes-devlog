@@ -33,3 +33,16 @@ def test_stationary_bean_never_crosses():
 
     assert result["total_crossed"] == 0
     assert result["new_crossings"] == 0
+
+
+def test_dual_counting_lines_count_track_once():
+    tracker = BeanTracker(line1_pos=0.4, line2_pos=0.6, frame_width=1600)
+    tracker.set_frame_size(1600, 1200)
+
+    crossings = []
+    for frame_id, center_x in enumerate([500, 650, 800, 950, 1100], start=1):
+        result = tracker.update([moving_box(center_x)], frame_id)
+        crossings.append(result["new_crossings"])
+
+    assert result["total_crossed"] == 1
+    assert sum(crossings) == 1

@@ -87,6 +87,8 @@ class _Track:
     prev_cx: float
     hits: int = 1
     counted: bool = False
+    crossed_line1: bool = False
+    crossed_line2: bool = False
     miss: int = 0
 
 
@@ -99,7 +101,9 @@ class BeanTracker:
         centroid_gate: Optional[float] = None,
         min_hits: int = MIN_HITS,
         max_age: int = MAX_AGE,
-        line_pos: float = 0.5,
+        line_pos: Optional[float] = None,
+        line1_pos: Optional[float] = None,
+        line2_pos: Optional[float] = None,
         axis: str = "x",
         direction: str = "positive",
         guard_band: Optional[float] = None,
@@ -113,10 +117,21 @@ class BeanTracker:
 
         self.min_hits = MIN_HITS
         self.max_age = MAX_AGE
-        self.line_pos = float(line_pos)
+        if line1_pos is None and line2_pos is None and line_pos is not None:
+            line1_pos = line_pos
+            line2_pos = line_pos
+        if line1_pos is None:
+            line1_pos = 0.40
+        if line2_pos is None:
+            line2_pos = 0.60
+
+        self.line1_pos = float(line1_pos)
+        self.line2_pos = float(line2_pos)
         self.frame_width = int(frame_width)
         self.frame_height: Optional[int] = None
-        self.line_x = self.frame_width * self.line_pos
+        self.line1_x = self.frame_width * self.line1_pos
+        self.line2_x = self.frame_width * self.line2_pos
+        self.line_x = self.line1_x
 
         self.tracks: List[_Track] = []
         self.prev_boxes: List[List[float]] = []
@@ -126,7 +141,9 @@ class BeanTracker:
     def set_frame_size(self, w: int, h: int) -> None:
         self.frame_width = int(w)
         self.frame_height = int(h)
-        self.line_x = self.frame_width * self.line_pos
+        self.line1_x = self.frame_width * self.line1_pos
+        self.line2_x = self.frame_width * self.line2_pos
+        self.line_x = self.line1_x
 
     def update(self, boxes, frame_id, frame_size=None) -> dict:
         """Update tracks from detector boxes and return crossing counters."""
@@ -171,14 +188,19 @@ class BeanTracker:
             track.hits += 1
             track.miss = 0
 
-            if (
-                not track.counted
-                and track.hits >= self.min_hits
-                and track.prev_cx < self.line_x <= track.cx
-            ):
-                track.counted = True
-                self.total_crossed += 1
-                new_crossings += 1
+            if track.hits >= self.min_hits:
+                crossed_line = False
+                if not track.crossed_line1 and track.prev_cx < self.line1_x <= track.cx:
+                    track.crossed_line1 = True
+                    crossed_line = True
+                if not track.crossed_line2 and track.prev_cx < self.line2_x <= track.cx:
+                    track.crossed_line2 = True
+                    crossed_line = True
+
+                if crossed_line and not track.counted:
+                    track.counted = True
+                    self.total_crossed += 1
+                    new_crossings += 1
 
         self.tracks = [track for track in self.tracks if track.miss <= self.max_age]
 
