@@ -531,7 +531,7 @@ def main():
             meta_row("烘焙後", f"{days} 天", TEXT)
         meta_row("批次", batch,   TEXT)
         # Last row: no divider
-        lbl_s = fXS.render("日期", True, MUTED)
+        lbl_s = fXS.render("採集日期", True, MUTED)
         val_s = fXS.render(capdate[:16], True, TEXT)
         screen.blit(lbl_s, (xL + 6, y + 4))
         screen.blit(val_s, (xR - val_s.get_width() - 4, y + 4))
