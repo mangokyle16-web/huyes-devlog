@@ -155,6 +155,7 @@ class StartRequest(BaseModel):
     origin:       str = "unknown"
     process:      str = "unknown"
     roast_level:  str = "green"
+    roast_date:   str = ""
     batch_id:     str = "batch-001"
     capture_date: str = ""
     bean_type:    str = "green"
@@ -242,6 +243,13 @@ def start_capture(req: StartRequest):
         return {"status": "already_running"}
 
     date = req.capture_date or datetime.date.today().isoformat()
+    days_since_roast = None
+    try:
+        capture_date = datetime.date.fromisoformat(date)
+        roast_date = datetime.date.fromisoformat(req.roast_date)
+        days_since_roast = (capture_date - roast_date).days
+    except ValueError:
+        days_since_roast = None
     env  = _sdk_env()
 
     # 寫 metadata 到 shm 供 7" 螢幕顯示
@@ -249,6 +257,8 @@ def start_capture(req: StartRequest):
         "origin":      req.origin,
         "process":     req.process,
         "roast_level": req.roast_level,
+        "roast_date":  req.roast_date,
+        "days_since_roast": days_since_roast,
         "batch_id":    req.batch_id,
         "capture_date": date,
         "bean_type":   req.bean_type,
@@ -286,6 +296,7 @@ def start_capture(req: StartRequest):
             "--origin",    req.origin,
             "--process",   req.process,
             "--roast",     req.roast_level,
+            "--roast-date", req.roast_date,
             "--batch-id",  req.batch_id,
             "--date",      date,
             "--bean-type", req.bean_type,

@@ -65,6 +65,7 @@
   }
   .param-row:last-child { border-bottom: none; }
   .param-label { font-size: 13px; color: #b0bec5; }
+  .param-note { color: #78909c; font-size: 11px; margin-top: 4px; }
   select, input[type=number], input[type=text], input[type=date] {
     background: #0f1117; color: #e8eaf6; border: 1px solid #37474f;
     border-radius: 6px; padding: 6px 8px; font-size: 13px;
@@ -174,6 +175,13 @@
       <option value="dark">深焙 Dark</option>
     </select>
   </div>
+  <div class="param-row" id="row-roast-date">
+    <div>
+      <span class="param-label">烘焙日期 Roast Date</span>
+      <div class="param-note" id="roast-days">烘焙後 — 天</div>
+    </div>
+    <input type="date" id="param-roast-date">
+  </div>
   <div class="param-row">
     <span class="param-label">批次 Batch ID</span>
     <input type="text" id="param-batch" placeholder="e.g. 20260606-001">
@@ -263,9 +271,39 @@ function setBeanType(type) {
   document.getElementById('btn-green').className = 'toggle-btn' + (type==='green' ? ' active-green' : '');
   document.getElementById('btn-roast').className = 'toggle-btn' + (type==='roast' ? ' active-roast' : '');
   document.getElementById('row-roast').style.display = type === 'roast' ? 'flex' : 'none';
+  document.getElementById('row-roast-date').style.display = type === 'roast' ? 'flex' : 'none';
+  updateRoastDays();
 }
 // Init: hide roast row for green beans
 document.getElementById('row-roast').style.display = 'none';
+document.getElementById('row-roast-date').style.display = 'none';
+
+function parseDateInput(value) {
+  if (!value) return null;
+  const parts = value.split('-').map(Number);
+  if (parts.length !== 3 || parts.some(n => !Number.isFinite(n))) return null;
+  return new Date(parts[0], parts[1] - 1, parts[2]);
+}
+
+function updateRoastDays() {
+  const el = document.getElementById('roast-days');
+  if (beanType !== 'roast') {
+    el.textContent = '';
+    return;
+  }
+  const captureValue = document.getElementById('param-date').value || new Date().toISOString().split('T')[0];
+  const roastValue = document.getElementById('param-roast-date').value;
+  const captureDate = parseDateInput(captureValue);
+  const roastDate = parseDateInput(roastValue);
+  if (!captureDate || !roastDate) {
+    el.textContent = '烘焙後 — 天';
+    return;
+  }
+  const days = Math.round((captureDate - roastDate) / 86400000);
+  el.textContent = '烘焙後 ' + days + ' 天';
+}
+document.getElementById('param-date').addEventListener('change', updateRoastDays);
+document.getElementById('param-roast-date').addEventListener('change', updateRoastDays);
 
 function colorLine(line) {
   if (line.includes('[detect]'))  return 'detect';
@@ -406,10 +444,12 @@ async function refresh() {
 
 async function startCapture() {
   const roastLevel = beanType === 'green' ? 'green' : document.getElementById('param-roast').value;
+  const roastDate = beanType === 'green' ? '' : document.getElementById('param-roast-date').value;
   const body = {
     origin:      document.getElementById('param-origin').value  || 'unknown',
     process:     document.getElementById('param-process').value || 'unknown',
     roast_level: roastLevel,
+    roast_date:  roastDate,
     batch_id:    document.getElementById('param-batch').value   || 'batch-001',
     capture_date: document.getElementById('param-date').value   || new Date().toISOString().split('T')[0],
     bean_type:   beanType,

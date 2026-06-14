@@ -508,6 +508,7 @@ def main():
         origin  = meta.get('origin', '_')
         process = PROCESS_MAP.get(meta.get('process', ''), '_')
         roast   = ROAST_MAP.get(meta.get('roast_level', ''), '_')
+        days    = meta.get('days_since_roast')
         batch   = meta.get('batch_id', '_')
         capdate = meta.get('capture_date', '_')
 
@@ -526,6 +527,8 @@ def main():
         meta_row("產地", origin,  AMBER)
         meta_row("處理", process, TEXT)
         meta_row("烘焙", roast,   TEXT)
+        if days is not None:
+            meta_row("烘焙後", f"{days} 天", TEXT)
         meta_row("批次", batch,   TEXT)
         # Last row: no divider
         lbl_s = fXS.render("日期", True, MUTED)

@@ -56,6 +56,7 @@ def init_db(db_path):
     existing = {row[1] for row in conn.execute("PRAGMA table_info(bean_spectra)")}
     migrations = [
         ('capture_date', 'TEXT',    "''"),
+        ('roast_date',   'TEXT',    "''"),
         ('process',      'TEXT',    "'unknown'"),
         ('bean_type',    'TEXT',    "'green'"),
         ('batch_id',     'TEXT',    "''"),
@@ -78,14 +79,14 @@ def insert_beans(conn, qs_file, ts, beans, args, frame_n):
     rows = [(ts, args.date, qs_file, b['cx'], b['cy'], b['area'],
              float(b['spec'][0]), float(b['spec'][1]), float(b['spec'][2]),
              float(b['spec'][3]), float(b['spec'][4]),
-             args.origin, args.process, args.roast, args.bean_type, args.batch_id,
+             args.origin, args.process, args.roast, args.roast_date, args.bean_type, args.batch_id,
              frame_n, 1)
             for b in beans]
     conn.executemany(
         'INSERT INTO bean_spectra '
         '(captured_at, capture_date, qs_file, bean_cx, bean_cy, area_px, '
-        ' b0,b1,b2,b3,b4, origin,process,roast_level,bean_type,batch_id, frame_n,has_beans) '
-        'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', rows)
+        ' b0,b1,b2,b3,b4, origin,process,roast_level,roast_date,bean_type,batch_id, frame_n,has_beans) '
+        'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', rows)
     conn.commit()
 
 
@@ -227,6 +228,7 @@ def main():
     p.add_argument('--origin',    default='unknown')
     p.add_argument('--process',   default='unknown')
     p.add_argument('--roast',     default='green')
+    p.add_argument('--roast-date', default='', dest='roast_date')
     p.add_argument('--bean-type', default='green', dest='bean_type')
     p.add_argument('--batch-id',  default='batch-001', dest='batch_id')
     p.add_argument('--date',      default=datetime.date.today().isoformat())
@@ -347,10 +349,10 @@ def main():
                 conn.execute(
                     'INSERT INTO bean_spectra '
                     '(captured_at, capture_date, qs_file, bean_cx, bean_cy, area_px, '
-                    ' b0,b1,b2,b3,b4, origin,process,roast_level,bean_type,batch_id, frame_n,has_beans) '
-                    'VALUES (?,?,?,0,0,0, 0,0,0,0,0, ?,?,?,?,?,?,0)',
+                    ' b0,b1,b2,b3,b4, origin,process,roast_level,roast_date,bean_type,batch_id, frame_n,has_beans) '
+                    'VALUES (?,?,?,0,0,0, 0,0,0,0,0, ?,?,?,?,?,?,?,0)',
                     (ts, args.date, str(saved_qs),
-                     args.origin, args.process, args.roast, args.bean_type, args.batch_id, frame_n))
+                     args.origin, args.process, args.roast, args.roast_date, args.bean_type, args.batch_id, frame_n))
                 conn.commit()
 
             total_beans += len(beans)
