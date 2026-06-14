@@ -1,61 +1,70 @@
 # VNIR Calibration Phase 1
 
-Phase 1 adds offline tooling for one calibration row per counted batch. It does
-not change the detector, tracker, or live counting path.
+Offline tooling that produces one batch-level calibration row per counted batch.
+It does **not** touch the detector, tracker, or live preview/counting path.
 
-## 10-band extraction
+Canonical module: `spectral_capture/spectral/` (`band_extract.py`, `calib_logger.py`).
 
-Preferred extraction uses the vendor SDK helper in
-`spectral_capture/capture/qs_to_bands.cpp`, which calls `qsToQsi()` and
-`qsiToGray()` for these 10 requested bands:
+## Band extraction — two paths
 
-```text
-B1 350-410 nm  B2 410-470 nm  B3 470-530 nm  B4 530-590 nm  B5 590-650 nm
-B6 650-710 nm  B7 710-770 nm  B8 770-830 nm  B9 830-890 nm  B10 890-950 nm
-```
-
-When SDK paths are unavailable, Python falls back to a configurable raw mosaic
-de-tile. The default `5x2` row-major layout is a hypothesis only; verify it with
-a known color/NIR target before trusting band identity.
-
-Sanity-check one `.qs` frame and write a montage:
-
-```bash
-python3 -m spectral_capture.spectral.band_extract /path/to/sample.qs
-```
-
-Use the SDK helper when built and calibration files are available:
-
-```bash
-python3 -m spectral_capture.spectral.band_extract /path/to/sample.qs \
-  --sdk-tool /home/kyle/KyleClaude/spectral_capture/capture/qs_to_bands \
-  --qsbs /home/kyle/KyleClaude/camera_new.qsbs \
-  --qsdb /home/kyle/KyleClaude/db_std.qsdb
-```
-
-## Calibration Row Logging
-
-After a batch is finalized, provide the saved batch JSON, manual scale weight,
-and a representative `.qs` frame:
-
-```bash
-python3 -m spectral_capture.spectral.calib_logger \
-  --batch /home/kyle/KyleClaude/spectral_capture/data/batches/batch_20260613_153012.json \
-  --weight 61.2 \
-  --qs /home/kyle/KyleClaude/spectral_capture/data/captures/20260613_153012/frame_000123.qs
-```
-
-If the capture pipeline has not copied a frame into `data/captures/<batch>/`,
-use `/dev/shm/qs_latest.qs` immediately after finalize as the representative QS
-source. The CLI picks the batch frame with the most boxes unless `--frame-id` is
-provided.
-
-Rows append to:
+**Primary (SDK cube, gate-validated).** The C++ helper
+`spectral_capture/capture/qs_to_bands.cpp` runs the QS SDK
+(`qsToQsi` / `qsiToGray` Fabry-Perot spectral inversion) and writes a band-cube
+binary (`/dev/shm/vnir_bands.bin` by default):
 
 ```text
-/home/kyle/KyleClaude/spectral_capture/data/calibration/calib_dataset.jsonl
+[n_bands:u32 LE][width:u32 LE][height:u32 LE][dtype:u32 LE=4]
+[float32 band-first data: n_bands x height x width]
 ```
 
-Each row includes `schema_version`, `batch_id`, `timestamp`, `count`,
-`g_per_bean_observed`, 10-element `band_mean`, 10-element `band_std`, bbox
-geometry mean/median fields, and `scale_weight_g`.
+Phase 1 gate (2026-06-14) confirmed `specBegin/specEnd = 350/950 nm` and ten
+distinct 60 nm bands (`outRange` 10/10), so this cube's band identity is trusted.
+Build/run the helper on the Pi5 (SDK is linux-arm64):
+
+```bash
+qs_to_bands camera_new.qsbs db_std.qsdb frame.qs /dev/shm/vnir_bands.bin 100
+```
+
+`band_extract.parse_band_cube()` / `load_band_cube()` read it, and
+`extract_batch_features()` aggregates batch-level VNIR + bbox features.
+
+**Smoke-test extension (dev only, NOT spectrally valid).** `load_qs()` +
+`extract_bands()` de-tile the raw mosaic into a `(10, H, W)` array just to
+exercise the pipeline / produce a montage when no SDK cube is available. The
+physical mosaic is 3x3 (9 filters) and the de-tile band identity is wrong — it
+must never be fed into calibration. The logger only accepts SDK cubes.
+
+## Calibration row logging
+
+After a batch is counted, append a row from the SDK cube plus the live
+detection / count snapshots, then fill in the scale weight when you have it:
+
+```bash
+# append a pending row (true_weight_g = null)
+python3 -m spectral_capture.spectral.calib_logger append \
+  --cube /dev/shm/vnir_bands.bin \
+  --detect-json /dev/shm/bean_detect.json \
+  --count-status /dev/shm/count_status.json \
+  --box-frame-width 1600 --box-frame-height 1200
+
+# later, record the kitchen-scale weight for that batch
+python3 -m spectral_capture.spectral.calib_logger set-weight 20260613_153012 61.2
+```
+
+Rows append to `data/calibration/vnir_calib.jsonl`. Each row:
+
+```json
+{
+  "schema_version": 1,
+  "batch_id": "...",
+  "timestamp": "...",
+  "count": 403,
+  "true_weight_g": null,
+  "spectral_features": {"band_ranges_nm": [...], "band_mean": [...10...], "band_std": [...10...], "valid_bean_count": 0},
+  "bbox_geometry": {"bean_count": 0, "bbox_width_mean": null, "bbox_area_median": null, "...": null},
+  "source": {"cube_path": "...", "cube_shape": [10, H, W], "...": null}
+}
+```
+
+`count` + `true_weight_g` + `bbox_geometry` also cover 提案14 (定量分裝) needs:
+per-batch `g_per_bean = true_weight_g / count` and bbox size features.
