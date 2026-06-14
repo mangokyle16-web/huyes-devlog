@@ -21,3 +21,4 @@ multispectral_demo/build/
 *.hef
 *.log
 spectral_capture/data/captures/
+.context/
