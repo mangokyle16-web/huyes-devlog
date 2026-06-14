@@ -65,6 +65,15 @@ target_link_libraries(spec_fingerprint
     dl
 )
 
+add_executable(spec_gate spec_gate.cpp)
+
+target_link_libraries(spec_gate
+    ${LIB_SPECINV}
+    ${LIB_FILEIO}
+    pthread
+    dl
+)
+
 add_executable(qs_to_png qs_to_png.cpp)
 
 target_link_libraries(qs_to_png
@@ -80,7 +89,7 @@ target_link_libraries(qs_to_png
 # Also add rpath-link for the bundled opencv so the linker resolves SDK transitive deps
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--disable-new-dtags -Wl,-rpath-link,${OPENCV_DIR}/lib")
 
-foreach(_tgt multispectral_demo capture_one spec_fingerprint qs_to_png)
+foreach(_tgt multispectral_demo capture_one spec_fingerprint spec_gate qs_to_png)
     set_target_properties(${_tgt} PROPERTIES
         BUILD_RPATH   "${SDK_LIB_DIR};${OPENCV_DIR}/lib;${SPINV_DIR}"
         INSTALL_RPATH "${SDK_LIB_DIR};${OPENCV_DIR}/lib;${SPINV_DIR}"

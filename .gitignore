@@ -15,3 +15,9 @@ hailo-compile/*.onnx
 hailo-compile/*.log
 *.db
 .gstack/
+
+# build artifacts & large binaries (kept on disk, out of version control)
+multispectral_demo/build/
+*.hef
+*.log
+spectral_capture/data/captures/
